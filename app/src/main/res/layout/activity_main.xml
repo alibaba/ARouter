@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context="com.alibaba.android.arouter.demo.MainActivity">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_test_area"
+            android:orientation="vertical"
+            android:padding="@dimen/test_area_padding">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:padding="5dp"
+                android:text="基本设置"/>
+
+            <Button
+                android:id="@+id/openLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="打开日志并打印堆栈"/>
+
+            <Button
+                android:id="@+id/openDebug"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="开启调试模式"/>
+
+            <Button
+                android:id="@+id/init"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="初始化ARouter"/>
+
+            <Button
+                android:id="@+id/destroy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="!!!关闭ARouter!!!"
+                android:textColor="@color/red"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/between_cell"
+            android:background="@drawable/bg_test_area"
+            android:orientation="vertical"
+            android:padding="@dimen/test_area_padding">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="基础功能(请先初始化)"/>
+
+            <Button
+                android:id="@+id/normalNavigation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="简单的应用内跳转"/>
+
+            <Button
+                android:id="@+id/normalNavigationWithParams"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="携带参数的应用内跳转"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/between_cell"
+            android:background="@drawable/bg_test_area"
+            android:orientation="vertical"
+            android:padding="@dimen/test_area_padding">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="进阶用法(请先初始化)"/>
+
+            <Button
+                android:id="@+id/navByUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="通过URL跳转"/>
+
+            <Button
+                android:id="@+id/autoInject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="开启参数自动注入"/>
+
+            <Button
+                android:id="@+id/interceptor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="拦截器测试"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/between_cell"
+            android:background="@drawable/bg_test_area"
+            android:orientation="vertical"
+            android:padding="@dimen/test_area_padding">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="服务管理(请先初始化)"/>
+
+            <Button
+                android:id="@+id/navByName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="By-Name调用服务"/>
+
+            <Button
+                android:id="@+id/navByType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="By-Type调用服务"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/between_cell"
+            android:background="@drawable/bg_test_area"
+            android:orientation="vertical"
+            android:padding="@dimen/test_area_padding">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="多模块测试(请先初始化)"/>
+
+            <Button
+                android:id="@+id/navToMoudle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="跳转到模块1"/>
+
+            <Button
+                android:id="@+id/navToMoudle2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="跳转到模块2"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

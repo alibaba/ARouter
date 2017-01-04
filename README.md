@@ -25,7 +25,7 @@
 4. Generate mapping-relationship document automatically.
 
 #### Ⅲ. The Basic
-1. Add dependencies
+1. Add dependencies and configuration
 
 		apply plugin: 'com.neenbedankt.android-apt'
 
@@ -38,9 +38,15 @@
             }
         }
 
+        apt {
+            arguments {
+                moduleName project.getName();
+            }
+        }
+
         dependencies {
-            apt 'com.alibaba.android:arouter-compiler:x.x.x'
-            compile 'com.alibaba.android:arouter-api:x.x.x'
+            apt 'com.alibaba:arouter-compiler:x.x.x'
+            compile 'com.alibaba:arouter-api:x.x.x'
             ...
         }
 
@@ -284,6 +290,12 @@
 
         2. 注意：推荐使用ByName方式获取Service，ByType这种方式写起来比较方便，但如果存在多实现的情况时，SDK不保证能获取到你想要的实现
 
+10. Service management - resolve dependencies through services
+
+            可以通过ARouter service包装您的业务逻辑或者sdk，在service的init方法中初始化您的sdk，不同的sdk使用ARouter的service进行调用，
+        每一个service在第一次使用的时候会被初始化，即调用init方法。
+            这样就可以告别各种乱七八糟的依赖关系的梳理，只要能调用到这个service，那么这个service中所包含的sdk等就已经被初始化过了，完全不需要
+        关心各个sdk的初始化顺序。
 
 #### Ⅴ. More function
 
@@ -348,14 +360,3 @@
     - They need to implement different interface
     - Interceptors will take effect in every navigation. Interceptors will initialize asynchronously at initialization of ARouter. If the initialization is not finished yet when first navigation execute, the navigation will block and wait.
     - Services will do the initialization only when they are invoked. If a service has never been invoked in whole lifecycle, it won’t initialize.
-
-3. Support Jack-Complier tool chain
-
-    - ARouter hide the messy params handling dependent on some javac APIs. As a result, when you use Jack to compile your project, some special work is needed.
-
-			// 在使用了Jack的模块的build.gradle中加入如下参数即可，moduleName保证和其他模块不重复，使用标准字符，不要使用各种特殊字符
-			apt {
-	        	arguments {
-        			moduleName 'lalala'
-        		}
-        	}

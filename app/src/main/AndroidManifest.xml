@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.alibaba.android.arouter.demo">
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.READ_PROFILE"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <application
+        android:name=".AppContext"
+        android:allowBackup="false"
+        android:label="ARouter demo"
+        android:theme="@style/Base.Theme.AppCompat">
+        <activity android:name=".SchameFilterActivity">
+
+            <!-- Schame -->
+            <intent-filter>
+                <data
+                    android:host="m.aliyun.com"
+                    android:scheme="arouter"/>
+
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+
+            <!-- App Links -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data
+                    android:host="m.aliyun.com"
+                    android:scheme="http"/>
+                <data
+                    android:host="m.aliyun.com"
+                    android:scheme="https"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".TestWebview">
+        </activity>
+        <activity android:name=".testactivity.Test1Activity">
+        </activity>
+        <activity android:name=".testactivity.Test2Activity">
+        </activity>
+        <activity android:name=".testactivity.Test3Activity">
+        </activity>
+        <activity android:name=".testactivity.Test4Activity">
+        </activity>
+    </application>
+
+</manifest>

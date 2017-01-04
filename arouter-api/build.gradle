@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+
+ext {
+    bintrayName = 'arouter-api'
+    artifact = bintrayName
+    libraryName = 'ARouter sdk'
+    libraryDescription = 'A router for android'
+    libraryVersion = '1.0.1'
+}
+
+android {
+    compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
+    buildToolsVersion BUILDTOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+        }
+
+        lintOptions { abortOnError false }
+    }
+}
+
+dependencies {
+    compile 'com.alibaba:arouter-annotation:1.0.0'
+    compile 'com.android.support:support-v4:23.1.1'
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

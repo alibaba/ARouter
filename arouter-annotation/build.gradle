@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+ext {
+    bintrayName = 'arouter-annotation'
+    artifact = bintrayName
+    libraryName = 'ARouter annotation'
+    libraryDescription = 'The annotation used in arouter api'
+    libraryVersion = '1.0.0'
+}
+
+dependencies {
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.apache.commons:commons-collections4:4.1'
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

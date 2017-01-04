@@ -1,0 +1,22 @@
+apply plugin: 'java'
+
+ext {
+    bintrayName = 'arouter-compiler'
+    artifact = bintrayName
+    libraryName = 'ARouter compiler'
+    libraryDescription = 'A compiler for ARouter to find route'
+    libraryVersion = '1.0.1'
+}
+
+dependencies {
+    compile 'com.alibaba:arouter-annotation:1.0.0'
+
+    compile 'com.google.auto.service:auto-service:1.0-rc2'
+    compile 'com.squareup:javapoet:1.7.0'
+
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile 'org.apache.commons:commons-collections4:4.1'
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

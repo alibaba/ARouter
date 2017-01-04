@@ -24,7 +24,7 @@
 4. 生成映射关系文档(考虑支持)
 
 #### 三、基础功能
-1. 添加依赖
+1. 添加依赖和配置
 
 		apply plugin: 'com.neenbedankt.android-apt'
          
@@ -37,9 +37,15 @@
             }
         }
         
+        apt {
+            arguments {
+                moduleName project.getName();
+            }
+        }
+        
         dependencies {
-            apt 'com.alibaba.android:arouter-compiler:x.x.x'
-            compile 'com.alibaba.android:arouter-api:x.x.x'
+            apt 'com.alibaba:arouter-compiler:x.x.x'
+            compile 'com.alibaba:arouter-api:x.x.x'
             ...
         }
 
@@ -283,7 +289,12 @@
             
         2. 注意：推荐使用ByName方式获取Service，ByType这种方式写起来比较方便，但如果存在多实现的情况时，SDK不保证能获取到你想要的实现
 	
-	
+10. 使用ARouter管理服务(三) 管理依赖
+
+            可以通过ARouter service包装您的业务逻辑或者sdk，在service的init方法中初始化您的sdk，不同的sdk使用ARouter的service进行调用，
+        每一个service在第一次使用的时候会被初始化，即调用init方法。
+            这样就可以告别各种乱七八糟的依赖关系的梳理，只要能调用到这个service，那么这个service中所包含的sdk等就已经被初始化过了，完全不需要
+        关心各个sdk的初始化顺序。
 
 #### 五、更多功能
 
@@ -351,11 +362,5 @@
 
 3. Jack 编译链的支持
 
-	- 因为不想让用户主动设置一堆乱七八糟的参数，在获取模块名的时候使用javac的api，使用了Jack之后没有了javac，只能让用户稍稍动动手了
-			
-			// 在使用了Jack的模块的build.gradle中加入如下参数即可，moduleName保证和其他模块不重复，使用标准字符，不要使用各种特殊字符
-			apt {
-	        	arguments {
-        			moduleName 'lalala'
-        		}
-        	}
+	- ~~因为不想让用户主动设置一堆乱七八糟的参数，在获取模块名的时候使用javac的api，使用了Jack之后没有了javac，只能让用户稍稍动动手了~~
+	- 因为一些其他原因，现在任何情况下都需要在build.gradle中配置moduleName了。。。。
