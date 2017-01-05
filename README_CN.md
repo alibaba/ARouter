@@ -380,3 +380,21 @@ dependencies {
 
 	- ~~因为不想让用户主动设置一堆乱七八糟的参数，在获取模块名的时候使用javac的api，使用了Jack之后没有了javac，只能让用户稍稍动动手了~~
 	- 因为一些其他原因，现在任何情况下都需要在build.gradle中配置moduleName了。。。。
+
+#### 七、Q&A
+
+1. "W/ARouter::: ARouter::No postcard![ ]"
+
+    这个Log正常的情况下也会打印出来，如果您的代码中没有实现DegradeService和PathReplaceService的话，因为ARouter本身的一些功能也依赖
+    自己提供的Service管理功能，ARouter在跳转的时候会尝试寻找用户实现的PathReplaceService，用于对路径进行重写(可选功能)，所以如果您没有
+    实现这个服务的话，也会抛出这个日志
+
+2. "W/ARouter::: ARouter::There is no route match the path [/xxx/xxx], in group [xxx][ ]"
+
+    - 通常来说这种情况是没有找到目标页面，目标不存在
+    - 如果这个页面是存在的，那么您可以按照下面的步骤进行排查
+        1. 检查目标页面的注解是否配置正确，正确的注解形式应该是 (@Route(path="/test/test"), 如没有特殊需求，请勿指定group字段，废弃功能)
+        2. 检查目标页面所在的模块的gradle脚本中是否依赖了 arouter-compiler sdk (需要注意的是，要使用apt依赖，而不是compile关键字依赖)
+        3. 检查编译打包日志，是否出现了形如 ARouter::Compiler >>> xxxxx 的日志，日志中会打印出发现的路由目标
+        4. 启动App的时候，开启debug、log(openDebug/openLog), 查看映射表是否已经被扫描出来，形如 D/ARouter::: LogisticsCenter has already been loaded, GroupIndex[4]，GroupIndex > 0
+        5. 都配置对了，还是不行，那么请直接提交issue
