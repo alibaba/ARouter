@@ -4,6 +4,10 @@
     用于在Android平台，从外部(浏览器等)，内部直接导航到页面、服务的中间件
 ```
 
+### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+
+[Demo gif](http://public.cdn.zhilong.me/arouter-demo.gif)
+
 #### 一、功能介绍
 1. 支持直接解析URL进行跳转、参数按类型解析，支持Java基本类型(*)
 2. 支持应用内的标准页面跳转，API接近Android原生接口
