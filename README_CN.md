@@ -6,7 +6,7 @@
 
 ### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
 
-[Demo gif](http://public.cdn.zhilong.me/arouter-demo.gif)
+![Demo gif](http://public.cdn.zhilong.me/arouter-demo.gif)
 
 #### 一、功能介绍
 1. 支持直接解析URL进行跳转、参数按类型解析，支持Java基本类型(*)
