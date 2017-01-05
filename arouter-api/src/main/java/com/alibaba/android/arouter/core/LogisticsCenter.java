@@ -367,6 +367,8 @@ public class LogisticsCenter {
                     }
                 }
             });
+        } else {
+            callback.onContinue(postcard);
         }
     }
 
