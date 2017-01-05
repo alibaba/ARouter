@@ -7,7 +7,7 @@
 ### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md)
 ### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
 
-![Demo gif](http://public.cdn.zhilong.me/arouter-demo.gif)
+![Demo gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### Ⅰ. Feature
 1. Support routing by URL patterns directly, resolve the params and do the assignment automatically. (*)
