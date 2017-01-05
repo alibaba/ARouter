@@ -1,10 +1,22 @@
-### ARouter
-
 ```
     用于在Android平台，从外部(浏览器等)，内部直接导航到页面、服务的中间件
 ```
 
 ### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+
+#### 最新版本
+
+###### arouter-annotation : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)
+###### arouter-compiler : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)
+###### arouter-api : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)
+
+#### Gradle依赖
+```
+dependencies {
+    apt 'com.alibaba:arouter-compiler:x.x.x'
+    compile 'com.alibaba:arouter-api:x.x.x'
+}
+```
 
 ![Demo gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
@@ -31,7 +43,7 @@
 1. 添加依赖和配置
 
 		apply plugin: 'com.neenbedankt.android-apt'
-         
+
         buildscript {
             repositories {
                 jcenter()
@@ -40,13 +52,13 @@
                 classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
             }
         }
-        
+
         apt {
             arguments {
                 moduleName project.getName();
             }
         }
-        
+
         dependencies {
             apt 'com.alibaba:arouter-compiler:x.x.x'
             compile 'com.alibaba:arouter-api:x.x.x'
@@ -63,24 +75,24 @@
 		}
 
 3. 初始化SDK
-        
+
         ARouter.init(mApplication); // 尽可能早，推荐在Application中初始化
-        	
+
 4. 发起路由操作
-	
+
 		// 1. 应用内简单的跳转(通过URL跳转在'中阶使用'中)
 		ARouter.getInstance().build("/test/1").navigation();
-		
+
 		// 2. 跳转并携带参数
 		ARouter.getInstance().build("/test/1")
 					.withLong("key1", 666L)
 					.withString("key3", "888")
 					.navigation();
-					
+
 5. 添加混淆规则(如果使用了Proguard)
-            
+
         -keep public class com.alibaba.android.arouter.routes.**{*;}
-					
+
 #### 四、进阶用法
 1. 通过URL跳转
 
@@ -92,7 +104,7 @@
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-        
+
                 // 外面用户点击的URL
                 Uri uri = getIntent().getData();
                 // 直接传递给ARouter即可
@@ -100,7 +112,7 @@
                 finish();
             }
         }
-        
+
         // AndroidManifest.xml 中 的参考配置
         <activity android:name=".activity.SchameFilterActivity">
                 <!-- Schame -->
@@ -108,20 +120,20 @@
                     <data
                         android:host="m.aliyun.com"
                         android:scheme="arouter"/>
-    
+
                     <action android:name="android.intent.action.VIEW"/>
-    
+
                     <category android:name="android.intent.category.DEFAULT"/>
                     <category android:name="android.intent.category.BROWSABLE"/>
                 </intent-filter>
-    
+
                 <!-- App Links -->
                 <intent-filter android:autoVerify="true">
                     <action android:name="android.intent.action.VIEW"/>
-    
+
                     <category android:name="android.intent.category.DEFAULT"/>
                     <category android:name="android.intent.category.BROWSABLE"/>
-    
+
                     <data
                         android:host="m.aliyun.com"
                         android:scheme="http"/>
@@ -144,36 +156,36 @@
             private int age;
             @Param(name = "girl")   // 可以通过name来映射URL中的不同参数
             private boolean boy;
-            
+
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-        
+
                 name = getIntent().getStringExtra("name");
                 age = getIntent().getIntExtra("age", -1);
                 boy = getIntent().getBooleanExtra("girl", false);   // 注意：使用映射之后，要从Girl中获取，而不是boy
-            }   
+            }
         }
-        
+
 3. 开启ARouter参数自动注入(实验性功能，不建议使用，正在开发保护策略)
-        
+
         // 首先在Application中重写 attachBaseContext方法，并加入ARouter.attachBaseContext();
         @Override
         protected void attachBaseContext(Context base) {
            super.attachBaseContext(base);
-        
+
            ARouter.attachBaseContext();
         }
-        
+
         // 设置ARouter的时候，开启自动注入
         ARouter.enableAutoInject();
-        
+
         // 至此，Activity中的属性，将会由ARouter自动注入，无需 getIntent().getStringExtra("xxx")等等
-        
+
 4. 声明拦截器(拦截跳转过程，面向切面搞事情)
-        
+
         // 比较经典的应用就是在跳转过程中处理登陆事件，这样就不需要在目标页重复做登陆检查
-        
+
         // 拦截器会在跳转之间执行，多个拦截器会按优先级顺序依次执行
         @Interceptor(priority = 666, name = "测试用拦截器")
         public class TestInterceptor implements IInterceptor {
@@ -186,13 +198,13 @@
             @Override
             public void process(Postcard postcard, InterceptorCallback callback) {
                 ...
-                
+
                 callback.onContinue(postcard);  // 处理完成，交还控制权
                 // callback.onInterrupt(new RuntimeException("我觉得有点异常"));      // 觉得有问题，中断路由流程
-                
+
                 // 以上两种至少需要调用其中一种，否则会超时跳过
             }
-        
+
             /**
              * Do your init work in this method, it well be call when processor has been load.
              *
@@ -200,12 +212,12 @@
              */
             @Override
             public void init(Context context) {
-        
+
             }
         }
 
 5. 处理跳转结果
-		
+
 		// 通过两个参数的navigation方法，可以获取单次跳转的结果
 		ARouter.getInstance().build("/test/1").navigation(this, new NavigationCallback() {
             @Override
@@ -218,9 +230,9 @@
                 ...
             }
         });
-       
+
 6. 自定义全局降级策略
-				
+
 			// 实现DegradeService接口，并加上一个Path内容任意的注解即可
 	       @Route(path = "/xxx/xxx") // 必须标明注解
 			public class DegradeServiceImpl implements DegradeService {
@@ -233,7 +245,7 @@
 			  public void onLost(Context context, Postcard postcard) {
 			        // do something.
 			  }
-			  
+
 			  /**
 			   * Do your init work in this method, it well be call when processor has been load.
 			   *
@@ -241,10 +253,10 @@
 			   */
 			  @Override
 			  public void init(Context context) {
-			  
+
 			  }
 			}
-       
+
 7. 为目标页面声明更多信息
 
 		// 我们经常需要在目标页面中配置一些属性，比方说"是否需要登陆"之类的
@@ -260,18 +272,18 @@
         public interface IService extends IProvider {
             String hello(String name);
         }
-        
+
         /**
          * 实现接口
          */
         @Route(path = "/service/1", name = "测试服务")
         public class ServiceImpl implements IService {
-        
+
             @Override
             public String hello(String name) {
                 return "hello, " + name;
             }
-        
+
             /**
              * Do your init work in this method, it well be call when processor has been load.
              *
@@ -279,20 +291,20 @@
              */
             @Override
             public void init(Context context) {
-        
+
             }
         }
-        
+
 9. 使用ARouter管理服务(二) 发现服务
 
         1. 可以通过两种API来获取Service，分别是ByName、ByType
         IService service = ARouter.getInstance().navigation(IService.class);    //  ByType
         IService service = (IService) ARouter.getInstance().build("/service/1").navigation(); //  ByName
-        
+
         service.hello("zz");
-            
+
         2. 注意：推荐使用ByName方式获取Service，ByType这种方式写起来比较方便，但如果存在多实现的情况时，SDK不保证能获取到你想要的实现
-	
+
 10. 使用ARouter管理服务(三) 管理依赖
 
             可以通过ARouter service包装您的业务逻辑或者sdk，在service的init方法中初始化您的sdk，不同的sdk使用ARouter的service进行调用，
@@ -311,14 +323,14 @@
 
 		// 构建标准的路由请求
 		ARouter.getInstance().build("/home/main").navigation();
-		
+
 		// 构建标准的路由请求，并指定分组
 		ARouter.getInstance().build("/home/main", "ap").navigation();
-		
+
 		// 构建标准的路由请求，通过Uri直接解析
 		Uri uri;
 		ARouter.getInstance().build(uri).navigation();
-		
+
 		// 构建标准的路由请求，startActivityForResult
 		// navigation的第一个参数必须是Activity，第二个参数则是RequestCode
 		ARouter.getInstance().build("/home/main", "ap").navigation(this, 5);
@@ -329,21 +341,21 @@
 					.build("/home/main")
 					.with(params)
 					.navigation();
-					
+
 		// 指定Flag
 		ARouter.getInstance()
 					.build("/home/main")
 					.withFlags();
 					.navigation();
-					
+
 		// 觉得接口不够多，可以直接拿出Bundle赋值
 		ARouter.getInstance()
 		            .build("/home/main")
 		            .getExtra();
-				
+
 	    // 使用绿色通道(跳过所有的拦截器)
 	    ARouter.getInstance().build("/home/main").greenChannal().navigation();
-	    	                
+
 3. 获取原始的URI
 
         String uriStr = getIntent().getStringExtra(ARouter.RAW_URI);
@@ -351,13 +363,13 @@
 #### 六、其他
 
 1. 路由中的分组概念
-    
+
 	- SDK中针对所有的路径(/test/1 /test/2)进行分组，分组只有在分组中的某一个路径第一次被访问的时候，该分组才会被初始化
 	- 可以通过 @Route 注解主动指定分组，否则使用路径中第一段字符串(/*/)作为分组
 	- 注意：一旦主动指定分组之后，应用内路由需要使用 ARouter.getInstance().build(path, group) 进行跳转，手动指定分组，否则无法找到
-	        
+
 	        @Route(path = "/test/1", group = "app")
-        
+
 2. 拦截器和服务的异同
 
 	- 拦截器和服务所需要实现的接口不同，但是结构类似，都存在 init(Context context) 方法，但是两者的调用时机不同

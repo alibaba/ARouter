@@ -1,11 +1,22 @@
-### ARouter
-
 ```
     ARouter is a middleware that help app navigating from external environment into internal activity on Android.
 ```
 
-### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md)
-### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+#### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md), [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+
+#### Lastest version
+
+###### arouter-annotation : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)
+###### arouter-compiler : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)
+###### arouter-api : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)
+
+#### Gradle dependencies
+```
+dependencies {
+    apt 'com.alibaba:arouter-compiler:x.x.x'
+    compile 'com.alibaba:arouter-api:x.x.x'
+}
+```
 
 ![Demo gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
