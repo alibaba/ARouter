@@ -366,6 +366,30 @@ dependencies {
 
         String uriStr = getIntent().getStringExtra(ARouter.RAW_URI);
 
+4. 重写跳转URL
+
+       	// 实现PathReplaceService接口，并加上一个Path内容任意的注解即可，ARouter会直接处理经过用户处理之后的路径
+        @Route(path = "/xxx/xxx") // 必须标明注解
+        public class PathReplaceServiceImpl implements DegradeService {
+            /**
+             * For normal path.
+             *
+             * @param path raw path
+             */
+            String forString(String path) {
+                return path;    // 按照一定的规则处理之后返回处理后的结果
+            }
+
+            /**
+             * For uri type.
+             *
+             * @param uri raw uri
+            */
+            Uri forUri(Uri uri) {
+                return url;    // 按照一定的规则处理之后返回处理后的结果
+            }
+         }
+
 #### 七、其他
 
 1. 路由中的分组概念
