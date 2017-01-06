@@ -39,7 +39,13 @@ dependencies {
 3. 多路径支持(不想支持，貌似是导致各种混乱的起因)
 4. 生成映射关系文档(考虑支持)
 
-#### 三、基础功能
+#### 三、典型应用场景
+1. 从外部URL映射到内部页面，以及参数传递与解析
+2. 跨模块页面跳转，模块间解耦
+3. 拦截跳转过程，处理登陆、埋点等逻辑
+4. 跨模块API调用，模块间解耦(注册ARouter服务的形式，通过接口互相调用)
+
+#### 四、基础功能
 1. 添加依赖和配置
 
 		apply plugin: 'com.neenbedankt.android-apt'
@@ -93,7 +99,7 @@ dependencies {
 
         -keep public class com.alibaba.android.arouter.routes.**{*;}
 
-#### 四、进阶用法
+#### 五、进阶用法
 1. 通过URL跳转
 
         // 新建一个Activity用于监听Schame事件
@@ -312,7 +318,7 @@ dependencies {
             这样就可以告别各种乱七八糟的依赖关系的梳理，只要能调用到这个service，那么这个service中所包含的sdk等就已经被初始化过了，完全不需要
         关心各个sdk的初始化顺序。
 
-#### 五、更多功能
+#### 六、更多功能
 
 1. 初始化中的其他设置
 
@@ -360,7 +366,7 @@ dependencies {
 
         String uriStr = getIntent().getStringExtra(ARouter.RAW_URI);
 
-#### 六、其他
+#### 七、其他
 
 1. 路由中的分组概念
 
@@ -381,7 +387,7 @@ dependencies {
 	- ~~因为不想让用户主动设置一堆乱七八糟的参数，在获取模块名的时候使用javac的api，使用了Jack之后没有了javac，只能让用户稍稍动动手了~~
 	- 因为一些其他原因，现在任何情况下都需要在build.gradle中配置moduleName了。。。。
 
-#### 七、Q&A
+#### 八、Q&A
 
 1. "W/ARouter::: ARouter::No postcard![ ]"
 
