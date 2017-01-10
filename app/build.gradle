@@ -46,10 +46,10 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     apt 'com.alibaba:arouter-compiler:1.0.1'
-    compile 'com.alibaba:arouter-api:1.0.1'
+//    compile ('com.alibaba:arouter-api:1.0.2')
 
+    compile project(':arouter-api')
     compile project(':test-module-1')
-    compile project(':test-module-2')
 
     compile 'com.android.support:appcompat-v7:22.2.0'
 }

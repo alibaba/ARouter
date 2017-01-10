@@ -73,8 +73,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance().navigation(HelloService.class).sayHello("mike");
                 break;
             case R.id.navToMoudle1:
-                // 这个页面主动指定了Group名
-                ARouter.getInstance().build("/module/1", "m1").navigation();
+                ARouter.getInstance().build("/module/1").navigation();
                 break;
             case R.id.navToMoudle2:
                 // 这个页面主动指定了Group名
