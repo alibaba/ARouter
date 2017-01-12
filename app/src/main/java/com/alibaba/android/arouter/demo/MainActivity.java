@@ -3,9 +3,12 @@ package com.alibaba.android.arouter.demo;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 
 import com.alibaba.android.arouter.demo.testservice.HelloService;
+import com.alibaba.android.arouter.facade.Postcard;
+import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -81,6 +84,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.destroy:
                 ARouter.getInstance().destroy();
+                break;
+            case R.id.failNav:
+                ARouter.getInstance().build("/xxx/xxx").navigation(this, new NavigationCallback() {
+                    @Override
+                    public void onFound(Postcard postcard) {
+
+                    }
+
+                    @Override
+                    public void onLost(Postcard postcard) {
+                        Log.d("ARouter", "找不到了");
+                    }
+                });
+                break;
+            case R.id.failNav2:
+                ARouter.getInstance().build("/xxx/xxx").navigation();
+                break;
+            case R.id.failNav3:
+                ARouter.getInstance().navigation(MainActivity.class);
                 break;
             default:
                 break;

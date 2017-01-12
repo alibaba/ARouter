@@ -76,6 +76,6 @@ public class Test1Interceptor implements IInterceptor {
     @Override
     public void init(Context context) {
         mContext = context;
-        Log.e("testService", HelloService.class.getName() + " has init.");
+        Log.e("testService", Test1Interceptor.class.getName() + " has init.");
     }
 }

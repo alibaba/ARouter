@@ -101,6 +101,10 @@ public class LogisticsCenter {
                 }
             }
 
+            if (groupsIndex.size() == 0) {
+                logger.error(TAG, "No mapping files were found, check your configuration please!");
+            }
+
             if (ARouter.debuggable()) {
                 logger.debug(TAG, String.format(Locale.getDefault(), "LogisticsCenter has already been loaded, GroupIndex[%d], InterceptorIndex[%d], ProviderIndex[%d]", groupsIndex.size(), interceptorsIndex.size(), providersIndex.size()));
             }
