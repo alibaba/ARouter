@@ -74,7 +74,8 @@ dependencies {
 2. 添加注解
 
 		// 在支持路由的页面、服务上添加注解(必选)
-		// 这是最小化配置，后面有详细配置
+		// 这是最小化配置，后面有详细配置, 这里的路径需要注意的是至少需要有两级，/xx/xx
+        // 第一段用于分组，后面会详细提到
 		@Route(path = "/test/1")
 		public class YourActivity extend Activity {
 		    ...
