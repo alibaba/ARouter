@@ -313,12 +313,12 @@ final class _ARouter {
                 int flags = postcard.getFlags();
                 if (-1 != flags) {
                     intent.setFlags(flags);
-                } else {
+                } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
                 // Judgment activity start type.
-                if (requestCode > 0) {  // RequestCode exist, tell us user's want startActivityForResult, so this context must son of activity.
+                if (requestCode > 0) {  // RequestCode exist, need startActivityForResult, so this context must son of activity.
                     ((Activity) currentContext).startActivityForResult(intent, requestCode);
                 } else {
                     currentContext.startActivity(intent);

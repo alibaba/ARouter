@@ -24,5 +24,7 @@ public class Test2Activity extends AppCompatActivity {
         if (!TextUtils.isEmpty(value)) {
             Toast.makeText(this, "exist param :" + value, Toast.LENGTH_LONG).show();
         }
+
+        setResult(999);
     }
 }
