@@ -434,3 +434,4 @@ dependencies {
         3. 检查编译打包日志，是否出现了形如 ARouter::Compiler >>> xxxxx 的日志，日志中会打印出发现的路由目标
         4. 启动App的时候，开启debug、log(openDebug/openLog), 查看映射表是否已经被扫描出来，形如 D/ARouter::: LogisticsCenter has already been loaded, GroupIndex[4]，GroupIndex > 0
         5. 都配置对了，还是不行，那么请直接提交issue
+        6. 有可能是因为您开启了Instant Run，需要注意的时候，新增注解之后，需要rebuild一次，并全新安装，因为已经安装自后，Instant Run只会动态替换修改过的类文件，新生成的映射文件有可能不会被扫描到
