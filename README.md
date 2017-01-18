@@ -1,6 +1,8 @@
 ```
-    ARouter is a middleware that help app navigating from external environment into internal activity on Android.
+    A middleware that provides navigation for the page and service on Android.
 ```
+
+- This document was translated by Google Translate, may affected your reading experience.
 
 #### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md), [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
 
@@ -21,16 +23,14 @@ dependencies {
 ![Demo gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### Ⅰ. Feature
-1. Support routing by URL patterns directly, resolve the params and do the assignment automatically. (*)
+1. **Support routing by URL patterns directly, resolve the params and do the assignment automatically.**
 2. Support routing between internal activitys, Android original-style API.
-3. Support multi-modules Android project, and allow package each module independently so long as the package is conforming to Android package convention. (*)
-4. Support injecting customized interceptors to the routing process. (*)
+3. **Support multi-modules Android project.**
+4. **Support injecting customized interceptors to the routing process.**
 5. Provide a service container for interface-oriented design or decoupling modules. (*)
 6. Mapping relationships is managed by type/level which reduces the memory consumption and improve the query performance. (*)
 7. Support designating global fallback strategy.
-8. Abundent API and customize.
-9. Activitys/interceptors/services do not need to register to ARouter expilicitly, they are discovered automatically.
-10. Support Jack compiler tool-chain release with Android N.
+8. Activitys/interceptors/services do not need to register to ARouter expilicitly, they are discovered automatically.
 
 #### Ⅱ. Unsupport Feature
 1. Customize URL resolving stratety(considering)
@@ -41,14 +41,15 @@ dependencies {
 #### Ⅲ. The Basic
 1. Add dependencies and configuration
 
-		apply plugin: 'com.neenbedankt.android-apt'
+		apply plugin: 'com.neenbedankt.android-apt' // It's unnecessary, if gradle plugin > 2.2
 
         buildscript {
             repositories {
                 jcenter()
             }
+
             dependencies {
-                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'  // It's unnecessary, if gradle plugin > 2.2
             }
         }
 
@@ -59,8 +60,11 @@ dependencies {
         }
 
         dependencies {
-            apt 'com.alibaba:arouter-compiler:x.x.x'
             compile 'com.alibaba:arouter-api:x.x.x'
+            apt 'com.alibaba:arouter-compiler:x.x.x'
+
+            // For gradle plugin > 2.2
+            // annotationProcessor 'com.alibaba:arouter-api:x.x.x'
             ...
         }
 
@@ -95,24 +99,21 @@ dependencies {
 #### Ⅳ. Further Usage
 1. Route by URL
 
-        // 新建一个Activity用于监听Schame事件
+        // Create activity用于监听Schame事件
         // 监听到Schame事件之后直接传递给ARouter即可
-        // 也可以做一些自定义玩法，比方说改改URL之类的
         // http://www.example.com/test/1
         public class SchameFilterActivity extends Activity {
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
 
-                // 外面用户点击的URL
                 Uri uri = getIntent().getData();
-                // 直接传递给ARouter即可
                 ARouter.getInstance().build(uri).navigation();
                 finish();
             }
         }
 
-        // AndroidManifest.xml 中 的参考配置
+        // AndroidManifest.xml
         <activity android:name=".activity.SchameFilterActivity">
                 <!-- Schame -->
                 <intent-filter>

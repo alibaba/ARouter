@@ -1,5 +1,5 @@
 ```
-    用于在Android平台，从外部(浏览器等)，内部直接导航到页面、服务的中间件
+    Android平台中对页面、服务提供路由功能的中间件
 ```
 
 ### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
@@ -21,23 +21,20 @@ dependencies {
 ![Demo gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### 一、功能介绍
-1. 支持直接解析URL进行跳转、参数按类型解析，支持Java基本类型(*)
+1. **支持直接解析URL进行跳转、参数按类型解析，支持Java基本类型**
 2. 支持应用内的标准页面跳转，API接近Android原生接口
-3. 支持多模块工程中使用，允许分别打包，包结构符合Android包规范即可(*)
-4. 支持跳转过程中插入自定义拦截逻辑，自定义拦截顺序(*)
-5. 支持服务托管，通过ByName,ByType两种方式获取服务实例，方便面向接口开发与跨模块调用解耦(*)
+3. **支持多模块工程中使用**
+4. **支持跳转过程中插入自定义拦截逻辑，自定义拦截顺序**
+5. **支持服务托管，通过ByName,ByType两种方式获取服务实例**
 6. 映射关系按组分类、多级管理，按需初始化，减少内存占用提高查询效率(*)
-7. 支持用户指定全局降级策略
-8. 支持获取单次跳转结果
-9. 丰富的API和可定制性
-10. 被ARouter管理的页面、拦截器、服务均无需主动注册到ARouter，被动发现
-11. 支持Android N推出的Jack编译链
+7. 支持用户指定全局降级与局部降级策略
+8. 被ARouter管理的页面、拦截器、服务均无需主动注册到ARouter
 
 #### 二、不支持的功能
 1. 自定义URL解析规则(考虑支持)
 2. 不能动态加载代码模块和添加路由规则(考虑支持)
 3. 多路径支持(不想支持，貌似是导致各种混乱的起因)
-4. 生成映射关系文档(考虑支持)
+4. 生成映射关系文档(正在支持)
 
 #### 三、典型应用场景
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -48,14 +45,15 @@ dependencies {
 #### 四、基础功能
 1. 添加依赖和配置
 
-		apply plugin: 'com.neenbedankt.android-apt'
+		apply plugin: 'com.neenbedankt.android-apt' // 如果gradle plugin > 2.2，无需这一行
 
         buildscript {
             repositories {
                 jcenter()
             }
+
             dependencies {
-                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'  // 如果gradle plugin > 2.2，无需这一行
             }
         }
 
@@ -66,8 +64,10 @@ dependencies {
         }
 
         dependencies {
-            apt 'com.alibaba:arouter-compiler:x.x.x'
             compile 'com.alibaba:arouter-api:x.x.x'
+            apt 'com.alibaba:arouter-compiler:x.x.x'
+            // 如果Gradle plugin > 2.2, 可以把apt关键字换成annotationProcessor
+            // annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
             ...
         }
 
@@ -105,22 +105,19 @@ dependencies {
 
         // 新建一个Activity用于监听Schame事件
         // 监听到Schame事件之后直接传递给ARouter即可
-        // 也可以做一些自定义玩法，比方说改改URL之类的
         // http://www.example.com/test/1
         public class SchameFilterActivity extends Activity {
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
 
-                // 外面用户点击的URL
                 Uri uri = getIntent().getData();
-                // 直接传递给ARouter即可
                 ARouter.getInstance().build(uri).navigation();
                 finish();
             }
         }
 
-        // AndroidManifest.xml 中 的参考配置
+        // AndroidManifest.xml
         <activity android:name=".activity.SchameFilterActivity">
                 <!-- Schame -->
                 <intent-filter>
@@ -433,5 +430,9 @@ dependencies {
         2. 检查目标页面所在的模块的gradle脚本中是否依赖了 arouter-compiler sdk (需要注意的是，要使用apt依赖，而不是compile关键字依赖)
         3. 检查编译打包日志，是否出现了形如 ARouter::Compiler >>> xxxxx 的日志，日志中会打印出发现的路由目标
         4. 启动App的时候，开启debug、log(openDebug/openLog), 查看映射表是否已经被扫描出来，形如 D/ARouter::: LogisticsCenter has already been loaded, GroupIndex[4]，GroupIndex > 0
-        5. 都配置对了，还是不行，那么请直接提交issue
-        6. 有可能是因为您开启了Instant Run，需要注意的时候，新增注解之后，需要rebuild一次，并全新安装，因为已经安装自后，Instant Run只会动态替换修改过的类文件，新生成的映射文件有可能不会被扫描到
+
+3. Instant Run
+
+    - 请注意，ARouter和Instant Run并没有任何关系，也不会互相干扰，但是在开启Instant Run的情况下，编译期生成的映射文件，可能不会被Instant Run加载到apk中，
+      而且在App没有重新初始化ARouter的情况下，ARouter并不会动态加载新生成的映射文件，如果新增注解，请全量编译并重新安装，鉴于开发中不会频繁添加注解，短期内不会
+      对这种场景进行优化。
