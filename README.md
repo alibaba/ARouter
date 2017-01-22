@@ -41,7 +41,8 @@ dependencies {
 #### Ⅲ. The Basic
 1. Add dependencies and configuration
 
-		apply plugin: 'com.neenbedankt.android-apt' // It's unnecessary, if gradle plugin > 2.2
+        // U can use 'annotationProcessor', if gradle plugin >= 2.2, look at 'Other#4'
+		apply plugin: 'com.neenbedankt.android-apt'
 
         buildscript {
             repositories {
@@ -49,7 +50,7 @@ dependencies {
             }
 
             dependencies {
-                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'  // It's unnecessary, if gradle plugin > 2.2
+                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
             }
         }
 
@@ -62,9 +63,6 @@ dependencies {
         dependencies {
             compile 'com.alibaba:arouter-api:x.x.x'
             apt 'com.alibaba:arouter-compiler:x.x.x'
-
-            // For gradle plugin > 2.2
-            // annotationProcessor 'com.alibaba:arouter-api:x.x.x'
             ...
         }
 
@@ -359,6 +357,29 @@ dependencies {
 3. Fetch raw uri
 
         String uriStr = getIntent().getStringExtra(ARouter.RAW_URI);
+
+4. For annotationProcessor
+
+        // If gradle plugin >= 2.2, android-apt plugin is unnecessary.
+        android {
+            compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
+            buildToolsVersion BUILDTOOLS_VERSION
+
+            defaultConfig {
+                ...
+                javaCompileOptions {
+                    annotationProcessorOptions {
+                        arguments = [ moduleName : project.getName() ]
+                    }
+                }
+            }
+        }
+
+        dependencies {
+            compile 'com.alibaba:arouter-api:x.x.x'
+            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
+            ...
+        }
 
 #### Ⅵ. Others
 

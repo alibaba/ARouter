@@ -45,7 +45,8 @@ dependencies {
 #### 四、基础功能
 1. 添加依赖和配置
 
-		apply plugin: 'com.neenbedankt.android-apt' // 如果gradle plugin > 2.2，无需这一行
+        // 如gradle plugin >= 2.2，可以使用annotationProcessor，配置方法见文末'其他#4'
+		apply plugin: 'com.neenbedankt.android-apt'
 
         buildscript {
             repositories {
@@ -53,7 +54,7 @@ dependencies {
             }
 
             dependencies {
-                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'  // 如果gradle plugin > 2.2，无需这一行
+                classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
             }
         }
 
@@ -66,8 +67,6 @@ dependencies {
         dependencies {
             compile 'com.alibaba:arouter-api:x.x.x'
             apt 'com.alibaba:arouter-compiler:x.x.x'
-            // 如果Gradle plugin > 2.2, 可以把apt关键字换成annotationProcessor
-            // annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
             ...
         }
 
@@ -411,6 +410,29 @@ dependencies {
 
 	- ~~因为不想让用户主动设置一堆乱七八糟的参数，在获取模块名的时候使用javac的api，使用了Jack之后没有了javac，只能让用户稍稍动动手了~~
 	- 因为一些其他原因，现在任何情况下都需要在build.gradle中配置moduleName了。。。。
+
+4. annotationProcessor的配置方式
+
+        // 如果使用gradle plugin >= 2.2 可以不依赖android-apt，按照如下配置方法
+        android {
+            compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
+            buildToolsVersion BUILDTOOLS_VERSION
+
+            defaultConfig {
+                ...
+                javaCompileOptions {
+                    annotationProcessorOptions {
+                        arguments = [ moduleName : project.getName() ]
+                    }
+                }
+            }
+        }
+
+        dependencies {
+            compile 'com.alibaba:arouter-api:x.x.x'
+            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
+            ...
+        }
 
 #### 八、Q&A
 
