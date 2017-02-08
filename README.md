@@ -396,3 +396,7 @@ dependencies {
     - They need to implement different interface
     - Interceptors will take effect in every navigation. Interceptors will initialize asynchronously at initialization of ARouter. If the initialization is not finished yet when first navigation execute, the navigation will block and wait.
     - Services will do the initialization only when they are invoked. If a service has never been invoked in whole lifecycle, it won’t initialize.
+
+3. For communicate
+
+    ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)

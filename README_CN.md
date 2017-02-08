@@ -458,3 +458,7 @@ dependencies {
     - 请注意，ARouter和Instant Run并没有任何关系，也不会互相干扰，但是在开启Instant Run的情况下，编译期生成的映射文件，可能不会被Instant Run加载到apk中，
       而且在App没有重新初始化ARouter的情况下，ARouter并不会动态加载新生成的映射文件，如果新增注解，请全量编译并重新安装，鉴于开发中不会频繁添加注解，短期内不会
       对这种场景进行优化。
+
+4. 沟通和交流
+
+    ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
