@@ -120,7 +120,7 @@ public class LogisticsCenter {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                if (null != interceptorsIndex && interceptorsIndex.size() > 0) {
+                if (MapUtils.isNotEmpty(interceptorsIndex)) {
                     for (Map.Entry<Integer, Class<? extends IInterceptor>> entry : interceptorsIndex.entrySet()) {
                         Class<? extends IInterceptor> interceptorClass = entry.getValue();
                         try {
@@ -360,8 +360,10 @@ public class LogisticsCenter {
                     CancelableCountDownLatch interceptorCounter = new CancelableCountDownLatch(interceptors.size());
                     try {
                         _excute(0, interceptorCounter, postcard);
-                        interceptorCounter.await(postcard.getTimeout(), TimeUnit.SECONDS); // Cancel the navigation this time, if it hasn't return anythings.
-                        if (null != postcard.getTag()) {    // Maybe some exception in the tag.
+                        interceptorCounter.await(postcard.getTimeout(), TimeUnit.SECONDS);
+                        if (interceptorCounter.getCount() > 0) {    // Cancel the navigation this time, if it hasn't return anythings.
+                            callback.onInterrupt(new HandlerException("The interceptor processing timed out."));
+                        } else if (null != postcard.getTag()) {    // Maybe some exception in the tag.
                             callback.onInterrupt(new HandlerException(postcard.getTag().toString()));
                         } else {
                             callback.onContinue(postcard);
