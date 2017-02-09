@@ -10,6 +10,7 @@
     <application
         android:name=".AppContext"
         android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
         android:label="ARouter demo"
         android:theme="@style/Base.Theme.AppCompat">
         <activity android:name=".SchameFilterActivity">
