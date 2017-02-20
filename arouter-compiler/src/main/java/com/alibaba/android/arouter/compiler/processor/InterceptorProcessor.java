@@ -116,16 +116,16 @@ public class InterceptorProcessor extends AbstractProcessor {
      */
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Interceptor.class);
-        boolean parseResult = false;
-        try {
-            parseInterceptors(elements);
-            parseResult = true;
-        } catch (Exception e) {
-            logger.error(e);
+        if (CollectionUtils.isNotEmpty(annotations)) {
+            Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(Interceptor.class);
+            try {
+                parseInterceptors(elements);
+            } catch (Exception e) {
+                logger.error(e);
+            }
         }
 
-        return parseResult;
+        return false;
     }
 
     /**
@@ -202,7 +202,7 @@ public class InterceptorProcessor extends AbstractProcessor {
     }
 
     /**
-     * Verify tollgate meta
+     * Verify inteceptor meta
      *
      * @param element Interceptor taw type
      * @return verify result

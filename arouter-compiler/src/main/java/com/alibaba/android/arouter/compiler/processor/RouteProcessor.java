@@ -143,18 +143,18 @@ public class RouteProcessor extends AbstractProcessor {
      */
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> routeElements = roundEnv.getElementsAnnotatedWith(Route.class);
-        boolean parseResult = false;
-        try {
-            logger.info(">>> Found routes, start... <<<");
-            this.parseRoutes(routeElements);
+        if (CollectionUtils.isNotEmpty(annotations)) {
+            Set<? extends Element> routeElements = roundEnv.getElementsAnnotatedWith(Route.class);
+            try {
+                logger.info(">>> Found routes, start... <<<");
+                this.parseRoutes(routeElements);
 
-            parseResult = true;
-        } catch (Exception e) {
-            logger.error(e);
+            } catch (Exception e) {
+                logger.error(e);
+            }
         }
 
-        return parseResult;
+        return false;
     }
 
     private void parseRoutes(Set<? extends Element> routeElements) throws IOException {
@@ -170,7 +170,6 @@ public class RouteProcessor extends AbstractProcessor {
             TypeElement type_Service = elementUtil.getTypeElement(SERVICE);
 
             // Interface of ARouter.
-            // TypeElement type_IProvider = elementUtil.getTypeElement(IPROVIDER);
             TypeElement type_IRouteGroup = elementUtil.getTypeElement(IROUTE_GROUP);
             TypeElement type_IProviderGroup = elementUtil.getTypeElement(IPROVIDER_GROUP);
             ClassName routeMetaCn = ClassName.get(RouteMeta.class);
