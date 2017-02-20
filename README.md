@@ -6,6 +6,8 @@
 
 #### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md), [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
 
+[![Join the chat at https://gitter.im/ARouter/Lobby](https://badges.gitter.im/ARouter/Lobby.svg)](https://gitter.im/ARouter/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 #### Lastest version
 
 ###### arouter-annotation : [![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)
