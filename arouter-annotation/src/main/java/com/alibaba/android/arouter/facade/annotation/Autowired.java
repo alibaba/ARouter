@@ -6,24 +6,22 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used for mark param of page.
- * THIS ANNOTATION WAS DEPRECATED, USE 'Autowired' PLEASE!
+ * Annotation for field, which need autowired.
  *
- * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
+ * @author zhilong <a href="mailto:zhilong.lzl@alibaba-inc.com">Contact me.</a>
  * @version 1.0
- * @since 2016/11/22 18:01
+ * @since 2017/2/20 下午4:26
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.CLASS)
-@Deprecated
-public @interface Param {
-    /**
-     * The field name
-     */
+public @interface Autowired {
+
+    // Get service by name, if the name was not null.
     String name() default "";
 
-    /**
-     * The description of the field
-     */
+    // If required, app will be crash when value is null.
+    boolean required() default false;
+
+    // Description of the field
     String desc() default "No desc.";
 }

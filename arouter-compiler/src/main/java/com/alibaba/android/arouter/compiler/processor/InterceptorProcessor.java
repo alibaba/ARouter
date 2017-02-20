@@ -4,7 +4,6 @@ import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
 import com.alibaba.android.arouter.facade.annotation.Interceptor;
 import com.google.auto.service.AutoService;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -18,7 +17,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -29,6 +27,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -36,6 +35,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
+import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_INTECEPTOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IINTERCEPTOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IINTERCEPTOR_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
@@ -54,6 +54,9 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @since 16/8/23 14:11
  */
 @AutoService(Processor.class)
+@SupportedOptions(KEY_MODULE_NAME)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedAnnotationTypes(ANNOTATION_TYPE_INTECEPTOR)
 public class InterceptorProcessor extends AbstractProcessor {
     private Map<Integer, Element> interceptors = new TreeMap<>();
     private Filer mFiler;       // File util, write class file into disk.
@@ -106,38 +109,6 @@ public class InterceptorProcessor extends AbstractProcessor {
     }
 
     /**
-     * If the processor class is annotated with {@link
-     * SupportedAnnotationTypes}, return an unmodifiable set with the
-     * same set of strings as the annotation.  If the class is not so
-     * annotated, an empty set is returned.
-     *
-     * @return the names of the annotation types supported by this
-     * processor, or an empty set if none
-     */
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(Interceptor.class.getCanonicalName());
-    }
-
-    /**
-     * If the processor class is annotated with {@link
-     * SupportedSourceVersion}, return the source version in the
-     * annotation.  If the class is not so annotated, {@link
-     * SourceVersion#RELEASE_6} is returned.
-     *
-     * @return the latest source version supported by this processor
-     */
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return super.getSupportedSourceVersion();
-    }
-
-    @Override
-    public Set<String> getSupportedOptions() {
-        return Sets.newHashSet(KEY_MODULE_NAME);
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @param annotations
@@ -173,9 +144,9 @@ public class InterceptorProcessor extends AbstractProcessor {
                     Interceptor interceptor = element.getAnnotation(Interceptor.class);
                     interceptors.put(interceptor.priority(), element);
 
-//                    if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
-//                        moduleName = ModuleUtils.generateModuleName(element, logger);
-//                    }
+                    // if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
+                    //     moduleName = ModuleUtils.generateModuleName(element, logger);
+                    // }
                 } else {
                     logger.error("A interceptor verify failed, its " + element.asType());
                 }
