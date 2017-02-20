@@ -5,7 +5,7 @@
 #### Look at here
 
 ##### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
-##### [![Join the chat at https://gitter.im/ARouter/Lobby](https://badges.gitter.im/ARouter/Lobby.svg)](https://gitter.im/ARouter/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### 最新版本
 
