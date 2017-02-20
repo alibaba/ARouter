@@ -31,6 +31,7 @@ import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -93,7 +94,8 @@ public class AutowiredProcessor extends AbstractProcessor {
 
     private void generateHelper() throws IOException {
         TypeElement type_ISyringe = elementUtil.getTypeElement(ISYRINGE);
-        TypeMirror iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();;
+        TypeMirror iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();
+        ;
 
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
@@ -150,10 +152,15 @@ public class AutowiredProcessor extends AbstractProcessor {
      *
      * @param elements Field need autowired
      */
-    private void categories(Set<? extends Element> elements) {
+    private void categories(Set<? extends Element> elements) throws IllegalAccessException {
         if (CollectionUtils.isNotEmpty(elements)) {
             for (Element element : elements) {
                 TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
+
+                if (element.getModifiers().contains(Modifier.PRIVATE)) {
+                    throw new IllegalAccessException("The autowired fields CAN NOT BE 'private'!!! please check field ["
+                            + element.getSimpleName() + "] in class [" + enclosingElement.getQualifiedName() + "]");
+                }
 
                 if (fatherAndChild.containsKey(enclosingElement)) { // Has categries
                     fatherAndChild.get(enclosingElement).add(element);
