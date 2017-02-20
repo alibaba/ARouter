@@ -4,7 +4,11 @@
 
 - This document was translated by Google Translate, may affected your reading experience.
 
-#### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md), [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+#### Look at here
+
+##### [中文版 README.md](https://github.com/alibaba/ARouter/blob/master/README_CN.md)
+##### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+##### [![Join the chat at https://gitter.im/ARouter/Lobby](https://badges.gitter.im/ARouter/Lobby.svg)](https://gitter.im/ARouter/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### Lastest version
 

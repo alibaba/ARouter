@@ -2,7 +2,10 @@
     Android平台中对页面、服务提供路由功能的中间件
 ```
 
-### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+#### Look at here
+
+##### [Demo apk](http://public.cdn.zhilong.me/app-debug.apk)
+##### [![Join the chat at https://gitter.im/ARouter/Lobby](https://badges.gitter.im/ARouter/Lobby.svg)](https://gitter.im/ARouter/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### 最新版本
 
