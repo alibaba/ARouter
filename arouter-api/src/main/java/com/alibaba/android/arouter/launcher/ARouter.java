@@ -92,6 +92,10 @@ public final class ARouter {
         hasInit = false;
     }
 
+    /**
+     * The interface is not stable enough, use 'ARouter.inject();';
+     */
+    @Deprecated
     public static synchronized void enableAutoInject() {
         _ARouter.enableAutoInject();
     }
@@ -100,6 +104,10 @@ public final class ARouter {
         return _ARouter.canAutoInject();
     }
 
+    /**
+     * The interface is not stable enough, use 'ARouter.inject();';
+     */
+    @Deprecated
     public static void attachBaseContext() {
         _ARouter.attachBaseContext();
     }
@@ -114,6 +122,13 @@ public final class ARouter {
 
     public static void setLogger(ILogger userLogger) {
         _ARouter.setLogger(userLogger);
+    }
+
+    /**
+     * Inject params and services.
+     */
+    public void inject(Object thiz) {
+        _ARouter.inject(thiz);
     }
 
     /**

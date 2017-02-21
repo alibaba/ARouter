@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.openDebug();
                 break;
             case R.id.init:
-                ARouter.init(AppContext.getInstance());
+                ARouter.init(getApplication());
                 break;
             case R.id.normalNavigation:
                 ARouter.getInstance()
@@ -68,7 +68,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation();
                 break;
             case R.id.autoInject:
-                ARouter.enableAutoInject();
+                ARouter.getInstance().build("/test/activity1")
+                        .withString("name", "老王")
+                        .withInt("age", 18)
+                        .withBoolean("girl", true)
+                        .withLong("high", 180)
+                        .withString("url", "https://a.b.c")
+                        .navigation();
                 break;
             case R.id.navByName:
                 ((HelloService) ARouter.getInstance().build("/service/hello").navigation()).sayHello("mike");

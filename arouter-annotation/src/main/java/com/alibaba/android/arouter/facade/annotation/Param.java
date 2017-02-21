@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Used for mark param of page.
+ * THIS ANNOTATION WAS DEPRECATED, USE 'Autowired' PLEASE!
  *
  * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
  * @version 1.0
@@ -14,6 +15,7 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.CLASS)
+@Deprecated
 public @interface Param {
     /**
      * The field name

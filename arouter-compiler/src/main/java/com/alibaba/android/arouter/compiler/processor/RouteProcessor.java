@@ -1,12 +1,13 @@
 package com.alibaba.android.arouter.compiler.processor;
 
+import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
-import com.alibaba.android.arouter.facade.annotation.Param;
+import com.alibaba.android.arouter.compiler.utils.TypeUtils;
+import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.google.auto.service.AutoService;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -22,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,27 +35,22 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
-import static com.alibaba.android.arouter.compiler.utils.Consts.BOOLEAN;
-import static com.alibaba.android.arouter.compiler.utils.Consts.BYTE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.DOUBEL;
-import static com.alibaba.android.arouter.compiler.utils.Consts.FLOAT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.INTEGER;
-import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER;
+import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
+import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ITROUTE_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
-import static com.alibaba.android.arouter.compiler.utils.Consts.LONG;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
@@ -63,8 +58,6 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.SHORT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.STRING;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -76,6 +69,9 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @since 16/8/15 下午10:08
  */
 @AutoService(Processor.class)
+@SupportedOptions(KEY_MODULE_NAME)
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
+@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
 public class RouteProcessor extends AbstractProcessor {
     private Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
     private Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
@@ -84,6 +80,7 @@ public class RouteProcessor extends AbstractProcessor {
     private Types typeUtil;
     private Elements elementUtil;
     private String moduleName = null;   // Module name, maybe its 'app' or others
+    private TypeMirror iProvider = null;
 
     /**
      * Initializes the processor with the processing environment by
@@ -125,41 +122,9 @@ public class RouteProcessor extends AbstractProcessor {
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
         }
 
+        iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();
+
         logger.info(">>> RouteProcessor init. <<<");
-    }
-
-    /**
-     * If the processor class is annotated with {@link
-     * SupportedAnnotationTypes}, return an unmodifiable set with the
-     * same set of strings as the annotation.  If the class is not so
-     * annotated, an empty set is returned.
-     *
-     * @return the names of the annotation types supported by this
-     * processor, or an empty set if none
-     */
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        Set<String> supportAnnotations = new HashSet<>();
-        supportAnnotations.add(Route.class.getCanonicalName());     // This annotation mark class which can be router.
-        return supportAnnotations;
-    }
-
-    /**
-     * If the processor class is annotated with {@link
-     * SupportedSourceVersion}, return the source version in the
-     * annotation.  If the class is not so annotated, {@link
-     * SourceVersion#RELEASE_6} is returned.
-     *
-     * @return the latest source version supported by this processor
-     */
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latestSupported();
-    }
-
-    @Override
-    public Set<String> getSupportedOptions() {
-        return Sets.newHashSet(KEY_MODULE_NAME);
     }
 
     /**
@@ -170,18 +135,19 @@ public class RouteProcessor extends AbstractProcessor {
      */
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> routeElements = roundEnv.getElementsAnnotatedWith(Route.class);
-        boolean parseResult = false;
-        try {
-            logger.info(">>> Found routes, start... <<<");
-            this.parseRoutes(routeElements);
+        if (CollectionUtils.isNotEmpty(annotations)) {
+            Set<? extends Element> routeElements = roundEnv.getElementsAnnotatedWith(Route.class);
+            try {
+                logger.info(">>> Found routes, start... <<<");
+                this.parseRoutes(routeElements);
 
-            parseResult = true;
-        } catch (Exception e) {
-            logger.error(e);
+            } catch (Exception e) {
+                logger.error(e);
+            }
+            return true;
         }
 
-        return parseResult;
+        return false;
     }
 
     private void parseRoutes(Set<? extends Element> routeElements) throws IOException {
@@ -197,16 +163,15 @@ public class RouteProcessor extends AbstractProcessor {
             TypeElement type_Service = elementUtil.getTypeElement(SERVICE);
 
             // Interface of ARouter.
-            TypeElement type_IProvider = elementUtil.getTypeElement(IPROVIDER);
             TypeElement type_IRouteGroup = elementUtil.getTypeElement(IROUTE_GROUP);
             TypeElement type_IProviderGroup = elementUtil.getTypeElement(IPROVIDER_GROUP);
             ClassName routeMetaCn = ClassName.get(RouteMeta.class);
             ClassName routeTypeCn = ClassName.get(RouteType.class);
 
-            /**
-             *  Build input type, format as :
-             *
-             *  ```Map<String, Class<? extends IRouteGroup>>```
+            /*
+               Build input type, format as :
+
+               ```Map<String, Class<? extends IRouteGroup>>```
              */
             ParameterizedTypeName inputMapTypeOfRoot = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
@@ -217,9 +182,9 @@ public class RouteProcessor extends AbstractProcessor {
                     )
             );
 
-            /**
-             *
-             * ```Map<String, RouteMeta>```
+            /*
+
+              ```Map<String, RouteMeta>```
              */
             ParameterizedTypeName inputMapTypeOfGroup = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
@@ -227,15 +192,15 @@ public class RouteProcessor extends AbstractProcessor {
                     ClassName.get(RouteMeta.class)
             );
 
-            /**
-             * Build input param name.
+            /*
+              Build input param name.
              */
             ParameterSpec rootParamSpec = ParameterSpec.builder(inputMapTypeOfRoot, "routes").build();
             ParameterSpec groupParamSpec = ParameterSpec.builder(inputMapTypeOfGroup, "atlas").build();
             ParameterSpec providerParamSpec = ParameterSpec.builder(inputMapTypeOfGroup, "providers").build();  // Ps. its param type same as groupParamSpec!
 
-            /**
-             * Build method : 'loadInto'
+            /*
+              Build method : 'loadInto'
              */
             MethodSpec.Builder loadIntoMethodOfRootBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
                     .addAnnotation(Override.class)
@@ -251,18 +216,17 @@ public class RouteProcessor extends AbstractProcessor {
                 if (typeUtil.isSubtype(tm, type_Activity.asType())) {                 // Activity
                     logger.info(">>> Found activity route: " + tm.toString() + " <<<");
 
-                    // Get all fields annotation by @Param
+                    // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
                     for (Element field : element.getEnclosedElements()) {
-                        if (field.getKind().isField() && field.getAnnotation(Param.class) != null) {
-                            Param paramConfig = field.getAnnotation(Param.class);
-                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : field.getSimpleName().toString() + "|" + paramConfig.name(), typeExchange(field.asType()));
+                        if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !typeUtil.isSubtype(field.asType(), iProvider)) {
+                            // It must be field, then it has annotation, but it not be provider.
+                            Autowired paramConfig = field.getAnnotation(Autowired.class);
+                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : field.getSimpleName().toString() + "|" + paramConfig.name(), TypeUtils.typeExchange(field.asType()));
                         }
                     }
-
-                    paramsType.size();
                     routeMete = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
-                } else if (typeUtil.isSubtype(tm, type_IProvider.asType())) {         // IProvider
+                } else if (typeUtil.isSubtype(tm, iProvider)) {         // IProvider
                     logger.info(">>> Found provider route: " + tm.toString() + " <<<");
                     routeMete = new RouteMeta(route, element, RouteType.PROVIDER, null);
                 } else if (typeUtil.isSubtype(tm, type_Service.asType())) {           // Service
@@ -271,9 +235,9 @@ public class RouteProcessor extends AbstractProcessor {
                 }
 
                 categories(routeMete);
-//                if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
-//                    moduleName = ModuleUtils.generateModuleName(element, logger);
-//                }
+                // if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
+                //     moduleName = ModuleUtils.generateModuleName(element, logger);
+                // }
             }
 
             MethodSpec.Builder loadIntoMethodOfProviderBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
@@ -297,7 +261,7 @@ public class RouteProcessor extends AbstractProcessor {
                         case PROVIDER:  // Need cache provider's super class
                             List<? extends TypeMirror> interfaces = ((TypeElement) routeMeta.getRawType()).getInterfaces();
                             for (TypeMirror tm : interfaces) {
-                                if (typeUtil.isSubtype(tm, type_IProvider.asType())) {
+                                if (typeUtil.isSubtype(tm, iProvider)) {
                                     // This interface extend the IProvider, so it can be used for mark provider
                                     loadIntoMethodOfProviderBuilder.addStatement(
                                             "providers.put($S, $T.build($T." + routeMeta.getType() + ", $T.class, $S, $S, null, " + routeMeta.getPriority() + ", " + routeMeta.getExtra() + "))",
@@ -443,38 +407,5 @@ public class RouteProcessor extends AbstractProcessor {
         }
 
         return true;
-    }
-
-    /**
-     * Diagnostics out the true java type
-     *
-     * @param rawType Raw type
-     * @return Type class of java
-     */
-    private int typeExchange(TypeMirror rawType) {
-        if (rawType.getKind().isPrimitive()) {  // is java base type
-            return rawType.getKind().ordinal();
-        }
-
-        switch (rawType.toString()) {
-            case BYTE:
-                return TypeKind.BYTE.ordinal();
-            case SHORT:
-                return TypeKind.SHORT.ordinal();
-            case INTEGER:
-                return TypeKind.INT.ordinal();
-            case LONG:
-                return TypeKind.LONG.ordinal();
-            case FLOAT:
-                return TypeKind.FLOAT.ordinal();
-            case DOUBEL:
-                return TypeKind.DOUBLE.ordinal();
-            case BOOLEAN:
-                return TypeKind.BOOLEAN.ordinal();
-            case STRING:
-            default:
-                return TypeKind.OTHER.ordinal();  // I say it was java.long.String
-
-        }
     }
 }
