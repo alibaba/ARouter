@@ -35,6 +35,7 @@ dependencies {
 6. Mapping relationships is managed by type/level which reduces the memory consumption and improve the query performance. (*)
 7. Support designating global fallback strategy.
 8. Activitys/interceptors/services do not need to register to ARouter expilicitly, they are discovered automatically.
+9. Full Ioc support, field can be autowired.
 
 #### Ⅱ. Unsupport Feature
 1. Customize URL resolving stratety(considering)
