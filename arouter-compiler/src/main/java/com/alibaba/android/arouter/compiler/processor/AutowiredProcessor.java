@@ -62,6 +62,7 @@ public class AutowiredProcessor extends AbstractProcessor {
     private Types typeUtil;
     private Elements elementUtil;
     private Map<TypeElement, List<Element>> fatherAndChild = new HashMap<>();   // Contain field need autowired and his super class.
+    private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -100,14 +101,14 @@ public class AutowiredProcessor extends AbstractProcessor {
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
 
-        // Build method : 'inject'
-        MethodSpec.Builder injectMethod = MethodSpec.methodBuilder(METHOD_INJECT)
-                .addAnnotation(Override.class)
-                .addModifiers(PUBLIC)
-                .addParameter(objectParamSpec);
-
         if (MapUtils.isNotEmpty(fatherAndChild)) {
             for (Map.Entry<TypeElement, List<Element>> entry : fatherAndChild.entrySet()) {
+                // Build method : 'inject'
+                MethodSpec.Builder injectMethodBuilder = MethodSpec.methodBuilder(METHOD_INJECT)
+                        .addAnnotation(Override.class)
+                        .addModifiers(PUBLIC)
+                        .addParameter(objectParamSpec);
+
                 TypeElement father = entry.getKey();
                 List<Element> childs = entry.getValue();
 
@@ -123,12 +124,40 @@ public class AutowiredProcessor extends AbstractProcessor {
                     ((MainActivity) target).helloService2 = (HelloService) ARouter.getInstance().build("/service/hello").navigation();
                     ((MainActivity) target).name = ((MainActivity) target).getIntent().getStringExtra("name");
                     ((MainActivity) target).boy = ((MainActivity) target).getIntent().getBooleanExtra("sex", false);
+
+                    (($T) target).helloService = $T.getInstance().navigation($T.class);
                  */
 
                 // Generate method body, start inject.
                 for (Element element : childs) {
                     if (typeUtil.isSubtype(element.asType(), iProvider)) {  // It's provider
+                        Autowired fieldConfig = element.getAnnotation(Autowired.class);
+                        if ("".equals(fieldConfig.name())) {    // User has not set service path, then use byType.
 
+                            // Getter
+                            injectMethodBuilder.addStatement(
+                                    "(($T) target)." + element.getSimpleName() + " = $T.getInstance().navigation($T.class)",
+                                    ClassName.get(father),
+                                    ARouterClass,
+                                    ClassName.get(element.asType())
+                            );
+
+                            // Validater
+                            if (fieldConfig.required()) {
+                                // TODO : add check logic
+                            }
+
+
+                        } else {    // use byName
+                            // Getter
+                            injectMethodBuilder.addStatement(
+                                    "(($T) target)." + element.getSimpleName() + " = ($T)$T.getInstance().build($S).navigation();",
+                                    ClassName.get(father),
+                                    ClassName.get(element.asType()),
+                                    ARouterClass,
+                                    fieldConfig.name()
+                            );
+                        }
                     } else {    // It's normal intent value
 
                     }
@@ -140,7 +169,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                                 .addJavadoc(WARNING_TIPS)
                                 .addSuperinterface(ClassName.get(type_ISyringe))
                                 .addModifiers(PUBLIC)
-                                .addMethod(injectMethod.build())
+                                .addMethod(injectMethodBuilder.build())
                                 .build()
                 ).build().writeTo(mFiler);
             }
