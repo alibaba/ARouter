@@ -100,6 +100,7 @@ public class AutowiredProcessor extends AbstractProcessor {
         TypeMirror iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();
         TypeMirror activityTm = elementUtil.getTypeElement(Consts.ACTIVITY).asType();
         TypeMirror fragmentTm = elementUtil.getTypeElement(Consts.FRAGMENT).asType();
+        TypeMirror fragmentTmV4 = elementUtil.getTypeElement(Consts.FRAGMENT_V4).asType();
 
 
         // Build input param name.
@@ -158,7 +159,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         if (typeUtil.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
                             isActivity = true;
                             statment += "getIntent().";
-                        } else if (typeUtil.isSubtype(parent.asType(), fragmentTm)) {   // Fragment, then use getArguments()
+                        } else if (typeUtil.isSubtype(parent.asType(), fragmentTm) || typeUtil.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
                             statment += "getArguments().";
                         } else {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
