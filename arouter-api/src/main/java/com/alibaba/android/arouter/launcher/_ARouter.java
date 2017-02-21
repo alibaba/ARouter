@@ -19,6 +19,7 @@ import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.facade.service.DegradeService;
 import com.alibaba.android.arouter.facade.service.PathReplaceService;
 import com.alibaba.android.arouter.facade.template.ILogger;
+import com.alibaba.android.arouter.facade.template.ISyringe;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
@@ -28,6 +29,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import static com.alibaba.android.arouter.utils.Consts.SUFFIX_AUTOWIRED;
+import static com.alibaba.android.arouter.utils.Consts.TAG;
 
 /**
  * ARouter core
@@ -54,6 +58,11 @@ final class _ARouter {
         LogisticsCenter.init(mContext, executor);
         logger.info(Consts.TAG, "ARouter init success!");
         hasInit = true;
+
+        // It's not a good idea.
+        // if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+        //     application.registerActivityLifecycleCallbacks(new AutowiredLifecycleCallback());
+        // }
         return true;
     }
 
@@ -95,14 +104,17 @@ final class _ARouter {
         logger.info(Consts.TAG, "ARouter openLog");
     }
 
+    @Deprecated
     static synchronized void enableAutoInject() {
         autoInject = true;
     }
 
+    @Deprecated
     static boolean canAutoInject() {
         return autoInject;
     }
 
+    @Deprecated
     static void attachBaseContext() {
         Log.i(Consts.TAG, "ARouter start attachBaseContext");
         try {
@@ -150,6 +162,16 @@ final class _ARouter {
     static void setLogger(ILogger userLogger) {
         if (null != userLogger) {
             logger = userLogger;
+        }
+    }
+
+    static void inject(Object thiz) {
+        try {
+            Class autowiredClass = Class.forName(thiz.getClass().getName() + SUFFIX_AUTOWIRED);
+            ISyringe iSyringe = (ISyringe) autowiredClass.getConstructor().newInstance();
+            iSyringe.inject(thiz);
+        } catch (Exception ex) {
+            logger.error(TAG, "Autowired made exception, message [" + ex.getMessage() + "]");
         }
     }
 

@@ -20,6 +20,7 @@ public @interface Autowired {
     String name() default "";
 
     // If required, app will be crash when value is null.
+    // Primitive type wont be check!
     boolean required() default false;
 
     // Description of the field

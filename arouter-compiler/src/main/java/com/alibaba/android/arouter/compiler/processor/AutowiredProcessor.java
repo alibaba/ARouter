@@ -2,6 +2,7 @@ package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
+import com.alibaba.android.arouter.compiler.utils.TypeUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
@@ -33,6 +34,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -93,10 +95,12 @@ public class AutowiredProcessor extends AbstractProcessor {
         return false;
     }
 
-    private void generateHelper() throws IOException {
+    private void generateHelper() throws IOException, IllegalAccessException {
         TypeElement type_ISyringe = elementUtil.getTypeElement(ISYRINGE);
         TypeMirror iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();
-        ;
+        TypeMirror activityTm = elementUtil.getTypeElement(Consts.ACTIVITY).asType();
+        TypeMirror fragmentTm = elementUtil.getTypeElement(Consts.FRAGMENT).asType();
+
 
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
@@ -116,37 +120,25 @@ public class AutowiredProcessor extends AbstractProcessor {
                 String packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
                 String fileName = parent.getSimpleName() + NAME_OF_AUTOWIRED;
 
-                /*
-                    ((MainActivity) target).helloService = ARouter.getInstance().navigation(HelloService.class);
-                    if (((MainActivity) target).helloService == null) {
-                        throw new RuntimeException("helloService is null, in class 'MainActivity L12'!");
-                    }
-                    ((MainActivity) target).helloService2 = (HelloService) ARouter.getInstance().build("/service/hello").navigation();
-                    ((MainActivity) target).name = ((MainActivity) target).getIntent().getStringExtra("name");
-                    ((MainActivity) target).boy = ((MainActivity) target).getIntent().getBooleanExtra("sex", false);
-
-                    (($T) target).helloService = $T.getInstance().navigation($T.class);
-                 */
+                injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
                 // Generate method body, start inject.
                 for (Element element : childs) {
+                    Autowired fieldConfig = element.getAnnotation(Autowired.class);
+                    String fieldName = element.getSimpleName().toString();
                     if (typeUtil.isSubtype(element.asType(), iProvider)) {  // It's provider
-                        Autowired fieldConfig = element.getAnnotation(Autowired.class);
-                        String fieldName = element.getSimpleName().toString();
                         if ("".equals(fieldConfig.name())) {    // User has not set service path, then use byType.
 
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "(($T) target)." + fieldName + " = $T.getInstance().navigation($T.class)",
-                                    ClassName.get(parent),
+                                    "substitute." + fieldName + " = $T.getInstance().navigation($T.class)",
                                     ARouterClass,
                                     ClassName.get(element.asType())
                             );
                         } else {    // use byName
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "(($T) target)." + fieldName + " = ($T)$T.getInstance().build($S).navigation();",
-                                    ClassName.get(parent),
+                                    "substitute." + fieldName + " = ($T)$T.getInstance().build($S).navigation();",
                                     ClassName.get(element.asType()),
                                     ARouterClass,
                                     fieldConfig.name()
@@ -155,14 +147,33 @@ public class AutowiredProcessor extends AbstractProcessor {
 
                         // Validater
                         if (fieldConfig.required()) {
-                            injectMethodBuilder.beginControlFlow("if ((($T) target)." + fieldName + " == null)", ClassName.get(parent));
+                            injectMethodBuilder.beginControlFlow("if (substitute." + fieldName + " == null)");
                             injectMethodBuilder.addStatement(
-                                    "throw new RuntimeException(\"The field '" + fieldName + "' is null, in class '" +
-                                            parent.getQualifiedName() + "'!\")");
+                                    "throw new RuntimeException(\"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         }
                     } else {    // It's normal intent value
+                        String statment = "substitute." + fieldName + " = substitute.";
+                        boolean isActivity = false;
+                        if (typeUtil.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
+                            isActivity = true;
+                            statment += "getIntent().";
+                        } else if (typeUtil.isSubtype(parent.asType(), fragmentTm)) {   // Fragment, then use getArguments()
+                            statment += "getArguments().";
+                        } else {
+                            throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
+                        }
 
+                        statment = buildStatement(statment, TypeUtils.typeExchange(element.asType()), isActivity);
+                        injectMethodBuilder.addStatement(statment, fieldName);
+
+                        // Validater
+                        if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
+                            injectMethodBuilder.beginControlFlow("if (substitute." + fieldName + " == null)");
+                            injectMethodBuilder.addStatement(
+                                    "throw new RuntimeException(\"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", ClassName.get(parent));
+                            injectMethodBuilder.endControlFlow();
+                        }
                     }
                 }
 
@@ -177,6 +188,28 @@ public class AutowiredProcessor extends AbstractProcessor {
                 ).build().writeTo(mFiler);
             }
         }
+    }
+
+    private String buildStatement(String statment, int type, boolean isActivity) {
+        if (type == TypeKind.BOOLEAN.ordinal()) {
+            statment += (isActivity ? ("getBooleanExtra($S, false)") : ("getBoolean($S)"));
+        } else if (type == TypeKind.BYTE.ordinal()) {
+            statment += (isActivity ? ("getByteExtra($S, (byte) 0)") : ("getByte($S)"));
+        } else if (type == TypeKind.SHORT.ordinal()) {
+            statment += (isActivity ? ("getShortExtra($S, (short) 0)") : ("getShort($S)"));
+        } else if (type == TypeKind.INT.ordinal()) {
+            statment += (isActivity ? ("getIntExtra($S, 0)") : ("getInt($S)"));
+        } else if (type == TypeKind.LONG.ordinal()) {
+            statment += (isActivity ? ("getLongExtra($S, 0)") : ("getLong($S)"));
+        } else if (type == TypeKind.FLOAT.ordinal()) {
+            statment += (isActivity ? ("getFloatExtra($S, 0)") : ("getFloat($S)"));
+        } else if (type == TypeKind.DOUBLE.ordinal()) {
+            statment += (isActivity ? ("getDoubleExtra($S, 0)") : ("getDouble($S)"));
+        } else if (type == TypeKind.OTHER.ordinal()) {
+            statment += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+        }
+
+        return statment;
     }
 
     /**

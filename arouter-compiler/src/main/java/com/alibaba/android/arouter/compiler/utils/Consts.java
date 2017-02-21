@@ -23,6 +23,7 @@ public class Consts {
 
     // System interface
     public static final String ACTIVITY = "android.app.Activity";
+    public static final String FRAGMENT = "android.app.Fragment";
     public static final String SERVICE = "android.app.Service";
 
     // Java type

@@ -2,6 +2,7 @@ package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
+import com.alibaba.android.arouter.compiler.utils.TypeUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
@@ -39,7 +40,6 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -47,16 +47,10 @@ import javax.lang.model.util.Types;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.BOOLEAN;
-import static com.alibaba.android.arouter.compiler.utils.Consts.BYTE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.DOUBEL;
-import static com.alibaba.android.arouter.compiler.utils.Consts.FLOAT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.INTEGER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ITROUTE_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
-import static com.alibaba.android.arouter.compiler.utils.Consts.LONG;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
@@ -64,8 +58,6 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.SHORT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.STRING;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -230,7 +222,7 @@ public class RouteProcessor extends AbstractProcessor {
                         if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !typeUtil.isSubtype(field.asType(), iProvider)) {
                             // It must be field, then it has annotation, but it not be provider.
                             Autowired paramConfig = field.getAnnotation(Autowired.class);
-                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : field.getSimpleName().toString() + "|" + paramConfig.name(), typeExchange(field.asType()));
+                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : field.getSimpleName().toString() + "|" + paramConfig.name(), TypeUtils.typeExchange(field.asType()));
                         }
                     }
                     routeMete = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
@@ -415,38 +407,5 @@ public class RouteProcessor extends AbstractProcessor {
         }
 
         return true;
-    }
-
-    /**
-     * Diagnostics out the true java type
-     *
-     * @param rawType Raw type
-     * @return Type class of java
-     */
-    private int typeExchange(TypeMirror rawType) {
-        if (rawType.getKind().isPrimitive()) {  // is java base type
-            return rawType.getKind().ordinal();
-        }
-
-        switch (rawType.toString()) {
-            case BYTE:
-                return TypeKind.BYTE.ordinal();
-            case SHORT:
-                return TypeKind.SHORT.ordinal();
-            case INTEGER:
-                return TypeKind.INT.ordinal();
-            case LONG:
-                return TypeKind.LONG.ordinal();
-            case FLOAT:
-                return TypeKind.FLOAT.ordinal();
-            case DOUBEL:
-                return TypeKind.DOUBLE.ordinal();
-            case BOOLEAN:
-                return TypeKind.BOOLEAN.ordinal();
-            case STRING:
-            default:
-                return TypeKind.OTHER.ordinal();  // I say it was java.long.String
-
-        }
     }
 }
