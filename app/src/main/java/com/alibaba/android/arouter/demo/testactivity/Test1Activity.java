@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.demo.R;
-import com.alibaba.android.arouter.facade.annotation.Param;
+import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 
 /**
@@ -14,19 +14,19 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 @Route(path = "/test/activity1")
 public class Test1Activity extends AppCompatActivity {
 
-    @Param
-    private String name;
+    @Autowired
+    String name;
 
-    @Param
-    private int age;
+    @Autowired
+    int age;
 
-    @Param(name = "boy")
-    private boolean girl;
+    @Autowired(name = "boy")
+    boolean girl;
 
     private long high;
 
-    @Param
-    private String url;
+    @Autowired
+    String url;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

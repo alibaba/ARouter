@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.demo.R;
-import com.alibaba.android.arouter.facade.annotation.Param;
+import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 
 /**
@@ -14,14 +14,14 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 @Route(path = "/test/activity3")
 public class Test3Activity extends AppCompatActivity {
 
-    @Param
-    private String name;
+    @Autowired
+    String name;
 
-    @Param
-    private int age;
+    @Autowired
+    int age;
 
-    @Param(name = "boy")
-    private boolean girl;
+    @Autowired(name = "boy")
+    boolean girl;
 
     // 这个字段没有注解，是不会自动注入的
     private long high;

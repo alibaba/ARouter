@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface Autowired {
 
-    // Get service by name, if the name was not null.
+    // Mark param's name or service name.
     String name() default "";
 
     // If required, app will be crash when value is null.
