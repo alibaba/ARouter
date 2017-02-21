@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
  * @version 1.0
  * @since 2016/11/24 16:42
  */
+@Deprecated
 public class InstrumentationHook extends Instrumentation {
 
     /**

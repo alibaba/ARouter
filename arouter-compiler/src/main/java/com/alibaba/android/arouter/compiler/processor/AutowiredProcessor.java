@@ -243,7 +243,6 @@ public class AutowiredProcessor extends AbstractProcessor {
             }
 
             logger.info("categories finished.");
-
         }
     }
 }

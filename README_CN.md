@@ -149,31 +149,34 @@ dependencies {
                 </intent-filter>
         </activity>
 
-2. 使用ARouter协助解析参数类型
+2. 使用ARouter自动注入参数类型
 
-        // URL中的参数会默认以String的形式保存在Bundle中
-        // 如果希望ARouter协助解析参数(按照不同类型保存进Bundle中)
-        // 只需要在需要解析的参数上添加 @Param 注解
+        // 需要解析的参数上添加 @Autowired 注解
         @Route(path = "/test/1")
         public class Test1Activity extends Activity {
-            @Param                   // 声明之后，ARouter会从URL中解析对应名字的参数，并按照类型存入Bundle
+            @Autowired                   // 声明之后，ARouter会从URL中解析对应名字的参数，并按照类型存入Bundle
             public String name;
-            @Param
+            @Autowired
             private int age;
-            @Param(name = "girl")   // 可以通过name来映射URL中的不同参数
+            @Autowired(name = "girl")   // 可以通过name来映射URL中的不同参数
             private boolean boy;
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
 
-                name = getIntent().getStringExtra("name");
-                age = getIntent().getIntExtra("age", -1);
-                boy = getIntent().getBooleanExtra("girl", false);   // 注意：使用映射之后，要从Girl中获取，而不是boy
+                ARouter.getInstance().inject(this);
+
+                Log.d("param", name + age + boy);
+
+                // 无需主动获取，ARouter会自动注入对应的参数
+                // name = getIntent().getStringExtra("name");
+                // age = getIntent().getIntExtra("age", -1);
+                // boy = getIntent().getBooleanExtra("girl", false);   // 注意：使用映射之后，要从Girl中获取，而不是boy
             }
         }
 
-3. 开启ARouter参数自动注入(实验性功能，不建议使用，正在开发保护策略)
+3. ~~开启ARouter参数自动注入(实验性功能，不建议使用，正在开发保护策略) 新版本的依赖注入已经上线，无需以下配置~~
 
         // 首先在Application中重写 attachBaseContext方法，并加入ARouter.attachBaseContext();
         @Override
@@ -303,13 +306,20 @@ dependencies {
 
 9. 使用ARouter管理服务(二) 发现服务
 
-        1. 可以通过两种API来获取Service，分别是ByName、ByType
+        1. 通过依赖查找获取服务 ：可以通过两种API来获取Service，分别是ByName、ByType
         IService service = ARouter.getInstance().navigation(IService.class);    //  ByType
         IService service = (IService) ARouter.getInstance().build("/service/1").navigation(); //  ByName
 
         service.hello("zz");
 
         2. 注意：推荐使用ByName方式获取Service，ByType这种方式写起来比较方便，但如果存在多实现的情况时，SDK不保证能获取到你想要的实现
+
+        3. 通过依赖注入的方式获取服务 ：依赖注入的方式需要注意，在使用前需要调用一次 ARouter.getInstance().inject(this);
+
+        @Autowired
+        IService service;
+
+        service.hello("zz");
 
 10. 使用ARouter管理服务(三) 管理依赖
 

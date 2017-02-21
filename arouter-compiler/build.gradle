@@ -5,7 +5,7 @@ ext {
     artifact = bintrayName
     libraryName = 'ARouter compiler'
     libraryDescription = 'A compiler for ARouter to find route'
-    libraryVersion = '1.0.1'
+    libraryVersion = '1.0.2'
 }
 
 dependencies {
