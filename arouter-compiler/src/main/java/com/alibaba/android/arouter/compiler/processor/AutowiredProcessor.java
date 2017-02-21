@@ -109,12 +109,12 @@ public class AutowiredProcessor extends AbstractProcessor {
                         .addModifiers(PUBLIC)
                         .addParameter(objectParamSpec);
 
-                TypeElement father = entry.getKey();
+                TypeElement parent = entry.getKey();
                 List<Element> childs = entry.getValue();
 
-                String qualifiedName = father.getQualifiedName().toString();
+                String qualifiedName = parent.getQualifiedName().toString();
                 String packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
-                String fileName = father.getSimpleName() + NAME_OF_AUTOWIRED;
+                String fileName = parent.getSimpleName() + NAME_OF_AUTOWIRED;
 
                 /*
                     ((MainActivity) target).helloService = ARouter.getInstance().navigation(HelloService.class);
@@ -132,31 +132,34 @@ public class AutowiredProcessor extends AbstractProcessor {
                 for (Element element : childs) {
                     if (typeUtil.isSubtype(element.asType(), iProvider)) {  // It's provider
                         Autowired fieldConfig = element.getAnnotation(Autowired.class);
+                        String fieldName = element.getSimpleName().toString();
                         if ("".equals(fieldConfig.name())) {    // User has not set service path, then use byType.
 
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "(($T) target)." + element.getSimpleName() + " = $T.getInstance().navigation($T.class)",
-                                    ClassName.get(father),
+                                    "(($T) target)." + fieldName + " = $T.getInstance().navigation($T.class)",
+                                    ClassName.get(parent),
                                     ARouterClass,
                                     ClassName.get(element.asType())
                             );
-
-                            // Validater
-                            if (fieldConfig.required()) {
-                                // TODO : add check logic
-                            }
-
-
                         } else {    // use byName
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "(($T) target)." + element.getSimpleName() + " = ($T)$T.getInstance().build($S).navigation();",
-                                    ClassName.get(father),
+                                    "(($T) target)." + fieldName + " = ($T)$T.getInstance().build($S).navigation();",
+                                    ClassName.get(parent),
                                     ClassName.get(element.asType()),
                                     ARouterClass,
                                     fieldConfig.name()
                             );
+                        }
+
+                        // Validater
+                        if (fieldConfig.required()) {
+                            injectMethodBuilder.beginControlFlow("if ((($T) target)." + fieldName + " == null)", ClassName.get(parent));
+                            injectMethodBuilder.addStatement(
+                                    "throw new RuntimeException(\"The field '" + fieldName + "' is null, in class '" +
+                                            parent.getQualifiedName() + "'!\")");
+                            injectMethodBuilder.endControlFlow();
                         }
                     } else {    // It's normal intent value
 
