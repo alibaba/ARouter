@@ -63,7 +63,7 @@ public class AutowiredProcessor extends AbstractProcessor {
     private Logger logger;
     private Types typeUtil;
     private Elements elementUtil;
-    private Map<TypeElement, List<Element>> fatherAndChild = new HashMap<>();   // Contain field need autowired and his super class.
+    private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
     private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
 
     @Override
@@ -102,12 +102,11 @@ public class AutowiredProcessor extends AbstractProcessor {
         TypeMirror fragmentTm = elementUtil.getTypeElement(Consts.FRAGMENT).asType();
         TypeMirror fragmentTmV4 = elementUtil.getTypeElement(Consts.FRAGMENT_V4).asType();
 
-
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
 
-        if (MapUtils.isNotEmpty(fatherAndChild)) {
-            for (Map.Entry<TypeElement, List<Element>> entry : fatherAndChild.entrySet()) {
+        if (MapUtils.isNotEmpty(parentAndChild)) {
+            for (Map.Entry<TypeElement, List<Element>> entry : parentAndChild.entrySet()) {
                 // Build method : 'inject'
                 MethodSpec.Builder injectMethodBuilder = MethodSpec.methodBuilder(METHOD_INJECT)
                         .addAnnotation(Override.class)
@@ -120,6 +119,8 @@ public class AutowiredProcessor extends AbstractProcessor {
                 String qualifiedName = parent.getQualifiedName().toString();
                 String packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
                 String fileName = parent.getSimpleName() + NAME_OF_AUTOWIRED;
+
+                logger.info(">>> Start process " + childs.size() + " field in " + parent.getSimpleName() + " ... <<<");
 
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
@@ -187,7 +188,11 @@ public class AutowiredProcessor extends AbstractProcessor {
                                 .addMethod(injectMethodBuilder.build())
                                 .build()
                 ).build().writeTo(mFiler);
+
+                logger.info(">>> " + parent.getSimpleName() + " has been processed, " + fileName + " has been generated. <<<");
             }
+
+            logger.info(">>> Autowired processor stop. <<<");
         }
     }
 
@@ -228,10 +233,10 @@ public class AutowiredProcessor extends AbstractProcessor {
                             + element.getSimpleName() + "] in class [" + enclosingElement.getQualifiedName() + "]");
                 }
 
-                if (fatherAndChild.containsKey(enclosingElement)) { // Has categries
-                    fatherAndChild.get(enclosingElement).add(element);
+                if (parentAndChild.containsKey(enclosingElement)) { // Has categries
+                    parentAndChild.get(enclosingElement).add(element);
                 } else {
-                    fatherAndChild.put(enclosingElement, new ArrayList<Element>() {{
+                    parentAndChild.put(enclosingElement, new ArrayList<Element>() {{
                         add(element);
                     }});
                 }
