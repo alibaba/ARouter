@@ -8,6 +8,11 @@ ext {
     libraryVersion = '1.0.2'
 }
 
+compileJava {
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
+}
+
 dependencies {
     compile 'com.alibaba:arouter-annotation:1.0.1'
 

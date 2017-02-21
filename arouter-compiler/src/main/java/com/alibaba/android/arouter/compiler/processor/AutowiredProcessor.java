@@ -236,9 +236,9 @@ public class AutowiredProcessor extends AbstractProcessor {
                 if (parentAndChild.containsKey(enclosingElement)) { // Has categries
                     parentAndChild.get(enclosingElement).add(element);
                 } else {
-                    parentAndChild.put(enclosingElement, new ArrayList<Element>() {{
-                        add(element);
-                    }});
+                    List<Element> childs = new ArrayList<>();
+                    childs.add(element);
+                    parentAndChild.put(enclosingElement, childs);
                 }
             }
 
