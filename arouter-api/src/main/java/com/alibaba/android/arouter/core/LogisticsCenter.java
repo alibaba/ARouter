@@ -3,6 +3,7 @@ package com.alibaba.android.arouter.core;
 import android.content.Context;
 import android.net.Uri;
 
+import com.alibaba.android.arouter.base.UniqueKeyTreeMap;
 import com.alibaba.android.arouter.exception.HandlerException;
 import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +63,7 @@ public class LogisticsCenter {
     private static Map<String, RouteMeta> providersIndex = new HashMap<>();
 
     // Cache interceptor
-    private static Map<Integer, Class<? extends IInterceptor>> interceptorsIndex = new TreeMap<>();
+    private static Map<Integer, Class<? extends IInterceptor>> interceptorsIndex = new UniqueKeyTreeMap<>("More than one interceptors use same priority [%s]");
     private static List<IInterceptor> interceptors = new ArrayList<>();
 
     private static Context mContext;
@@ -109,7 +109,7 @@ public class LogisticsCenter {
                 logger.debug(TAG, String.format(Locale.getDefault(), "LogisticsCenter has already been loaded, GroupIndex[%d], InterceptorIndex[%d], ProviderIndex[%d]", groupsIndex.size(), interceptorsIndex.size(), providersIndex.size()));
             }
         } catch (Exception e) {
-            throw new HandlerException(TAG + "ARouter init atlas exception! [" + e.getMessage() + "]");
+            throw new HandlerException(TAG + "ARouter init logistics center exception! [" + e.getMessage() + "]");
         }
     }
 
