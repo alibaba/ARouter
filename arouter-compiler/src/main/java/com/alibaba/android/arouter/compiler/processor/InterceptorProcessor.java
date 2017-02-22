@@ -17,6 +17,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -144,15 +145,17 @@ public class InterceptorProcessor extends AbstractProcessor {
                     logger.info("A interceptor verify over, its " + element.asType());
                     Interceptor interceptor = element.getAnnotation(Interceptor.class);
 
-                    if (interceptors.containsKey(interceptor.priority())) { // Added, throw exceptions
-                        throw new IllegalArgumentException("More than one interceptors use same priority [" + interceptor.priority() + "].");
+                    Element lastInterceptor = interceptors.get(interceptor.priority());
+                    if (null != lastInterceptor) { // Added, throw exceptions
+                        throw new IllegalArgumentException(
+                                String.format(Locale.getDefault(), "More than one interceptors use same priority [%d], They are [%s] and [%s].",
+                                        interceptor.priority(),
+                                        lastInterceptor.getSimpleName(),
+                                        element.getSimpleName())
+                        );
                     }
 
                     interceptors.put(interceptor.priority(), element);
-
-                    // if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
-                    //     moduleName = ModuleUtils.generateModuleName(element, logger);
-                    // }
                 } else {
                     logger.error("A interceptor verify failed, its " + element.asType());
                 }
