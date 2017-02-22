@@ -143,6 +143,11 @@ public class InterceptorProcessor extends AbstractProcessor {
                 if (verify(element)) {  // Check the interceptor meta
                     logger.info("A interceptor verify over, its " + element.asType());
                     Interceptor interceptor = element.getAnnotation(Interceptor.class);
+
+                    if (interceptors.containsKey(interceptor.priority())) { // Added, throw exceptions
+                        throw new IllegalArgumentException("More than one interceptors use same priority [" + interceptor.priority() + "].");
+                    }
+
                     interceptors.put(interceptor.priority(), element);
 
                     // if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
