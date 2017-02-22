@@ -98,6 +98,7 @@ dependencies {
 5. Add proguard rule(If proguard tools was used)
 
         -keep public class com.alibaba.android.arouter.routes.**{*;}
+        -keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
 
 #### Ⅳ. Further Usage
 1. Route by URL
