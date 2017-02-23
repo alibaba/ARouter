@@ -63,4 +63,32 @@ public class TextUtils {
 
         return Collections.unmodifiableMap(paramMap);
     }
+
+    /**
+     * Split key with |
+     *
+     * @param key raw key
+     * @return left key
+     */
+    public static String getLeft(String key) {
+        if (key.contains("|") && !key.endsWith("|")) {
+            return key.substring(0, key.indexOf("|"));
+        } else {
+            return key;
+        }
+    }
+
+    /**
+     * Split key with |
+     *
+     * @param key raw key
+     * @return right key
+     */
+    public static String getRight(String key) {
+        if (key.contains("|") && !key.startsWith("|")) {
+            return key.substring(key.indexOf("|") + 1);
+        } else {
+            return key;
+        }
+    }
 }

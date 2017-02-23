@@ -17,6 +17,7 @@ import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.facade.service.DegradeService;
+import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.service.PathReplaceService;
 import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.facade.template.ISyringe;
@@ -49,6 +50,8 @@ final class _ARouter {
     private volatile static boolean hasInit = false;
     private volatile static ThreadPoolExecutor executor = DefaultPoolExecutor.getInstance();
     private static Context mContext;
+
+    private static InterceptorService interceptorService;
 
     private _ARouter() {
     }
@@ -242,7 +245,7 @@ final class _ARouter {
     }
 
     static void afterInit() {
-        LogisticsCenter.initInterceptors();
+        interceptorService = ARouter.getInstance().navigation(InterceptorService.class); // Trigger interceptor init.
     }
 
     protected <T> T navigation(Class<? extends T> service) {
@@ -293,7 +296,7 @@ final class _ARouter {
         }
 
         if (!postcard.isGreenChannal()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
-            LogisticsCenter.interceptions(postcard, new InterceptorCallback() {
+            interceptorService.doInterceptions(postcard, new InterceptorCallback() {
                 /**
                  * Continue process
                  *
