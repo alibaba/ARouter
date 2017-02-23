@@ -35,6 +35,8 @@ public class ClassUtils {
     private static final String PREFS_FILE = "multidex.version";
     private static final String KEY_DEX_NUMBER = "dex.number";
 
+    private static final String INSTANT_RUN_FILE_PATH = "files" + File.separator + "instant-run" + File.separator + "dex";
+
     private static final int VM_WITH_MULTIDEX_VERSION_MAJOR = 2;
     private static final int VM_WITH_MULTIDEX_VERSION_MINOR = 1;
 
@@ -110,7 +112,31 @@ public class ClassUtils {
             }
         }
 
+        sourcePaths.addAll(getInstantRunDexFile(applicationInfo)); // Maybe user has open the InstantRun feature.
+
         return sourcePaths;
+    }
+
+    /**
+     * Get dex file path in InstantRun, only Debug
+     */
+    private static List<String> getInstantRunDexFile(ApplicationInfo applicationInfo) {
+        List<String> instantRunSourcePaths = new ArrayList<>();
+        try {
+            File instantRunFilePath = new File(applicationInfo.dataDir, INSTANT_RUN_FILE_PATH);
+            if (instantRunFilePath.exists() && instantRunFilePath.isDirectory()) {
+                File[] dexFile = instantRunFilePath.listFiles();
+                for (File file : dexFile) {
+                    if (null != file && file.exists() && file.isFile() && file.getName().endsWith(".dex")) {
+                        instantRunSourcePaths.add(file.getAbsolutePath());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.e("galaxy", "Found dex file in InstantRun made error, " + e.getMessage());
+        }
+
+        return instantRunSourcePaths;
     }
 
     /**
