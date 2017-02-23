@@ -15,6 +15,7 @@ import com.alibaba.android.arouter.launcher.ARouter;
  * @version 1.0
  * @since 2017/2/21 上午11:28
  */
+@Deprecated
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class AutowiredLifecycleCallback implements Application.ActivityLifecycleCallbacks {
     @Override

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.neenbedankt.android-apt'
 
 ext {
     bintrayName = 'arouter-api'
@@ -33,8 +34,15 @@ android {
 }
 
 dependencies {
+    apt 'com.alibaba:arouter-compiler:1.0.2'
     compile 'com.alibaba:arouter-annotation:1.0.1'
     compile 'com.android.support:support-v4:23.1.1'
+}
+
+apt {
+    arguments {
+        moduleName project.getName();
+    }
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
