@@ -78,7 +78,7 @@ final class _ARouter {
             LogisticsCenter.suspend();
             logger.info(Consts.TAG, "ARouter destroy success!");
         } else {
-            throw new HandlerException("ARouter::destroy can be used in debug mode only!");
+            logger.error(Consts.TAG, "Destroy can be used in debug mode only!");
         }
     }
 
