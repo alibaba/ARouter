@@ -36,6 +36,7 @@ dependencies {
 7. Support designating global fallback strategy.
 8. Activitys/interceptors/services do not need to register to ARouter expilicitly, they are discovered automatically.
 9. Full Ioc support, field can be autowired.
+10. InstantRun support.
 
 #### Ⅱ. Unsupport Feature
 1. Customize URL resolving stratety(considering)

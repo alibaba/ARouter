@@ -2,13 +2,9 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.neenbedankt.android-apt'
 
 dependencies {
-//    apt project(':arouter-compiler')
     compile project(':arouter-api')
 
-    //    compile 'com.alibaba:arouter-api:1.0.1'
-
     compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha8'
     apt 'com.alibaba:arouter-compiler:1.0.1'
 }
 android {

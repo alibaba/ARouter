@@ -9,9 +9,13 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
 
+import com.alibaba.android.arouter.launcher.ARouter;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -34,8 +38,6 @@ public class ClassUtils {
 
     private static final String PREFS_FILE = "multidex.version";
     private static final String KEY_DEX_NUMBER = "dex.number";
-
-    private static final String INSTANT_RUN_FILE_PATH = "files" + File.separator + "instant-run" + File.separator + "dex";
 
     private static final int VM_WITH_MULTIDEX_VERSION_MAJOR = 2;
     private static final int VM_WITH_MULTIDEX_VERSION_MINOR = 1;
@@ -70,7 +72,7 @@ public class ClassUtils {
             }
         }
 
-        Log.d("galaxy", "Filter " + classNames.size() + " classes by packageName <" + packageName + ">");
+        Log.d("ARouter", "Filter " + classNames.size() + " classes by packageName <" + packageName + ">");
         return classNames;
     }
 
@@ -112,28 +114,43 @@ public class ClassUtils {
             }
         }
 
-        sourcePaths.addAll(getInstantRunDexFile(applicationInfo)); // Maybe user has open the InstantRun feature.
-
+        if (ARouter.debuggable()) { // Search instant run support only debuggable
+            sourcePaths.addAll(tryLoadInstantRunDexFile(applicationInfo));
+        }
         return sourcePaths;
     }
 
     /**
-     * Get dex file path in InstantRun, only Debug
+     * Get instant run dex path, used to catch the branch usingApkSplits=false.
      */
-    private static List<String> getInstantRunDexFile(ApplicationInfo applicationInfo) {
+    private static List<String> tryLoadInstantRunDexFile(ApplicationInfo applicationInfo) {
         List<String> instantRunSourcePaths = new ArrayList<>();
-        try {
-            File instantRunFilePath = new File(applicationInfo.dataDir, INSTANT_RUN_FILE_PATH);
-            if (instantRunFilePath.exists() && instantRunFilePath.isDirectory()) {
-                File[] dexFile = instantRunFilePath.listFiles();
-                for (File file : dexFile) {
-                    if (null != file && file.exists() && file.isFile() && file.getName().endsWith(".dex")) {
-                        instantRunSourcePaths.add(file.getAbsolutePath());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && null != applicationInfo.splitSourceDirs) {
+            // add the splite apk, normally for InstantRun, and newest version.
+            instantRunSourcePaths.addAll(Arrays.asList(applicationInfo.splitSourceDirs));
+            Log.d("ARouter", "Found InstantRun support");
+        } else {
+            try {
+                // This man is reflection from Google instant run sdk, he will tell me where the dex files go.
+                Class pathsByInstantRun = Class.forName("com.android.tools.fd.runtime.Paths");
+                Method getDexFileDirectory = pathsByInstantRun.getMethod("getDexFileDirectory", String.class);
+                String instantRunDexPath = (String) getDexFileDirectory.invoke(null, applicationInfo.packageName);
+
+                File instantRunFilePath = new File(instantRunDexPath);
+                if (instantRunFilePath.exists() && instantRunFilePath.isDirectory()) {
+                    File[] dexFile = instantRunFilePath.listFiles();
+                    for (File file : dexFile) {
+                        if (null != file && file.exists() && file.isFile() && file.getName().endsWith(".dex")) {
+                            instantRunSourcePaths.add(file.getAbsolutePath());
+                        }
                     }
+                    Log.d("ARouter", "Found InstantRun support");
                 }
+
+            } catch (Exception e) {
+                Log.e("ARouter", "InstantRun support error, " + e.getMessage());
             }
-        } catch (Exception e) {
-            Log.e("galaxy", "Found dex file in InstantRun made error, " + e.getMessage());
         }
 
         return instantRunSourcePaths;

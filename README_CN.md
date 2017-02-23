@@ -33,6 +33,7 @@ dependencies {
 7. 支持用户指定全局降级与局部降级策略
 8. 被ARouter管理的页面、拦截器、服务均无需主动注册到ARouter
 9. 页面参数以及服务均可以自动注入，无需主动获取
+10. **支持Instant Run**
 
 #### 二、不支持的功能
 1. 自定义URL解析规则(考虑支持)
@@ -472,12 +473,6 @@ dependencies {
         3. 检查编译打包日志，是否出现了形如 ARouter::Compiler >>> xxxxx 的日志，日志中会打印出发现的路由目标
         4. 启动App的时候，开启debug、log(openDebug/openLog), 查看映射表是否已经被扫描出来，形如 D/ARouter::: LogisticsCenter has already been loaded, GroupIndex[4]，GroupIndex > 0
 
-3. Instant Run
-
-    - 请注意，ARouter和Instant Run并没有任何关系，也不会互相干扰，但是在开启Instant Run的情况下，编译期生成的映射文件，可能不会被Instant Run加载到apk中，
-      而且在App没有重新初始化ARouter的情况下，ARouter并不会动态加载新生成的映射文件，如果新增注解，请全量编译并重新安装，鉴于开发中不会频繁添加注解，短期内不会
-      对这种场景进行优化。
-
-4. 沟通和交流
+3. 沟通和交流
 
     ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
