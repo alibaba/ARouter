@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
@@ -9,6 +8,12 @@ android {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
         versionName "0.0.1"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ moduleName : project.getName() ]
+            }
+        }
     }
 
     compileOptions {
@@ -45,17 +50,11 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    apt project(':arouter-compiler')
+    annotationProcessor project(':arouter-compiler')
     compile project(':arouter-api')
     compile project(':test-module-1')
     compile project(':arouter-annotation')
 
     compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:support-v4:23.4.0'
-}
-
-apt {
-    arguments {
-        moduleName project.getName();
-    }
 }
