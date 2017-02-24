@@ -1,6 +1,8 @@
 package com.alibaba.android.arouter.demo;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +45,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.openDebug();
                 break;
             case R.id.init:
+                // 调试模式不是必须开启，但是为了防止有用户开启了InstantRun，但是
+                // 忘了开调试模式，导致无法使用Demo，如果使用了InstantRun，必须在
+                // 初始化之前开启调试模式，但是上线前需要关闭，InstantRun仅用于开
+                // 发阶段，线上开启调试模式有安全风险，可以使用BuildConfig.DEBUG
+                // 来区分环境
+                ARouter.openDebug();
                 ARouter.init(getApplication());
                 break;
             case R.id.normalNavigation:
