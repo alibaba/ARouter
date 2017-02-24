@@ -1,11 +1,10 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.neenbedankt.android-apt'
 
 dependencies {
     compile project(':arouter-api')
 
     compile 'com.android.support:appcompat-v7:23.4.0'
-    apt 'com.alibaba:arouter-compiler:1.0.1'
+    annotationProcessor 'com.alibaba:arouter-compiler:1.0.1'
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
@@ -14,6 +13,12 @@ android {
     defaultConfig {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ moduleName : project.getName() ]
+            }
+        }
     }
 
     compileOptions {
@@ -29,11 +34,5 @@ android {
         }
 
         lintOptions { abortOnError false }
-    }
-}
-
-apt {
-    arguments {
-        moduleName project.getName();
     }
 }
