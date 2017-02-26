@@ -19,15 +19,15 @@
 ##### [Demo apk下载](http://public.cdn.zhilong.me/app-debug.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### 一、功能介绍
-1. **支持直接解析URL进行跳转，并自动解析参数注入**
-2. **支持多模块工程**
-3. **支持添加自定义拦截器，自定义拦截顺序**
+1. **支持直接解析标准URL进行跳转，并自动解析参数注入**
+2. **支持多模块工程使用**
+3. **支持添加多个拦截器，自定义拦截顺序**
 4. **支持依赖注入，可单独作为依赖注入框架使用**
 5. **支持InstantRun**
 6. **支持MultiDex**(Google方案)
 7. 映射关系按组分类、多级管理，按需初始化
 8. 支持用户指定全局降级与局部降级策略
-9. 页面、拦截器、服务等组件均可以自动注册
+9. 页面、拦截器、服务等组件均自动注册到框架
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -67,7 +67,7 @@
 
 3. 初始化SDK
 
-        if (BuildConfig.DEBUG) {
+        if (isDebug()) {
             ARouter.openLog();     // 打印日志
             ARouter.openDebug();   // 开启调试模式(如果在InstantRun模式下运行，必须开启调试模式！线上版本需要关闭,否则有安全风险)
         }
