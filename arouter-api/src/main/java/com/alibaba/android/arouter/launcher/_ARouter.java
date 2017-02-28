@@ -16,11 +16,11 @@ import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.service.AutowiredService;
 import com.alibaba.android.arouter.facade.service.DegradeService;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.service.PathReplaceService;
 import com.alibaba.android.arouter.facade.template.ILogger;
-import com.alibaba.android.arouter.facade.template.ISyringe;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
@@ -30,9 +30,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.ThreadPoolExecutor;
-
-import static com.alibaba.android.arouter.utils.Consts.SUFFIX_AUTOWIRED;
-import static com.alibaba.android.arouter.utils.Consts.TAG;
 
 /**
  * ARouter core
@@ -169,12 +166,9 @@ final class _ARouter {
     }
 
     static void inject(Object thiz) {
-        try {
-            Class autowiredClass = Class.forName(thiz.getClass().getName() + SUFFIX_AUTOWIRED);
-            ISyringe iSyringe = (ISyringe) autowiredClass.getConstructor().newInstance();
-            iSyringe.inject(thiz);
-        } catch (Exception ex) {
-            logger.error(TAG, "Autowired made exception, message [" + ex.getMessage() + "]");
+        AutowiredService autowiredService = ((AutowiredService) ARouter.getInstance().build("/arouter/service/autowired").navigation());
+        if (null != autowiredService) {
+            autowiredService.autowire(thiz);
         }
     }
 
@@ -245,7 +239,8 @@ final class _ARouter {
     }
 
     static void afterInit() {
-        interceptorService = ARouter.getInstance().navigation(InterceptorService.class); // Trigger interceptor init.
+        // Trigger interceptor init, use byName.
+        interceptorService = (InterceptorService) ARouter.getInstance().build("/arouter/service/interceptor").navigation();
     }
 
     protected <T> T navigation(Class<? extends T> service) {

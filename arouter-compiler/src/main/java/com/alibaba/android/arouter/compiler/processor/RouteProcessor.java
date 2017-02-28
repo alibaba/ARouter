@@ -222,7 +222,7 @@ public class RouteProcessor extends AbstractProcessor {
                         if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !typeUtil.isSubtype(field.asType(), iProvider)) {
                             // It must be field, then it has annotation, but it not be provider.
                             Autowired paramConfig = field.getAnnotation(Autowired.class);
-                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : field.getSimpleName().toString() + "|" + paramConfig.name(), TypeUtils.typeExchange(field.asType()));
+                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name(), TypeUtils.typeExchange(field.asType()));
                         }
                     }
                     routeMete = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
