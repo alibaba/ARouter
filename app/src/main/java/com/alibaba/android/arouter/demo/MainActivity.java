@@ -1,8 +1,6 @@
 package com.alibaba.android.arouter.demo;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -79,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance().build("/test/activity1")
                         .withString("name", "老王")
                         .withInt("age", 18)
-                        .withBoolean("girl", true)
+                        .withBoolean("boy", true)
                         .withLong("high", 180)
                         .withString("url", "https://a.b.c")
                         .navigation();

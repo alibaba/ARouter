@@ -154,7 +154,7 @@ public class LogisticsCenter {
                         setValue(postcard,
                                 params.getValue(),
                                 params.getKey(),
-                                resultMap.get(TextUtils.getRight(params.getKey())));
+                                resultMap.get(params.getKey()));
                     }
 
                     // Save params name which need autoinject.
@@ -200,37 +200,35 @@ public class LogisticsCenter {
      */
     private static void setValue(Postcard postcard, Integer typeDef, String key, String value) {
         try {
-            String currentKey = TextUtils.getLeft(key);
-
             if (null != typeDef) {
                 switch (typeDef) {
                     case Consts.DEF_BOOLEAN:
-                        postcard.withBoolean(currentKey, Boolean.parseBoolean(value));
+                        postcard.withBoolean(key, Boolean.parseBoolean(value));
                         break;
                     case Consts.DEF_BYTE:
-                        postcard.withByte(currentKey, Byte.valueOf(value));
+                        postcard.withByte(key, Byte.valueOf(value));
                         break;
                     case Consts.DEF_SHORT:
-                        postcard.withShort(currentKey, Short.valueOf(value));
+                        postcard.withShort(key, Short.valueOf(value));
                         break;
                     case Consts.DEF_INT:
-                        postcard.withInt(currentKey, Integer.valueOf(value));
+                        postcard.withInt(key, Integer.valueOf(value));
                         break;
                     case Consts.DEF_LONG:
-                        postcard.withLong(currentKey, Long.valueOf(value));
+                        postcard.withLong(key, Long.valueOf(value));
                         break;
                     case Consts.DEF_FLOAT:
-                        postcard.withFloat(currentKey, Float.valueOf(value));
+                        postcard.withFloat(key, Float.valueOf(value));
                         break;
                     case Consts.DEF_DOUBLE:
-                        postcard.withDouble(currentKey, Double.valueOf(value));
+                        postcard.withDouble(key, Double.valueOf(value));
                         break;
                     case Consts.DEF_STRING:
                     default:
-                        postcard.withString(currentKey, value);
+                        postcard.withString(key, value);
                 }
             } else {
-                postcard.withString(currentKey, value);
+                postcard.withString(key, value);
             }
         } catch (Throwable ex) {
             logger.warning(Consts.TAG, "LogisticsCenter setValue failed! " + ex.getMessage());

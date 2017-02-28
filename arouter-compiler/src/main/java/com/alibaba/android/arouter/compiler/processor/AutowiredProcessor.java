@@ -14,6 +14,7 @@ import com.squareup.javapoet.TypeSpec;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -167,7 +168,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         }
 
                         statment = buildStatement(statment, TypeUtils.typeExchange(element.asType()), isActivity);
-                        injectMethodBuilder.addStatement(statment, fieldName);
+                        injectMethodBuilder.addStatement(statment, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
 
                         // Validater
                         if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
