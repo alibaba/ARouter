@@ -1,5 +1,6 @@
 ## Look at here
 
-- → Did you add apt plugin
+- → Did you read the doc carefully
 - → Did you add annotation above target activity
-- → Did you read the source code carefully
+- → Did you add annotation processor dependence
+- → **Receive only bugs and suggestions**
