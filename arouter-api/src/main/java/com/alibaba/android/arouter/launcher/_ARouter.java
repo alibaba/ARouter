@@ -25,7 +25,7 @@ import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
 
-import org.apache.commons.lang3.StringUtils;
+import com.alibaba.android.arouter.utils.TextUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -176,7 +176,7 @@ final class _ARouter {
      * Build postcard by path and default group
      */
     protected Postcard build(String path) {
-        if (StringUtils.isEmpty(path)) {
+        if (TextUtils.isEmpty(path)) {
             throw new HandlerException(Consts.TAG + "Parameter is invalid!");
         } else {
             PathReplaceService pService = ARouter.getInstance().navigation(PathReplaceService.class);
@@ -191,7 +191,7 @@ final class _ARouter {
      * Build postcard by uri
      */
     protected Postcard build(Uri uri) {
-        if (null == uri || StringUtils.isEmpty(uri.toString())) {
+        if (null == uri || TextUtils.isEmpty(uri.toString())) {
             throw new HandlerException(Consts.TAG + "Parameter invalid!");
         } else {
             PathReplaceService pService = ARouter.getInstance().navigation(PathReplaceService.class);
@@ -206,7 +206,7 @@ final class _ARouter {
      * Build postcard by path and group
      */
     protected Postcard build(String path, String group) {
-        if (StringUtils.isEmpty(path) || StringUtils.isEmpty(group)) {
+        if (TextUtils.isEmpty(path) || TextUtils.isEmpty(group)) {
             throw new HandlerException(Consts.TAG + "Parameter is invalid!");
         } else {
             PathReplaceService pService = ARouter.getInstance().navigation(PathReplaceService.class);
@@ -221,13 +221,13 @@ final class _ARouter {
      * Extract the default group from path.
      */
     private String extractGroup(String path) {
-        if (StringUtils.isEmpty(path) || !path.startsWith("/")) {
+        if (TextUtils.isEmpty(path) || !path.startsWith("/")) {
             throw new HandlerException(Consts.TAG + "Extract the default group failed, the path must be start with '/' and contain more than 2 '/'!");
         }
 
         try {
             String defaultGroup = path.substring(1, path.indexOf("/", 1));
-            if (StringUtils.isEmpty(defaultGroup)) {
+            if (TextUtils.isEmpty(defaultGroup)) {
                 throw new HandlerException(Consts.TAG + "Extract the default group failed! There's nothing between 2 '/'!");
             } else {
                 return defaultGroup;

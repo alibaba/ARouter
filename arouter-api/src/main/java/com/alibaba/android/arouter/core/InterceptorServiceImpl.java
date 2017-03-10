@@ -9,9 +9,7 @@ import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.template.IInterceptor;
 import com.alibaba.android.arouter.thread.CancelableCountDownLatch;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
+import com.alibaba.android.arouter.utils.MapUtils;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +31,7 @@ public class InterceptorServiceImpl implements InterceptorService {
 
     @Override
     public void doInterceptions(final Postcard postcard, final InterceptorCallback callback) {
-        if (CollectionUtils.isNotEmpty(Warehouse.interceptors)) {
+        if (null != Warehouse.interceptors && Warehouse.interceptors.size() > 0) {
 
             checkInterceptorsInitStatus();
 

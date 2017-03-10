@@ -15,6 +15,10 @@ import java.util.Map;
  */
 public class TextUtils {
 
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+
     /**
      * Print thread stack
      */
