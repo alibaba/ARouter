@@ -49,7 +49,7 @@
 
         dependencies {
             compile 'com.alibaba:arouter-api:x.x.x'
-            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
+            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'    // 替换成最新版本
             ...
         }
         // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'
