@@ -1,16 +1,14 @@
 package com.alibaba.android.arouter.core;
 
 import android.content.Context;
+import android.util.LruCache;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.service.AutowiredService;
 import com.alibaba.android.arouter.facade.template.ISyringe;
 
-import org.apache.commons.collections4.map.LRUMap;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import static com.alibaba.android.arouter.utils.Consts.SUFFIX_AUTOWIRED;
 
@@ -23,12 +21,12 @@ import static com.alibaba.android.arouter.utils.Consts.SUFFIX_AUTOWIRED;
  */
 @Route(path = "/arouter/service/autowired")
 public class AutowiredServiceImpl implements AutowiredService {
-    private Map<String, ISyringe> classCache;
+    private LruCache<String, ISyringe> classCache;
     private List<String> blackList;
 
     @Override
     public void init(Context context) {
-        classCache = new LRUMap<>();
+        classCache = new LruCache<>(66);
         blackList = new ArrayList<>();
     }
 

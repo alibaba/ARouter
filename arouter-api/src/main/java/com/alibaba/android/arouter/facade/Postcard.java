@@ -461,6 +461,7 @@ public final class Postcard extends RouteMeta {
      *
      * @param key   a String, or null
      * @param value a char array object, or null
+     * @return this
      */
     public Postcard withCharArray(@Nullable String key, @Nullable char[] value) {
         mBundle.putCharArray(key, value);
@@ -473,6 +474,7 @@ public final class Postcard extends RouteMeta {
      *
      * @param key   a String, or null
      * @param value a float array object, or null
+     * @return this
      */
     public Postcard withFloatArray(@Nullable String key, @Nullable float[] value) {
         mBundle.putFloatArray(key, value);
@@ -485,6 +487,7 @@ public final class Postcard extends RouteMeta {
      *
      * @param key   a String, or null
      * @param value a CharSequence array object, or null
+     * @return this
      */
     public Postcard withCharSequenceArray(@Nullable String key, @Nullable CharSequence[] value) {
         mBundle.putCharSequenceArray(key, value);
@@ -497,6 +500,7 @@ public final class Postcard extends RouteMeta {
      *
      * @param key   a String, or null
      * @param value a Bundle object, or null
+     * @return this
      */
     public Postcard withBundle(@Nullable String key, @Nullable Bundle value) {
         mBundle.putBundle(key, value);

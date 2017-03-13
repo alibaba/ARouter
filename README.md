@@ -4,7 +4,7 @@
     Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
 ```
 
-##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![api9](https://camo.githubusercontent.com/9dad3f34074f4ffb29ac1c727d6570f0cb714716/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4150492d392532422d6f72616e67652e737667) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 ---
 
@@ -51,7 +51,7 @@
 
         dependencies {
             compile 'com.alibaba:arouter-api:x.x.x'
-            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
+            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'    // 替换成最新版本
             ...
         }
         // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'

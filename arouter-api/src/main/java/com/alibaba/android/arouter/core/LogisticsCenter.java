@@ -15,9 +15,8 @@ import com.alibaba.android.arouter.facade.template.IRouteRoot;
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.alibaba.android.arouter.utils.ClassUtils;
 import com.alibaba.android.arouter.utils.Consts;
+import com.alibaba.android.arouter.utils.MapUtils;
 import com.alibaba.android.arouter.utils.TextUtils;
-
-import org.apache.commons.collections4.MapUtils;
 
 import java.util.List;
 import java.util.Locale;
