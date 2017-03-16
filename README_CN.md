@@ -64,6 +64,7 @@
 		}
 
 3. 初始化SDK
+
         if (isDebug()) {
             ARouter.openLog();     // 打印日志
             ARouter.openDebug();   // 开启调试模式(如果在InstantRun模式下运行，必须开启调试模式！线上版本需要关闭,否则有安全风险)
@@ -124,9 +125,9 @@
             @Autowired
             public String name;
             @Autowired
-            private int age;
+            int age;
             @Autowired(name = "girl") // 通过name来映射URL中的不同参数
-            private boolean boy;
+            boolean boy;
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
