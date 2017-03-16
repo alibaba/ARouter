@@ -221,6 +221,8 @@ public class LogisticsCenter {
                     // TODO : How to description parcelable value with string?
                 } else if (typeDef == TypeKind.OBJECT.ordinal()) {
                     postcard.withString(key, value);
+                } else {    // Compatible compiler sdk 1.0.3, in that version, the string type = 18
+                    postcard.withString(key, value);
                 }
             } else {
                 postcard.withString(key, value);
