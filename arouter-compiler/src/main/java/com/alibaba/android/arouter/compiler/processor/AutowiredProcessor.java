@@ -4,6 +4,7 @@ import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
 import com.alibaba.android.arouter.compiler.utils.TypeUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
+import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -35,7 +36,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -62,18 +62,23 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 public class AutowiredProcessor extends AbstractProcessor {
     private Filer mFiler;       // File util, write class file into disk.
     private Logger logger;
-    private Types typeUtil;
-    private Elements elementUtil;
+    private Types types;
+    private TypeUtils typeUtils;
+    private Elements elements;
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
     private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
+    private static final ClassName JsonClass = ClassName.get("com.alibaba.fastjson", "JSON");
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
 
         mFiler = processingEnv.getFiler();                  // Generate class.
-        typeUtil = processingEnv.getTypeUtils();            // Get type utils.
-        elementUtil = processingEnv.getElementUtils();      // Get class meta.
+        types = processingEnv.getTypeUtils();            // Get type utils.
+        elements = processingEnv.getElementUtils();      // Get class meta.
+
+        typeUtils = new TypeUtils(types, elements);
+
         logger = new Logger(processingEnv.getMessager());   // Package the log utils.
 
         logger.info(">>> AutowiredProcessor init. <<<");
@@ -97,11 +102,11 @@ public class AutowiredProcessor extends AbstractProcessor {
     }
 
     private void generateHelper() throws IOException, IllegalAccessException {
-        TypeElement type_ISyringe = elementUtil.getTypeElement(ISYRINGE);
-        TypeMirror iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();
-        TypeMirror activityTm = elementUtil.getTypeElement(Consts.ACTIVITY).asType();
-        TypeMirror fragmentTm = elementUtil.getTypeElement(Consts.FRAGMENT).asType();
-        TypeMirror fragmentTmV4 = elementUtil.getTypeElement(Consts.FRAGMENT_V4).asType();
+        TypeElement type_ISyringe = elements.getTypeElement(ISYRINGE);
+        TypeMirror iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
+        TypeMirror activityTm = elements.getTypeElement(Consts.ACTIVITY).asType();
+        TypeMirror fragmentTm = elements.getTypeElement(Consts.FRAGMENT).asType();
+        TypeMirror fragmentTmV4 = elements.getTypeElement(Consts.FRAGMENT_V4).asType();
 
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
@@ -129,7 +134,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                 for (Element element : childs) {
                     Autowired fieldConfig = element.getAnnotation(Autowired.class);
                     String fieldName = element.getSimpleName().toString();
-                    if (typeUtil.isSubtype(element.asType(), iProvider)) {  // It's provider
+                    if (types.isSubtype(element.asType(), iProvider)) {  // It's provider
                         if ("".equals(fieldConfig.name())) {    // User has not set service path, then use byType.
 
                             // Getter
@@ -158,17 +163,26 @@ public class AutowiredProcessor extends AbstractProcessor {
                     } else {    // It's normal intent value
                         String statment = "substitute." + fieldName + " = substitute.";
                         boolean isActivity = false;
-                        if (typeUtil.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
+                        if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
                             isActivity = true;
                             statment += "getIntent().";
-                        } else if (typeUtil.isSubtype(parent.asType(), fragmentTm) || typeUtil.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
+                        } else if (types.isSubtype(parent.asType(), fragmentTm) || types.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
                             statment += "getArguments().";
                         } else {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
-                        statment = buildStatement(statment, TypeUtils.typeExchange(element.asType()), isActivity);
-                        injectMethodBuilder.addStatement(statment, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                        statment = buildStatement(statment, typeUtils.typeExchange(element), isActivity);
+                        if (statment.startsWith("$T.")) {   // Not mortals
+                            injectMethodBuilder.addStatement(
+                                    "substitute." + fieldName + " = " + statment,
+                                    JsonClass,
+                                    (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
+                                    ClassName.get(element.asType())
+                            );
+                        } else {
+                            injectMethodBuilder.addStatement(statment, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                        }
 
                         // Validater
                         if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
@@ -212,8 +226,12 @@ public class AutowiredProcessor extends AbstractProcessor {
             statment += (isActivity ? ("getFloatExtra($S, 0)") : ("getFloat($S)"));
         } else if (type == TypeKind.DOUBLE.ordinal()) {
             statment += (isActivity ? ("getDoubleExtra($S, 0)") : ("getDouble($S)"));
-        } else if (type == TypeKind.OTHER.ordinal()) {
+        } else if (type == TypeKind.STRING.ordinal()) {
             statment += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+        } else if (type == TypeKind.PARCELABLE.ordinal()) {
+            statment += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
+        } else if (type == TypeKind.OBJECT.ordinal()) {
+            statment = "$T.parseObject(" + (isActivity ? "substitute.getIntent()." : "getArguments(). ") + "getStringExtra($S), $T.class)";
         }
 
         return statment;

@@ -6,6 +6,7 @@ import android.net.Uri;
 import com.alibaba.android.arouter.exception.HandlerException;
 import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
+import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.template.IInterceptorGroup;
 import com.alibaba.android.arouter.facade.template.IProvider;
@@ -200,31 +201,26 @@ public class LogisticsCenter {
     private static void setValue(Postcard postcard, Integer typeDef, String key, String value) {
         try {
             if (null != typeDef) {
-                switch (typeDef) {
-                    case Consts.DEF_BOOLEAN:
-                        postcard.withBoolean(key, Boolean.parseBoolean(value));
-                        break;
-                    case Consts.DEF_BYTE:
-                        postcard.withByte(key, Byte.valueOf(value));
-                        break;
-                    case Consts.DEF_SHORT:
-                        postcard.withShort(key, Short.valueOf(value));
-                        break;
-                    case Consts.DEF_INT:
-                        postcard.withInt(key, Integer.valueOf(value));
-                        break;
-                    case Consts.DEF_LONG:
-                        postcard.withLong(key, Long.valueOf(value));
-                        break;
-                    case Consts.DEF_FLOAT:
-                        postcard.withFloat(key, Float.valueOf(value));
-                        break;
-                    case Consts.DEF_DOUBLE:
-                        postcard.withDouble(key, Double.valueOf(value));
-                        break;
-                    case Consts.DEF_STRING:
-                    default:
-                        postcard.withString(key, value);
+                if (typeDef == TypeKind.BOOLEAN.ordinal()) {
+                    postcard.withBoolean(key, Boolean.parseBoolean(value));
+                } else if (typeDef == TypeKind.BYTE.ordinal()) {
+                    postcard.withByte(key, Byte.valueOf(value));
+                } else if (typeDef == TypeKind.SHORT.ordinal()) {
+                    postcard.withShort(key, Short.valueOf(value));
+                } else if (typeDef == TypeKind.INT.ordinal()) {
+                    postcard.withInt(key, Integer.valueOf(value));
+                } else if (typeDef == TypeKind.LONG.ordinal()) {
+                    postcard.withLong(key, Long.valueOf(value));
+                } else if (typeDef == TypeKind.FLOAT.ordinal()) {
+                    postcard.withFloat(key, Float.valueOf(value));
+                } else if (typeDef == TypeKind.DOUBLE.ordinal()) {
+                    postcard.withDouble(key, Double.valueOf(value));
+                } else if (typeDef == TypeKind.STRING.ordinal()) {
+                    postcard.withString(key, value);
+                } else if (typeDef == TypeKind.PARCELABLE.ordinal()) {
+                    // TODO : How to description parcelable value with string?
+                } else if (typeDef == TypeKind.OBJECT.ordinal()) {
+                    postcard.withString(key, value);
                 }
             } else {
                 postcard.withString(key, value);

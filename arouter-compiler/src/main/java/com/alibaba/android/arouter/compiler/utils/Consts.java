@@ -26,6 +26,7 @@ public class Consts {
     public static final String FRAGMENT = "android.app.Fragment";
     public static final String FRAGMENT_V4 = "android.support.v4.app.Fragment";
     public static final String SERVICE = "android.app.Service";
+    public static final String PARCELABLE = "android.os.Parcelable";
 
     // Java type
     private static final String LANG = "java.lang";

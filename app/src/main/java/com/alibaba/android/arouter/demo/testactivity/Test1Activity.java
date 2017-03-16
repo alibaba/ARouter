@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.demo.R;
+import com.alibaba.android.arouter.demo.testinject.TestObj;
+import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testservice.HelloService;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
@@ -24,6 +26,12 @@ public class Test1Activity extends AppCompatActivity {
 
     @Autowired(name = "boy")
     boolean girl;
+
+    @Autowired
+    TestParcelable pac;
+
+    @Autowired
+    TestObj obj;
 
     private long high;
 
@@ -47,7 +55,16 @@ public class Test1Activity extends AppCompatActivity {
         // high = getIntent().getLongExtra("high", 0);
         // url = getIntent().getStringExtra("url");
 
-        String params = String.format("name=%s, age=%s, girl=%s, high=%s, url=%s", name, age, girl, high, url);
+        String params = String.format(
+                "name=%s,\n age=%s,\n girl=%s,\n high=%s,\n url=%s,\n pac=%s,\n obj=%s",
+                name,
+                age,
+                girl,
+                high,
+                url,
+                pac,
+                obj
+        );
         helloService.sayHello("Hello moto.");
 
         ((TextView)findViewById(R.id.test)).setText("I am " + Test1Activity.class.getName());

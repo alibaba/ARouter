@@ -56,6 +56,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.PARCELABLE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
@@ -77,8 +78,9 @@ public class RouteProcessor extends AbstractProcessor {
     private Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
     private Filer mFiler;       // File util, write class file into disk.
     private Logger logger;
-    private Types typeUtil;
-    private Elements elementUtil;
+    private Types types;
+    private Elements elements;
+    private TypeUtils typeUtils;
     private String moduleName = null;   // Module name, maybe its 'app' or others
     private TypeMirror iProvider = null;
 
@@ -98,8 +100,10 @@ public class RouteProcessor extends AbstractProcessor {
         super.init(processingEnv);
 
         mFiler = processingEnv.getFiler();                  // Generate class.
-        typeUtil = processingEnv.getTypeUtils();            // Get type utils.
-        elementUtil = processingEnv.getElementUtils();      // Get class meta.
+        types = processingEnv.getTypeUtils();            // Get type utils.
+        elements = processingEnv.getElementUtils();      // Get class meta.
+
+        typeUtils = new TypeUtils(types, elements);
         logger = new Logger(processingEnv.getMessager());   // Package the log utils.
 
         // Attempt to get user configuration [moduleName]
@@ -122,7 +126,7 @@ public class RouteProcessor extends AbstractProcessor {
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
         }
 
-        iProvider = elementUtil.getTypeElement(Consts.IPROVIDER).asType();
+        iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
 
         logger.info(">>> RouteProcessor init. <<<");
     }
@@ -158,13 +162,13 @@ public class RouteProcessor extends AbstractProcessor {
 
             rootMap.clear();
 
-            // Fantastic four
-            TypeElement type_Activity = elementUtil.getTypeElement(ACTIVITY);
-            TypeElement type_Service = elementUtil.getTypeElement(SERVICE);
+            TypeMirror type_Activity = elements.getTypeElement(ACTIVITY).asType();
+            TypeMirror type_Service = elements.getTypeElement(SERVICE).asType();
+            TypeElement type_Parcelable = elements.getTypeElement(PARCELABLE);
 
-            // Interface of ARouter.
-            TypeElement type_IRouteGroup = elementUtil.getTypeElement(IROUTE_GROUP);
-            TypeElement type_IProviderGroup = elementUtil.getTypeElement(IPROVIDER_GROUP);
+            // Interface of ARouter
+            TypeElement type_IRouteGroup = elements.getTypeElement(IROUTE_GROUP);
+            TypeElement type_IProviderGroup = elements.getTypeElement(IPROVIDER_GROUP);
             ClassName routeMetaCn = ClassName.get(RouteMeta.class);
             ClassName routeTypeCn = ClassName.get(RouteType.class);
 
@@ -213,23 +217,23 @@ public class RouteProcessor extends AbstractProcessor {
                 Route route = element.getAnnotation(Route.class);
                 RouteMeta routeMete = null;
 
-                if (typeUtil.isSubtype(tm, type_Activity.asType())) {                 // Activity
+                if (types.isSubtype(tm, type_Activity)) {                 // Activity
                     logger.info(">>> Found activity route: " + tm.toString() + " <<<");
 
                     // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
                     for (Element field : element.getEnclosedElements()) {
-                        if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !typeUtil.isSubtype(field.asType(), iProvider)) {
+                        if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !types.isSubtype(field.asType(), iProvider)) {
                             // It must be field, then it has annotation, but it not be provider.
                             Autowired paramConfig = field.getAnnotation(Autowired.class);
-                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name(), TypeUtils.typeExchange(field.asType()));
+                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name(), typeUtils.typeExchange(field));
                         }
                     }
                     routeMete = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
-                } else if (typeUtil.isSubtype(tm, iProvider)) {         // IProvider
+                } else if (types.isSubtype(tm, iProvider)) {         // IProvider
                     logger.info(">>> Found provider route: " + tm.toString() + " <<<");
                     routeMete = new RouteMeta(route, element, RouteType.PROVIDER, null);
-                } else if (typeUtil.isSubtype(tm, type_Service.asType())) {           // Service
+                } else if (types.isSubtype(tm, type_Service)) {           // Service
                     logger.info(">>> Found service route: " + tm.toString() + " <<<");
                     routeMete = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
                 }
@@ -261,7 +265,7 @@ public class RouteProcessor extends AbstractProcessor {
                         case PROVIDER:  // Need cache provider's super class
                             List<? extends TypeMirror> interfaces = ((TypeElement) routeMeta.getRawType()).getInterfaces();
                             for (TypeMirror tm : interfaces) {
-                                if (typeUtil.isSubtype(tm, iProvider)) {
+                                if (types.isSubtype(tm, iProvider)) {
                                     // This interface extend the IProvider, so it can be used for mark provider
                                     loadIntoMethodOfProviderBuilder.addStatement(
                                             "providers.put($S, $T.build($T." + routeMeta.getType() + ", $T.class, $S, $S, null, " + routeMeta.getPriority() + ", " + routeMeta.getExtra() + "))",
@@ -338,7 +342,7 @@ public class RouteProcessor extends AbstractProcessor {
             JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                     TypeSpec.classBuilder(rootFileName)
                             .addJavadoc(WARNING_TIPS)
-                            .addSuperinterface(ClassName.get(elementUtil.getTypeElement(ITROUTE_ROOT)))
+                            .addSuperinterface(ClassName.get(elements.getTypeElement(ITROUTE_ROOT)))
                             .addModifiers(PUBLIC)
                             .addMethod(loadIntoMethodOfRootBuilder.build())
                             .build()

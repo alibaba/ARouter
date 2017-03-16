@@ -19,7 +19,7 @@
 ##### [Demo apk下载](http://public.cdn.zhilong.me/app-debug.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### 一、功能介绍
-1. **支持直接解析标准URL进行跳转，并自动解析参数注入**
+1. **支持直接解析标准URL进行跳转，并自动注入参数到目标页面中**
 2. **支持多模块工程使用**
 3. **支持添加多个拦截器，自定义拦截顺序**
 4. **支持依赖注入，可单独作为依赖注入框架使用**
@@ -50,8 +50,10 @@
         }
 
         dependencies {
+            // 替换成最新版本, 需要注意的是api
+            // 要与compiler匹配使用，均使用最新版可以保证兼容
             compile 'com.alibaba:arouter-api:x.x.x'
-            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'    // 替换成最新版本
+            annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
             ...
         }
         // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'
@@ -82,6 +84,7 @@
 		ARouter.getInstance().build("/test/1")
 					.withLong("key1", 666L)
 					.withString("key3", "888")
+					.withObject("key4", new Test("Jack", "Rose"))
 					.navigation();
 
 5. 添加混淆规则(如果使用了Proguard)
@@ -122,6 +125,7 @@
 2. 解析URL中的参数
 
         // 为每一个参数声明一个字段，并使用 @Autowired 标注
+        // URL中不能传递Parcelable类型数据，通过ARouter api可以传递Parcelable对象
         @Route(path = "/test/activity")
         public class Test1Activity extends Activity {
             @Autowired
@@ -130,6 +134,8 @@
             int age;
             @Autowired(name = "girl") // 通过name来映射URL中的不同参数
             boolean boy;
+            @Autowired
+            TestObj obj;    // 支持解析自定义对象，URL中使用json传递
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
@@ -290,6 +296,11 @@
 					.build("/home/main")
 					.withFlags();
 					.navigation();
+					
+	    // 对象传递
+	    ARouter.getInstance()
+	                .withObject("key", new TestObj("Jack", "Rose"))
+	                .navigation();
 
 		// 觉得接口不够多，可以直接拿出Bundle赋值
 		ARouter.getInstance()
