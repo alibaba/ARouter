@@ -41,7 +41,7 @@ android {
 dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:1.0.3'
     compile 'com.alibaba:arouter-annotation:1.0.2'
-    compile 'com.android.support:support-v4:25.2.0'
+    compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

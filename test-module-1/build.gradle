@@ -2,9 +2,8 @@ apply plugin: 'com.android.library'
 
 dependencies {
     compile project(':arouter-api')
-
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    annotationProcessor 'com.alibaba:arouter-compiler:1.0.1'
+    compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    annotationProcessor 'com.alibaba:arouter-compiler:1.0.3'
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)

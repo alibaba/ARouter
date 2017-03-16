@@ -127,9 +127,9 @@
             @Autowired
             public String name;
             @Autowired
-            private int age;
+            int age;
             @Autowired(name = "girl") // 通过name来映射URL中的不同参数
-            private boolean boy;
+            boolean boy;
 
             @Override
             protected void onCreate(Bundle savedInstanceState) {
