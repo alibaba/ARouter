@@ -5,7 +5,7 @@ ext {
     artifact = bintrayName
     libraryName = 'ARouter annotation'
     libraryDescription = 'The annotation used in arouter api'
-    libraryVersion = '1.0.2'
+    libraryVersion = arouter_annotation_version
 }
 
 compileJava {

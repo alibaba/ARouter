@@ -8,7 +8,7 @@ import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
 
-public class SchameFilterActivity extends Activity {
+public class SchemeFilterActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

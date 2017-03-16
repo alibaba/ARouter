@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.alibaba.android.arouter.demo.testinject.TestObj;
+import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testservice.HelloService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
@@ -74,12 +76,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation();
                 break;
             case R.id.autoInject:
+                TestParcelable testParcelable = new TestParcelable("jack", 666);
+                TestObj testObj = new TestObj("Rose", 777);
+
                 ARouter.getInstance().build("/test/activity1")
                         .withString("name", "老王")
                         .withInt("age", 18)
                         .withBoolean("boy", true)
                         .withLong("high", 180)
                         .withString("url", "https://a.b.c")
+                        .withParcelable("pac", testParcelable)
+                        .withObject("obj", testObj)
                         .navigation();
                 break;
             case R.id.navByName:

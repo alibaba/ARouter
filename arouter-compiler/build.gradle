@@ -5,7 +5,7 @@ ext {
     artifact = bintrayName
     libraryName = 'ARouter compiler'
     libraryDescription = 'A compiler for ARouter to find route'
-    libraryVersion = '1.0.3'
+    libraryVersion = arouter_compiler_version
 }
 
 compileJava {
@@ -14,7 +14,7 @@ compileJava {
 }
 
 dependencies {
-    compile 'com.alibaba:arouter-annotation:1.0.1'
+    compile 'com.alibaba:arouter-annotation:1.0.3'
 
     compile 'com.google.auto.service:auto-service:1.0-rc2'
     compile 'com.squareup:javapoet:1.7.0'

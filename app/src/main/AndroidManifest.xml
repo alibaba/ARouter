@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="ARouter demo"
         android:theme="@style/Base.Theme.AppCompat">
-        <activity android:name=".SchameFilterActivity">
+        <activity android:name=".SchemeFilterActivity">
 
             <!-- Schame -->
             <intent-filter>
