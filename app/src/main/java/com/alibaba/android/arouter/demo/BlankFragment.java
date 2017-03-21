@@ -9,10 +9,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.facade.annotation.Autowired;
+import com.alibaba.android.arouter.facade.annotation.Route;
 
 /**
  * A simple {@link Fragment} subclass.
  */
+@Route(path = "/test/fragment")
 public class BlankFragment extends Fragment {
 
     @Autowired

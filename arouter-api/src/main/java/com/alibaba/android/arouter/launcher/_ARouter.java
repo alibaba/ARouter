@@ -2,6 +2,7 @@ package com.alibaba.android.arouter.launcher;
 
 import android.app.Activity;
 import android.app.Application;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -360,6 +361,19 @@ final class _ARouter {
             case BOARDCAST:
             case CONTENT_PROVIDER:
             case FRAGMENT:
+                Class fragmentMeta = postcard.getDestination();
+                try {
+                    Object instance = fragmentMeta.getConstructor().newInstance();
+                    if (instance instanceof Fragment) {
+                        ((Fragment) instance).setArguments(postcard.getExtras());
+                    } else if (instance instanceof android.support.v4.app.Fragment) {
+                        ((android.support.v4.app.Fragment) instance).setArguments(postcard.getExtras());
+                    }
+
+                    return instance;
+                } catch (Exception ex) {
+                    logger.error(Consts.TAG, "Navigation to fragment error, " + TextUtils.formatStackTrace(ex.getStackTrace()));
+                }
             case METHOD:
             case SERVICE:
             default:

@@ -47,6 +47,7 @@ import javax.lang.model.util.Types;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.FRAGMENT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ITROUTE_ROOT;
@@ -56,7 +57,6 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.PARCELABLE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
@@ -164,7 +164,8 @@ public class RouteProcessor extends AbstractProcessor {
 
             TypeMirror type_Activity = elements.getTypeElement(ACTIVITY).asType();
             TypeMirror type_Service = elements.getTypeElement(SERVICE).asType();
-            TypeElement type_Parcelable = elements.getTypeElement(PARCELABLE);
+            TypeMirror fragmentTm = elements.getTypeElement(FRAGMENT).asType();
+            TypeMirror fragmentTmV4 = elements.getTypeElement(Consts.FRAGMENT_V4).asType();
 
             // Interface of ARouter
             TypeElement type_IRouteGroup = elements.getTypeElement(IROUTE_GROUP);
@@ -236,6 +237,9 @@ public class RouteProcessor extends AbstractProcessor {
                 } else if (types.isSubtype(tm, type_Service)) {           // Service
                     logger.info(">>> Found service route: " + tm.toString() + " <<<");
                     routeMete = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
+                } else if (types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
+                    logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
+                    routeMete = new RouteMeta(route, element, RouteType.parse(FRAGMENT), null);
                 }
 
                 categories(routeMete);

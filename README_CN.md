@@ -27,6 +27,7 @@
 8. 支持用户指定全局降级与局部降级策略
 9. 页面、拦截器、服务等组件均自动注册到框架
 10. 支持多种方式配置转场动画
+11. 支持获取Fragment
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -300,6 +301,9 @@
 	    ARouter.getInstance()
 	                .withObject("key", new TestObj("Jack", "Rose"))
 	                .navigation();
+	                
+        // 获取Fragment
+        Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
 
 		// 觉得接口不够多，可以直接拿出Bundle赋值
 		ARouter.getInstance()
