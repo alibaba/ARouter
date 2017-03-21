@@ -5,6 +5,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,7 +27,6 @@ import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
-
 import com.alibaba.android.arouter.utils.TextUtils;
 
 import java.lang.reflect.Field;
@@ -290,7 +292,7 @@ final class _ARouter {
             callback.onFound(postcard);
         }
 
-        if (!postcard.isGreenChannal()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
+        if (!postcard.isGreenChannel()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
             interceptorService.doInterceptions(postcard, new InterceptorCallback() {
                 /**
                  * Continue process
@@ -320,13 +322,12 @@ final class _ARouter {
     }
 
     private Object _navigation(final Context context, final Postcard postcard, final int requestCode) {
-        Context currentContext = null == context ? mContext : context;
+        final Context currentContext = null == context ? mContext : context;
 
         switch (postcard.getType()) {
             case ACTIVITY:
-
                 // Build intent
-                Intent intent = new Intent(currentContext, postcard.getDestination());
+                final Intent intent = new Intent(currentContext, postcard.getDestination());
                 intent.putExtras(postcard.getExtras());
 
                 // Set flags.
@@ -337,12 +338,21 @@ final class _ARouter {
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
-                // Judgment activity start type.
-                if (requestCode > 0) {  // RequestCode exist, need startActivityForResult, so this context must son of activity.
-                    ((Activity) currentContext).startActivityForResult(intent, requestCode);
-                } else {
-                    currentContext.startActivity(intent);
-                }
+                // Navigation in main looper.
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (requestCode > 0) {  // Need start for result
+                            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+                        } else {
+                            ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
+                        }
+
+                        if ((0 != postcard.getEnterAnim() || 0 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
+                            ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
+                        }
+                    }
+                });
 
                 break;
             case PROVIDER:

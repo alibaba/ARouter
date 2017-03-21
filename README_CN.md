@@ -26,6 +26,7 @@
 7. 映射关系按组分类、多级管理，按需初始化
 8. 支持用户指定全局降级与局部降级策略
 9. 页面、拦截器、服务等组件均自动注册到框架
+10. 支持多种方式配置转场动画
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -305,8 +306,23 @@
 		            .build("/home/main")
 		            .getExtra();
 
+        // 转场动画(常规方式)
+        ARouter.getInstance()
+            .build("/test/activity2")
+            .withTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom)
+            .navigation(this);
+        
+        // 转场动画(API16+)
+        ActivityOptionsCompat compat = ActivityOptionsCompat.
+            makeScaleUpAnimation(v, v.getWidth() / 2, v.getHeight() / 2, 0, 0);
+
+        ARouter.getInstance()
+                .build("/test/activity2")
+                .withOptionsCompat(compat)
+                .navigation();
+        
 	    // 使用绿色通道(跳过所有的拦截器)
-	    ARouter.getInstance().build("/home/main").greenChannal().navigation();
+	    ARouter.getInstance().build("/home/main").greenChannel().navigation();
 
 	    // 使用自己的日志工具打印日志
 	    ARouter.setLogger();

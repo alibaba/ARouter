@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.util.SparseArray;
 
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
@@ -25,17 +27,35 @@ import java.util.ArrayList;
  * A container that contains the roadmap.
  *
  * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
- * @version 1.0
+ * @version 1.1.0
  * @since 16/8/22 19:16
  */
 public final class Postcard extends RouteMeta {
+    // Base
     private Uri uri;
     private Object tag;             // A tag prepare for some thing wrong.
-    private Bundle mBundle;         // Data to tranform
+    private Bundle mBundle;         // Data to transform
     private int flags = -1;         // Flags of route
-    private int timeout = 300;      // Navigation timeout, TimeUnit.Second !
+    private int timeout = 300;      // Navigation timeout, TimeUnit.Second
     private IProvider provider;     // It will be set value, if this postcard was provider.
-    private boolean greenChannal;
+    private boolean greenChannel;
+
+    // Animation
+    private Bundle optionsCompat;    // The transition animation of activity
+    private int enterAnim;
+    private int exitAnim;
+
+    public Bundle getOptionsBundle() {
+        return optionsCompat;
+    }
+
+    public int getEnterAnim() {
+        return enterAnim;
+    }
+
+    public int getExitAnim() {
+        return exitAnim;
+    }
 
     public IProvider getProvider() {
         return provider;
@@ -61,8 +81,8 @@ public final class Postcard extends RouteMeta {
         this.mBundle = (null == bundle ? new Bundle() : bundle);
     }
 
-    public boolean isGreenChannal() {
-        return greenChannal;
+    public boolean isGreenChannel() {
+        return greenChannel;
     }
 
     public Object getTag() {
@@ -149,12 +169,12 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
-     * Green channal, it will skip all of interceptors.
+     * Green channel, it will skip all of interceptors.
      *
      * @return this
      */
     public Postcard greenChannel() {
-        this.greenChannal = true;
+        this.greenChannel = true;
         return this;
     }
 
@@ -540,8 +560,47 @@ public final class Postcard extends RouteMeta {
         return this;
     }
 
+    /**
+     * Set normal transition anim
+     *
+     * @param enterAnim enter
+     * @param exitAnim  exit
+     * @return current
+     */
+    public Postcard withTransition(int enterAnim, int exitAnim) {
+        this.enterAnim = enterAnim;
+        this.exitAnim = exitAnim;
+        return this;
+    }
+
+    /**
+     * Set options compat
+     *
+     * @param compat compat
+     * @return this
+     */
+    @RequiresApi(16)
+    public Postcard withOptionsCompat(ActivityOptionsCompat compat) {
+        if (null != compat) {
+            this.optionsCompat = compat.toBundle();
+        }
+        return this;
+    }
+
     @Override
     public String toString() {
-        return "Postcard " + super.toString();
+        return "Postcard{" +
+                "uri=" + uri +
+                ", tag=" + tag +
+                ", mBundle=" + mBundle +
+                ", flags=" + flags +
+                ", timeout=" + timeout +
+                ", provider=" + provider +
+                ", greenChannel=" + greenChannel +
+                ", optionsCompat=" + optionsCompat +
+                ", enterAnim=" + enterAnim +
+                ", exitAnim=" + exitAnim +
+                "}\n" +
+                super.toString();
     }
 }

@@ -2,10 +2,13 @@ package com.alibaba.android.arouter.demo;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
@@ -63,6 +66,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .build("/test/activity2")
                         .withString("key1", "value1")
                         .navigation();
+                break;
+            case R.id.oldVersionAnim:
+                ARouter.getInstance()
+                        .build("/test/activity2")
+                        .withTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom)
+                        .navigation(this);
+                break;
+            case R.id.newVersionAnim:
+                if (Build.VERSION.SDK_INT >= 16) {
+                    ActivityOptionsCompat compat = ActivityOptionsCompat.
+                            makeScaleUpAnimation(v, v.getWidth() / 2, v.getHeight() / 2, 0, 0);
+
+                    ARouter.getInstance()
+                            .build("/test/activity2")
+                            .withOptionsCompat(compat)
+                            .navigation();
+                } else {
+                    Toast.makeText(this, "API < 16,不支持新版本动画", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.interceptor:
                 ARouter.getInstance()

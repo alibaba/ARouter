@@ -7,6 +7,7 @@ package com.alibaba.android.arouter.facade.template;
  * @version 1.0
  * @since 16/8/24 10:15
  */
+@Deprecated
 public interface IPolicy {
     int getFlag();
 }
