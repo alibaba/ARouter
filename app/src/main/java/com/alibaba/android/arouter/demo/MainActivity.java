@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -150,6 +151,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance()
                         .build("/test/activity2")
                         .navigation(this, 666);
+                break;
+            case R.id.getFragment:
+                Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
+                Toast.makeText(this, "找到Fragment:" + fragment.toString(), Toast.LENGTH_SHORT).show();
                 break;
             default:
                 break;

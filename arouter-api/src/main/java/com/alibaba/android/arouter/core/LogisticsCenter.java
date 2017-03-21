@@ -184,6 +184,8 @@ public class LogisticsCenter {
                     postcard.setProvider(instance);
                     postcard.greenChannel();    // Provider should skip all of interceptors
                     break;
+                case FRAGMENT:
+                    postcard.greenChannel();    // Fragment needn't interceptors
                 default:
                     break;
             }
