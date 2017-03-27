@@ -322,6 +322,8 @@
         ActivityOptionsCompat compat = ActivityOptionsCompat.
             makeScaleUpAnimation(v, v.getWidth() / 2, v.getHeight() / 2, 0, 0);
 
+        // ps. makeSceneTransitionAnimation 使用共享元素的时候，需要在navigation方法中传入当前Activity
+
         ARouter.getInstance()
                 .build("/test/activity2")
                 .withOptionsCompat(compat)
