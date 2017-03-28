@@ -248,7 +248,7 @@ final class _ARouter {
 
     protected <T> T navigation(Class<? extends T> service) {
         try {
-            Postcard postcard = LogisticsCenter.buildProvider(service.getSimpleName());
+            Postcard postcard = LogisticsCenter.buildProvider(service.getName());
             LogisticsCenter.completion(postcard);
             return (T) postcard.getProvider();
         } catch (NoRouteFoundException ex) {
