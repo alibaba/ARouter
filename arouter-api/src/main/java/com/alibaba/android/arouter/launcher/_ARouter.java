@@ -249,6 +249,12 @@ final class _ARouter {
     protected <T> T navigation(Class<? extends T> service) {
         try {
             Postcard postcard = LogisticsCenter.buildProvider(service.getName());
+
+            // Compatible 1.0.5 compiler sdk.
+            if (null == postcard) { // No service, or this service in old version.
+                postcard = LogisticsCenter.buildProvider(service.getSimpleName());
+            }
+
             LogisticsCenter.completion(postcard);
             return (T) postcard.getProvider();
         } catch (NoRouteFoundException ex) {
