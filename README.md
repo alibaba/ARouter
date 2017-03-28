@@ -91,7 +91,7 @@ ARouter.getInstance().build("/test/1")
 			.withString("key3", "888")
 			.withObject("key4", new Test("Jack", "Rose"))
 			.navigation();
-			```
+```
 
 5. 添加混淆规则(如果使用了Proguard)
 ``` 
