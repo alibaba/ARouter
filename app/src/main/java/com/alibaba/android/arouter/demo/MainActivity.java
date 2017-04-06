@@ -132,12 +132,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance().build("/xxx/xxx").navigation(this, new NavigationCallback() {
                     @Override
                     public void onFound(Postcard postcard) {
-
+                        Log.d("ARouter", "找到了");
                     }
 
                     @Override
                     public void onLost(Postcard postcard) {
                         Log.d("ARouter", "找不到了");
+                    }
+
+                    @Override
+                    public void onArrival(Postcard postcard) {
+                        Log.d("ARouter", "跳转完了");
                     }
                 });
                 break;
