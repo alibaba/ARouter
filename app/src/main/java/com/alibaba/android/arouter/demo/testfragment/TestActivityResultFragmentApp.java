@@ -29,8 +29,10 @@ public class TestActivityResultFragmentApp extends Fragment {
         root.findViewById(R.id.start_activity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ARouter.getInstance().build("/test/target").navigation(TestActivityResultFragmentApp.this.getActivity(),
-                        TestActivityResultFragmentApp.this, REQUEST_CODE);
+                ARouter.getInstance().build("/test/target")
+                        .withString("args", "fragment_app")
+                        .navigation(TestActivityResultFragmentApp.this.getActivity(),
+                                TestActivityResultFragmentApp.this, REQUEST_CODE);
             }
         });
         return root;
@@ -41,7 +43,7 @@ public class TestActivityResultFragmentApp extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (REQUEST_CODE == requestCode) {
-            Toast.makeText(getActivity(), "FragmentApp::onActivityResult::"  + "resultCode = " + resultCode, Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "FragmentApp::onActivityResult::" + "resultCode = " + resultCode, Toast.LENGTH_LONG).show();
         }
     }
 }

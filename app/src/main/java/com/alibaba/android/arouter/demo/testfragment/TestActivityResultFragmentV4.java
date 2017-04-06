@@ -30,8 +30,10 @@ public class TestActivityResultFragmentV4 extends Fragment {
         root.findViewById(R.id.start_activity).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ARouter.getInstance().build("/test/target").navigation(TestActivityResultFragmentV4.this.getActivity(),
-                        TestActivityResultFragmentV4.this, REQUEST_CODE);
+                ARouter.getInstance().build("/test/target")
+                        .withString("args", "fragment_v4")
+                        .navigation(TestActivityResultFragmentV4.this.getActivity(),
+                                TestActivityResultFragmentV4.this, REQUEST_CODE);
             }
         });
         return root;
