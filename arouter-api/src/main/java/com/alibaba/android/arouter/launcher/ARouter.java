@@ -182,4 +182,30 @@ public final class ARouter {
     public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
         return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
     }
+
+    /**
+     * Launch the navigation.
+     *
+     * @param mContext    fragment's containing Activity.
+     * @param fragment    fragment
+     * @param postcard    .
+     * @param requestCode Set for startActivityForResult
+     * @param callback    cb
+     */
+    public Object navigation(Context mContext, android.app.Fragment fragment, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(mContext, fragment, postcard, requestCode, callback);
+    }
+
+    /**
+     * Launch the navigation.
+     *
+     * @param mContext    fragment's containing Activity.
+     * @param fragment    fragment
+     * @param postcard    .
+     * @param requestCode Set for startActivityForResult
+     * @param callback    cb
+     */
+    public Object navigation(Context mContext, android.support.v4.app.Fragment fragment, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(mContext, fragment, postcard, requestCode, callback);
+    }
 }

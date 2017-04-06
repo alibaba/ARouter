@@ -169,6 +169,50 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity context, android.app.Fragment fragment, int requestCode) {
+        navigation(context, fragment, requestCode, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity context, android.app.Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(context, fragment, this, requestCode, callback);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity context, android.support.v4.app.Fragment fragment, int requestCode) {
+        navigation(context, fragment, requestCode, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity context, android.support.v4.app.Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(context, fragment, this, requestCode, callback);
+    }
+
+    /**
      * Green channel, it will skip all of interceptors.
      *
      * @return this

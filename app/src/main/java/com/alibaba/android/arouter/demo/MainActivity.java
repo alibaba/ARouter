@@ -156,6 +156,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
                 Toast.makeText(this, "找到Fragment:" + fragment.toString(), Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.fragment_start_activity_result:
+                ARouter.getInstance().build("/test/fragment_container").navigation();
+                break;
             default:
                 break;
         }

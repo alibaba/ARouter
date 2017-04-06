@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
@@ -263,6 +264,10 @@ final class _ARouter {
         }
     }
 
+    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, NavigationCallback callback) {
+        return navigation(context, (android.support.v4.app.Fragment) null, postcard, requestCode, callback);
+    }
+
     /**
      * Use router navigation.
      *
@@ -271,7 +276,7 @@ final class _ARouter {
      * @param requestCode RequestCode
      * @param callback    cb
      */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, NavigationCallback callback) {
+    protected Object navigation(final Context context, final android.app.Fragment fragment, final Postcard postcard, final int requestCode, NavigationCallback callback) {
         try {
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
@@ -308,7 +313,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode);
+                    _navigation(context, fragment, postcard, requestCode);
                 }
 
                 /**
@@ -322,13 +327,78 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode);
+            return _navigation(context, fragment, postcard, requestCode);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode) {
+    /**
+     * Use router navigation.
+     *
+     * @param context     Activity or null.
+     * @param postcard    Route metas
+     * @param requestCode RequestCode
+     * @param callback    cb
+     */
+    protected Object navigation(final Context context, final android.support.v4.app.Fragment fragment, final Postcard postcard, final int requestCode, NavigationCallback callback) {
+        try {
+            LogisticsCenter.completion(postcard);
+        } catch (NoRouteFoundException ex) {
+            logger.warning(Consts.TAG, ex.getMessage());
+
+            if (debuggable()) { // Show friendly tips for user.
+                Toast.makeText(mContext, "There's no route matched!\n" +
+                        " Path = [" + postcard.getPath() + "]\n" +
+                        " Group = [" + postcard.getGroup() + "]", Toast.LENGTH_LONG).show();
+            }
+
+            if (null != callback) {
+                callback.onLost(postcard);
+            } else {    // No callback for this invoke, then we use the global degrade service.
+                DegradeService degradeService = ARouter.getInstance().navigation(DegradeService.class);
+                if (null != degradeService) {
+                    degradeService.onLost(context, postcard);
+                }
+            }
+
+            return null;
+        }
+
+        if (null != callback) {
+            callback.onFound(postcard);
+        }
+
+        if (!postcard.isGreenChannel()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
+            interceptorService.doInterceptions(postcard, new InterceptorCallback() {
+                /**
+                 * Continue process
+                 *
+                 * @param postcard route meta
+                 */
+                @Override
+                public void onContinue(Postcard postcard) {
+                    _navigation(context, fragment, postcard, requestCode);
+                }
+
+                /**
+                 * Interrupt process, pipeline will be destory when this method called.
+                 *
+                 * @param exception Reson of interrupt.
+                 */
+                @Override
+                public void onInterrupt(Throwable exception) {
+                    logger.info(Consts.TAG, "Navigation failed, termination by interceptor : " + exception.getMessage());
+                }
+            });
+        } else {
+            return _navigation(context, fragment, postcard, requestCode);
+        }
+
+        return null;
+    }
+
+    private Object _navigation(final Context context, final android.app.Fragment fragment, final Postcard postcard, final int requestCode) {
         final Context currentContext = null == context ? mContext : context;
 
         switch (postcard.getType()) {
@@ -350,7 +420,81 @@ final class _ARouter {
                     @Override
                     public void run() {
                         if (requestCode > 0) {  // Need start for result
-                            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+                            if (fragment != null) {
+                                intent.setClass(fragment.getActivity(), postcard.getDestination());
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                                    fragment.startActivityForResult(intent, requestCode, postcard.getOptionsBundle());
+                                } else {
+                                    fragment.startActivityForResult(intent, requestCode);
+                                }
+                            } else {
+                                ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+                            }
+                        } else {
+                            ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
+                        }
+
+                        if ((0 != postcard.getEnterAnim() || 0 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
+                            ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
+                        }
+                    }
+                });
+
+                break;
+            case PROVIDER:
+                return postcard.getProvider();
+            case BOARDCAST:
+            case CONTENT_PROVIDER:
+            case FRAGMENT:
+                Class fragmentMeta = postcard.getDestination();
+                try {
+                    Object instance = fragmentMeta.getConstructor().newInstance();
+                    if (instance instanceof Fragment) {
+                        ((Fragment) instance).setArguments(postcard.getExtras());
+                    } else if (instance instanceof android.support.v4.app.Fragment) {
+                        ((android.support.v4.app.Fragment) instance).setArguments(postcard.getExtras());
+                    }
+
+                    return instance;
+                } catch (Exception ex) {
+                    logger.error(Consts.TAG, "Navigation to fragment error, " + TextUtils.formatStackTrace(ex.getStackTrace()));
+                }
+            case METHOD:
+            case SERVICE:
+            default:
+                return null;
+        }
+
+        return null;
+    }
+
+    private Object _navigation(final Context context, final android.support.v4.app.Fragment fragment, final Postcard postcard, final int requestCode) {
+        final Context currentContext = null == context ? mContext : context;
+
+        switch (postcard.getType()) {
+            case ACTIVITY:
+                // Build intent
+                final Intent intent = new Intent(currentContext, postcard.getDestination());
+                intent.putExtras(postcard.getExtras());
+
+                // Set flags.
+                int flags = postcard.getFlags();
+                if (-1 != flags) {
+                    intent.setFlags(flags);
+                } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+
+                // Navigation in main looper.
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (requestCode > 0) {  // Need start for result
+                            if (null != fragment) {
+                                fragment.startActivityForResult(intent, requestCode, postcard.getOptionsBundle());
+                            } else {
+                                ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+                            }
                         } else {
                             ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
                         }

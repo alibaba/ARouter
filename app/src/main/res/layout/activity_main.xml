@@ -96,6 +96,13 @@
                 android:text="获取Fragment实例" />
 
             <Button
+                android:id="@+id/fragment_start_activity_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="Fragment跳转结果回调" />
+
+            <Button
                 android:id="@+id/normalNavigationWithParams"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -11,7 +11,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = [ moduleName : project.getName() ]
+                arguments = [moduleName: project.getName()]
             }
         }
     }
@@ -47,6 +47,8 @@ android {
     }
 }
 
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -57,4 +59,5 @@ dependencies {
 
     compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
     compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
