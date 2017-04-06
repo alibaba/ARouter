@@ -186,7 +186,8 @@ public final class ARouter {
     /**
      * Launch the navigation.
      *
-     * @param mContext    .
+     * @param mContext    fragment's containing Activity.
+     * @param fragment    fragment
      * @param postcard    .
      * @param requestCode Set for startActivityForResult
      * @param callback    cb
@@ -198,7 +199,8 @@ public final class ARouter {
     /**
      * Launch the navigation.
      *
-     * @param mContext    .
+     * @param mContext    fragment's containing Activity.
+     * @param fragment    fragment
      * @param postcard    .
      * @param requestCode Set for startActivityForResult
      * @param callback    cb

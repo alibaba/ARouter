@@ -169,23 +169,45 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
-     * Fragment跳转结果回调支持
-     * @param context
-     * @param fragment
-     * @param requestCode
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
      */
     public void navigation(Activity context, android.app.Fragment fragment, int requestCode) {
         navigation(context, fragment, requestCode, null);
     }
 
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
     public void navigation(Activity context, android.app.Fragment fragment, int requestCode, NavigationCallback callback) {
         ARouter.getInstance().navigation(context, fragment, this, requestCode, callback);
     }
 
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
     public void navigation(Activity context, android.support.v4.app.Fragment fragment, int requestCode) {
         navigation(context, fragment, requestCode, null);
     }
 
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context     Fragment's containing activity.
+     * @param fragment    Fragment
+     * @param requestCode startActivityForResult's param
+     */
     public void navigation(Activity context, android.support.v4.app.Fragment fragment, int requestCode, NavigationCallback callback) {
         ARouter.getInstance().navigation(context, fragment, this, requestCode, callback);
     }

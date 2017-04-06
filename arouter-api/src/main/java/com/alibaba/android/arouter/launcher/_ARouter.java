@@ -404,7 +404,7 @@ final class _ARouter {
         switch (postcard.getType()) {
             case ACTIVITY:
                 // Build intent
-                final Intent intent = new Intent(fragment == null ? currentContext : fragment.getActivity(), postcard.getDestination());
+                final Intent intent = new Intent(currentContext, postcard.getDestination());
                 intent.putExtras(postcard.getExtras());
 
                 // Set flags.
