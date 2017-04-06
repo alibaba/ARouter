@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.alibaba.android.arouter.demo">
+    package="com.alibaba.android.arouter.demo">
 
     <application
         android:allowBackup="false"
@@ -13,46 +13,43 @@
             <intent-filter>
                 <data
                     android:host="m.aliyun.com"
-                    android:scheme="arouter"/>
+                    android:scheme="arouter" />
 
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
 
             <!-- App Links -->
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
                     android:host="m.aliyun.com"
-                    android:scheme="http"/>
+                    android:scheme="http" />
                 <data
                     android:host="m.aliyun.com"
-                    android:scheme="https"/>
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".TestWebview">
-        </activity>
-        <activity android:name=".testactivity.Test1Activity">
-        </activity>
-        <activity android:name=".testactivity.Test2Activity">
-        </activity>
-        <activity android:name=".testactivity.Test3Activity">
-        </activity>
-        <activity android:name=".testactivity.Test4Activity">
-        </activity>
+        <activity android:name=".TestWebview" />
+        <activity android:name=".testactivity.Test1Activity" />
+        <activity android:name=".testactivity.Test2Activity" />
+        <activity android:name=".testactivity.Test3Activity" />
+        <activity android:name=".testactivity.Test4Activity" />
+        <activity android:name=".testfragment.TestFragmentContainerActivity" />
+        <activity android:name=".testfragment.TestTargetActivity" />
     </application>
 
 </manifest>

@@ -169,6 +169,28 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
+     * Fragment跳转结果回调支持
+     * @param context
+     * @param fragment
+     * @param requestCode
+     */
+    public void navigation(Activity context, android.app.Fragment fragment, int requestCode) {
+        navigation(context, fragment, requestCode, null);
+    }
+
+    public void navigation(Activity context, android.app.Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(context, fragment, this, requestCode, callback);
+    }
+
+    public void navigation(Activity context, android.support.v4.app.Fragment fragment, int requestCode) {
+        navigation(context, fragment, requestCode, null);
+    }
+
+    public void navigation(Activity context, android.support.v4.app.Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(context, fragment, this, requestCode, callback);
+    }
+
+    /**
      * Green channel, it will skip all of interceptors.
      *
      * @return this
