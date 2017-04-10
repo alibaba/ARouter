@@ -318,6 +318,10 @@ final class _ARouter {
                  */
                 @Override
                 public void onInterrupt(Throwable exception) {
+                    if (null != callback) {
+                        callback.onInterrupt(postcard);
+                    }
+
                     logger.info(Consts.TAG, "Navigation failed, termination by interceptor : " + exception.getMessage());
                 }
             });
