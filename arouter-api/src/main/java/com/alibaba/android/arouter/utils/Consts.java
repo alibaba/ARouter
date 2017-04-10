@@ -17,14 +17,4 @@ public final class Consts {
     public static final String SUFFIX_AUTOWIRED = SEPARATOR + SDK_NAME + SEPARATOR + "Autowired";
     public static final String DOT = ".";
     public static final String ROUTE_ROOT_PAKCAGE = "com.alibaba.android.arouter.routes";
-
-    // Java base type, copy from javax 'TypeKind'
-    // public static final int DEF_BOOLEAN = 0;
-    // public static final int DEF_BYTE = 1;
-    // public static final int DEF_SHORT = 2;
-    // public static final int DEF_INT = 3;
-    // public static final int DEF_LONG = 4;
-    // public static final int DEF_FLOAT = 6;
-    // public static final int DEF_DOUBLE = 7;
-    // public static final int DEF_STRING = 18;
 }

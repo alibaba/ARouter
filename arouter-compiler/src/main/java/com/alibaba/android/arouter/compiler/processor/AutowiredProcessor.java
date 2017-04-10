@@ -7,6 +7,7 @@ import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -42,6 +43,7 @@ import javax.lang.model.util.Types;
 
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ISYRINGE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.JSON_SERVICE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_INJECT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_AUTOWIRED;
@@ -67,7 +69,7 @@ public class AutowiredProcessor extends AbstractProcessor {
     private Elements elements;
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
     private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
-    private static final ClassName JsonClass = ClassName.get("com.alibaba.fastjson", "JSON");
+    private static final ClassName AndroidLog = ClassName.get("android.util", "Log");
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -103,6 +105,7 @@ public class AutowiredProcessor extends AbstractProcessor {
 
     private void generateHelper() throws IOException, IllegalAccessException {
         TypeElement type_ISyringe = elements.getTypeElement(ISYRINGE);
+        TypeElement type_JsonService = elements.getTypeElement(JSON_SERVICE);
         TypeMirror iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
         TypeMirror activityTm = elements.getTypeElement(Consts.ACTIVITY).asType();
         TypeMirror fragmentTm = elements.getTypeElement(Consts.FRAGMENT).asType();
@@ -128,6 +131,15 @@ public class AutowiredProcessor extends AbstractProcessor {
 
                 logger.info(">>> Start process " + childs.size() + " field in " + parent.getSimpleName() + " ... <<<");
 
+                TypeSpec.Builder helper = TypeSpec.classBuilder(fileName)
+                        .addJavadoc(WARNING_TIPS)
+                        .addSuperinterface(ClassName.get(type_ISyringe))
+                        .addModifiers(PUBLIC);
+
+                FieldSpec jsonServiceField = FieldSpec.builder(TypeName.get(type_JsonService.asType()), "serializationService", Modifier.PRIVATE).build();
+                helper.addField(jsonServiceField);
+
+                injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class);", ARouterClass, ClassName.get(type_JsonService));
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
                 // Generate method body, start inject.
@@ -173,36 +185,35 @@ public class AutowiredProcessor extends AbstractProcessor {
                         }
 
                         statment = buildStatement(statment, typeUtils.typeExchange(element), isActivity);
-                        if (statment.startsWith("$T.")) {   // Not mortals
+                        if (statment.startsWith("serializationService.")) {   // Not mortals
+                            injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
                                     "substitute." + fieldName + " = " + statment,
-                                    JsonClass,
                                     (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
                                     ClassName.get(element.asType())
                             );
+                            injectMethodBuilder.nextControlFlow("else");
+                            injectMethodBuilder.addStatement(
+                                    "$T.e(\"" + Consts.TAG +  "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
+                            injectMethodBuilder.endControlFlow();
                         } else {
                             injectMethodBuilder.addStatement(statment, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
                         }
 
-                        // Validater
+                        // Validator
                         if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
-                            injectMethodBuilder.beginControlFlow("if (substitute." + fieldName + " == null)");
+                            injectMethodBuilder.beginControlFlow("if (null == substitute." + fieldName + ")");
                             injectMethodBuilder.addStatement(
-                                    "throw new RuntimeException(\"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", ClassName.get(parent));
+                                    "$T.e(\"" + Consts.TAG +  "\", \"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         }
                     }
                 }
 
-                // Generate autowired helper
-                JavaFile.builder(packageName,
-                        TypeSpec.classBuilder(fileName)
-                                .addJavadoc(WARNING_TIPS)
-                                .addSuperinterface(ClassName.get(type_ISyringe))
-                                .addModifiers(PUBLIC)
-                                .addMethod(injectMethodBuilder.build())
-                                .build()
-                ).build().writeTo(mFiler);
+                helper.addMethod(injectMethodBuilder.build());
+
+                // Generate autowire helper
+                JavaFile.builder(packageName, helper.build()).build().writeTo(mFiler);
 
                 logger.info(">>> " + parent.getSimpleName() + " has been processed, " + fileName + " has been generated. <<<");
             }
@@ -231,7 +242,7 @@ public class AutowiredProcessor extends AbstractProcessor {
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statment += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
-            statment = "$T.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", $T.class)";
+            statment = "serializationService.json2Object(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", $T.class)";
         }
 
         return statment;

@@ -41,7 +41,6 @@ android {
 dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:1.0.3'
     compile 'com.alibaba:arouter-annotation:1.0.3'
-    compile 'com.alibaba:fastjson:1.2.9'
     compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
 }
 

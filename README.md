@@ -156,6 +156,26 @@ public class Test1Activity extends Activity {
 	Log.d("param", name + age + boy);
     }
 }
+
+
+// 如果需要传递自定义对象，需要实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
+@Route(path = "/service/json")
+public class JsonServiceImpl implements SerializationService {
+    @Override
+    public void init(Context context) {
+
+    }
+
+    @Override
+    public <T> T json2Object(String text, Class<T> clazz) {
+        return JSON.parseObject(text, clazz);
+    }
+
+    @Override
+    public String object2Json(Object instance) {
+        return JSON.toJSONString(instance);
+    }
+}
 ```
 
 3. 声明拦截器(拦截跳转过程，面向切面编程)
