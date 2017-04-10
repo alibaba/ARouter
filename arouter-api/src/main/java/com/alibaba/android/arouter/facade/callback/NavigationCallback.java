@@ -12,14 +12,30 @@ import com.alibaba.android.arouter.facade.Postcard;
 public interface NavigationCallback {
 
     /**
-     * Callback after you find the destination.
+     * Callback when find the destination.
+     *
      * @param postcard meta
      */
     void onFound(Postcard postcard);
 
     /**
-     * Callback after you lose your way.
+     * Callback after lose your way.
+     *
      * @param postcard meta
      */
     void onLost(Postcard postcard);
+
+    /**
+     * Callback after navigation.
+     *
+     * @param postcard meta
+     */
+    void onArrival(Postcard postcard);
+
+    /**
+     * Callback on interrupt.
+     *
+     * @param postcard meta
+     */
+    void onInterrupt(Postcard postcard);
 }

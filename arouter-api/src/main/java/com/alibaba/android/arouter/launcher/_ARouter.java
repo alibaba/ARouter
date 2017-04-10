@@ -35,7 +35,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * ARouter core
+ * ARouter core (Facade patten)
  *
  * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
  * @version 1.0
@@ -271,7 +271,7 @@ final class _ARouter {
      * @param requestCode RequestCode
      * @param callback    cb
      */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, NavigationCallback callback) {
+    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         try {
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
@@ -308,7 +308,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode);
+                    _navigation(context, postcard, requestCode, callback);
                 }
 
                 /**
@@ -318,17 +318,21 @@ final class _ARouter {
                  */
                 @Override
                 public void onInterrupt(Throwable exception) {
+                    if (null != callback) {
+                        callback.onInterrupt(postcard);
+                    }
+
                     logger.info(Consts.TAG, "Navigation failed, termination by interceptor : " + exception.getMessage());
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode);
+            return _navigation(context, postcard, requestCode, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode) {
+    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         final Context currentContext = null == context ? mContext : context;
 
         switch (postcard.getType()) {
@@ -358,6 +362,10 @@ final class _ARouter {
                         if ((0 != postcard.getEnterAnim() || 0 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
                             ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
                         }
+
+                        if (null != callback) { // Navigation over.
+                            callback.onArrival(postcard);
+                        }
                     }
                 });
 
@@ -378,7 +386,7 @@ final class _ARouter {
 
                     return instance;
                 } catch (Exception ex) {
-                    logger.error(Consts.TAG, "Navigation to fragment error, " + TextUtils.formatStackTrace(ex.getStackTrace()));
+                    logger.error(Consts.TAG, "Fetch fragment instance error, " + TextUtils.formatStackTrace(ex.getStackTrace()));
                 }
             case METHOD:
             case SERVICE:
