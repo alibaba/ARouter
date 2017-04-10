@@ -231,7 +231,7 @@ public class AutowiredProcessor extends AbstractProcessor {
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statment += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
-            statment = "$T.parseObject(" + (isActivity ? "substitute.getIntent()." : "getArguments(). ") + "getStringExtra($S), $T.class)";
+            statment = "$T.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", $T.class)";
         }
 
         return statment;

@@ -91,7 +91,7 @@ ARouter.getInstance().build("/test/1")
 			.withString("key3", "888")
 			.withObject("key4", new Test("Jack", "Rose"))
 			.navigation();
-			```
+```
 
 5. 添加混淆规则(如果使用了Proguard)
 ``` 
@@ -360,7 +360,7 @@ String uriStr = getIntent().getStringExtra(ARouter.RAW_URI);
 ``` java
 // 实现PathReplaceService接口，并加上一个Path内容任意的注解即可
 @Route(path = "/xxx/xxx") // 必须标明注解
-public class PathReplaceServiceImpl implements DegradeService {
+public class PathReplaceServiceImpl implements PathReplaceService {
     /**
      * For normal path.
      *
