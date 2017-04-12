@@ -14,9 +14,9 @@ import android.util.SparseArray;
 
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
+import com.alibaba.android.arouter.facade.service.SerializationService;
 import com.alibaba.android.arouter.facade.template.IProvider;
 import com.alibaba.android.arouter.launcher.ARouter;
-import com.alibaba.fastjson.JSON;
 
 import java.io.Serializable;
 import java.lang.annotation.Retention;
@@ -39,6 +39,7 @@ public final class Postcard extends RouteMeta {
     private int timeout = 300;      // Navigation timeout, TimeUnit.Second
     private IProvider provider;     // It will be set value, if this postcard was provider.
     private boolean greenChannel;
+    private SerializationService serializationService;
 
     // Animation
     private Bundle optionsCompat;    // The transition animation of activity
@@ -239,7 +240,8 @@ public final class Postcard extends RouteMeta {
      * @return current
      */
     public Postcard withObject(@Nullable String key, @Nullable Object value) {
-        mBundle.putString(key, JSON.toJSONString(value));
+        serializationService = ARouter.getInstance().navigation(SerializationService.class);
+        mBundle.putString(key, serializationService.object2Json(value));
         return this;
     }
 

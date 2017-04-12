@@ -43,7 +43,6 @@ public class AutowiredServiceImpl implements AutowiredService {
                 classCache.put(className, autowiredHelper);
             }
         } catch (Exception ex) {
-            // ARouter.logger.error(TAG, "Autowired made exception, in class [" + className + "]");
             blackList.add(className);    // This instance need not autowired.
         }
     }

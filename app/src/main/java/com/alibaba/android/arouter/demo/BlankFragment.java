@@ -21,7 +21,7 @@ public class BlankFragment extends Fragment {
     @Autowired
     String name;
 
-    @Autowired
+    @Autowired(required = true)
     TestObj obj;
 
     public BlankFragment() {

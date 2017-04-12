@@ -55,6 +55,8 @@ dependencies {
     compile project(':test-module-1')
     compile project(':arouter-annotation')
 
+    compile 'com.alibaba:fastjson:1.2.9'
+
     compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
     compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
 }
