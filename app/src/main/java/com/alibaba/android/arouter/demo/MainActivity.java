@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testservice.HelloService;
+import com.alibaba.android.arouter.demo.testservice.SingleService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
@@ -160,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Log.d("ARouter", "被拦截了");
                     }
                 });
+                break;
+            case R.id.callSingle:
+                ARouter.getInstance().navigation(SingleService.class).sayHello("Mike");
                 break;
             case R.id.failNav2:
                 ARouter.getInstance().build("/xxx/xxx").navigation();
