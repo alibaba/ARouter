@@ -2,6 +2,7 @@ package com.alibaba.android.arouter.demo;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -64,10 +65,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation();
                 break;
             case R.id.normalNavigationWithParams:
-                ARouter.getInstance()
-                        .build("/test/activity2")
+                // ARouter.getInstance()
+                //         .build("/test/activity2")
+                //         .withString("key1", "value1")
+                //         .navigation();
+
+                Uri testUriMix = Uri.parse("arouter://m.aliyun.com/test/activity2");
+                ARouter.getInstance().build(testUriMix)
                         .withString("key1", "value1")
                         .navigation();
+
                 break;
             case R.id.oldVersionAnim:
                 ARouter.getInstance()

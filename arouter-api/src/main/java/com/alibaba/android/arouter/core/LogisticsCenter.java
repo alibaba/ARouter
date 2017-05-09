@@ -201,6 +201,10 @@ public class LogisticsCenter {
      * @param value    value
      */
     private static void setValue(Postcard postcard, Integer typeDef, String key, String value) {
+        if (TextUtils.isEmpty(key) || TextUtils.isEmpty(value)) {
+            return;
+        }
+
         try {
             if (null != typeDef) {
                 if (typeDef == TypeKind.BOOLEAN.ordinal()) {
