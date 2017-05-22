@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.alibaba.android.arouter.demo.MainActivity;
 import com.alibaba.android.arouter.demo.MainLooper;
-import com.alibaba.android.arouter.demo.testservice.HelloService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.annotation.Interceptor;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
@@ -31,7 +30,7 @@ public class Test1Interceptor implements IInterceptor {
      * @param callback cb
      */
     @Override
-    public void process(final Postcard postcard, final InterceptorCallback callback) {
+    public void process(final Context context, final Postcard postcard, final InterceptorCallback callback) {
         if ("/test/activity4".equals(postcard.getPath())) {
             final AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.getThis());
             ab.setCancelable(false);
