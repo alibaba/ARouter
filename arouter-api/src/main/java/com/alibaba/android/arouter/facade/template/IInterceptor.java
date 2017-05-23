@@ -1,5 +1,7 @@
 package com.alibaba.android.arouter.facade.template;
 
+import android.content.Context;
+
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 
@@ -18,5 +20,5 @@ public interface IInterceptor extends IProvider {
      * @param postcard meta
      * @param callback cb
      */
-    void process(Postcard postcard, InterceptorCallback callback);
+    void process(Context context, Postcard postcard, InterceptorCallback callback);
 }

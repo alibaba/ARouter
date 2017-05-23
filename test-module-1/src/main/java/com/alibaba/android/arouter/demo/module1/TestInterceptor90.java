@@ -24,7 +24,7 @@ public class TestInterceptor90 implements IInterceptor {
      * @param callback cb
      */
     @Override
-    public void process(Postcard postcard, InterceptorCallback callback) {
+    public void process(final Context context, Postcard postcard, InterceptorCallback callback) {
         callback.onContinue(postcard);
     }
 
