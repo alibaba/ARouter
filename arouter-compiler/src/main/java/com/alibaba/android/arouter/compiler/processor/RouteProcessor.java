@@ -269,7 +269,17 @@ public class RouteProcessor extends AbstractProcessor {
                         case PROVIDER:  // Need cache provider's super class
                             List<? extends TypeMirror> interfaces = ((TypeElement) routeMeta.getRawType()).getInterfaces();
                             for (TypeMirror tm : interfaces) {
-                                if (types.isSubtype(tm, iProvider)) {
+                                if (types.isSameType(tm, iProvider)) {   // Its implements iProvider interface himself.
+                                    // This interface extend the IProvider, so it can be used for mark provider
+                                    loadIntoMethodOfProviderBuilder.addStatement(
+                                            "providers.put($S, $T.build($T." + routeMeta.getType() + ", $T.class, $S, $S, null, " + routeMeta.getPriority() + ", " + routeMeta.getExtra() + "))",
+                                            (routeMeta.getRawType()).toString(),
+                                            routeMetaCn,
+                                            routeTypeCn,
+                                            ClassName.get((TypeElement) routeMeta.getRawType()),
+                                            routeMeta.getPath(),
+                                            routeMeta.getGroup());
+                                } else if (types.isSubtype(tm, iProvider)) {
                                     // This interface extend the IProvider, so it can be used for mark provider
                                     loadIntoMethodOfProviderBuilder.addStatement(
                                             "providers.put($S, $T.build($T." + routeMeta.getType() + ", $T.class, $S, $S, null, " + routeMeta.getPriority() + ", " + routeMeta.getExtra() + "))",
