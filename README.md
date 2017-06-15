@@ -30,6 +30,7 @@
 9. 页面、拦截器、服务等组件均自动注册到框架
 10. 支持多种方式配置转场动画
 11. 支持获取Fragment
+12. 完全支持Kotlin(配置见文末 其他#5)
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -59,6 +60,7 @@ dependencies {
     ...
 }
 // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'
+// Kotlin配置参考文末'其他#5'
 ```
 
 2. 添加注解
@@ -450,6 +452,23 @@ dependencies {
 }
 ```
 
+5. Kotlin项目中的配置方式
+```
+apply plugin: 'kotlin-kapt'
+
+kapt {
+    arguments {
+        arg("moduleName", project.getName())
+    }
+}
+
+dependencies {
+    compile 'com.alibaba:arouter-api:x.x.x'
+    kapt 'com.alibaba:arouter-compiler:x.x.x'
+    ...
+}
+```
+
 #### 七、Q&A
 
 1. "W/ARouter::: ARouter::No postcard![ ]"
@@ -477,6 +496,11 @@ dependencies {
 4. TransformException:java.util.zip.ZipException: duplicate entry ....
  
      ARouter有按组加载的机制，关于分组可以参考 6-1 部分，ARouter允许一个module中存在多个分组，但是不允许多个module中存在相同的分组，会导致映射文件冲突
+
+5. Kotlin类中的字段无法注入如何解决？
+    
+    首先，Kotlin中的字段是可以自动注入的，但是注入代码为了减少反射，使用的字段赋值的方式来注入的，Kotlin默认会生成set/get方法，并把属性设置为private
+    所以只要保证Kotlin中字段可见性不是private即可，简单解决可以在字段上添加 @JvmField 
 
 #### 八、其他
 
