@@ -1,3 +1,5 @@
+## English version is being re-translated, coming soon...
+
 ```
     Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
 ```
@@ -28,6 +30,7 @@
 9. 页面、拦截器、服务等组件均自动注册到框架
 10. 支持多种方式配置转场动画
 11. 支持获取Fragment
+12. 完全支持Kotlin(配置见文末 其他#5)
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -57,10 +60,11 @@ dependencies {
     ...
 }
 // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'
+// Kotlin配置参考文末'其他#5'
 ```
 
 2. 添加注解
-``` java		
+``` java
 // 在支持路由的页面上添加注解(必选)
 // 这里的路径需要注意的是至少需要有两级，/xx/xx
 @Route(path = "/test/activity")
@@ -155,6 +159,7 @@ public class Test1Activity extends Activity {
     }
 }
 
+
 // 如果需要传递自定义对象，需要实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
 @Route(path = "/service/json")
 public class JsonServiceImpl implements SerializationService {
@@ -203,7 +208,7 @@ public class TestInterceptor implements IInterceptor {
 ARouter.getInstance().build("/test/1").navigation(this, new NavigationCallback() {
     @Override
     public void onFound(Postcard postcard) {
-	...
+      ...
     }
 
     @Override
@@ -298,7 +303,7 @@ public class Test {
 1. 初始化中的其他设置
 ``` java
 ARouter.openLog(); // 开启日志
-ARouter.openDebug() // 使用InstantRun的时候，需要打开该开关，上线之后关闭，否则有安全风险
+ARouter.openDebug(); // 使用InstantRun的时候，需要打开该开关，上线之后关闭，否则有安全风险
 ARouter.printStackTrace(); // 打印日志的时候打印线程堆栈
 ```
 
@@ -331,13 +336,13 @@ ARouter.getInstance()
 	.withFlags();
 	.navigation();
 
+// 获取Fragment
+Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
+					
 // 对象传递
 ARouter.getInstance()
 	.withObject("key", new TestObj("Jack", "Rose"))
 	.navigation();
-
-// 获取Fragment
-Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
 
 // 觉得接口不够多，可以直接拿出Bundle赋值
 ARouter.getInstance()
@@ -346,9 +351,9 @@ ARouter.getInstance()
 
 // 转场动画(常规方式)
 ARouter.getInstance()
-        .build("/test/activity2")
-        .withTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom)
-        .navigation(this);
+    .build("/test/activity2")
+    .withTransition(R.anim.slide_in_bottom, R.anim.slide_out_bottom)
+    .navigation(this);
 
 // 转场动画(API16+)
 ActivityOptionsCompat compat = ActivityOptionsCompat.
@@ -360,7 +365,7 @@ ARouter.getInstance()
 	.build("/test/activity2")
 	.withOptionsCompat(compat)
 	.navigation();
-
+        
 // 使用绿色通道(跳过所有的拦截器)
 ARouter.getInstance().build("/home/main").greenChannel().navigation();
 
@@ -378,14 +383,14 @@ String uriStr = getIntent().getStringExtra(ARouter.RAW_URI);
 // 实现PathReplaceService接口，并加上一个Path内容任意的注解即可
 @Route(path = "/xxx/xxx") // 必须标明注解
 public class PathReplaceServiceImpl implements PathReplaceService {
-   /**
-    * For normal path.
-    *
-    * @param path raw path
-    */
-   String forString(String path) {
+    /**
+     * For normal path.
+     *
+     * @param path raw path
+     */
+    String forString(String path) {
 	return path;    // 按照一定的规则处理之后返回处理后的结果
-   }
+    }
 
    /**
     * For uri type.
@@ -421,7 +426,7 @@ public class PathReplaceServiceImpl implements PathReplaceService {
 	- 现在任何情况下都需要在build.gradle中配置moduleName了。。。。
 
 4. 旧版本gradle插件的配置方式
-``` gradle		
+``` gradle
 apply plugin: 'com.neenbedankt.android-apt'
 
 buildscript {
@@ -443,6 +448,23 @@ apt {
 dependencies {
     compile 'com.alibaba:arouter-api:x.x.x'
     apt 'com.alibaba:arouter-compiler:x.x.x'
+    ...
+}
+```
+
+5. Kotlin项目中的配置方式
+```
+apply plugin: 'kotlin-kapt'
+
+kapt {
+    arguments {
+        arg("moduleName", project.getName())
+    }
+}
+
+dependencies {
+    compile 'com.alibaba:arouter-api:x.x.x'
+    kapt 'com.alibaba:arouter-compiler:x.x.x'
     ...
 }
 ```
@@ -474,6 +496,11 @@ dependencies {
 4. TransformException:java.util.zip.ZipException: duplicate entry ....
  
      ARouter有按组加载的机制，关于分组可以参考 6-1 部分，ARouter允许一个module中存在多个分组，但是不允许多个module中存在相同的分组，会导致映射文件冲突
+
+5. Kotlin类中的字段无法注入如何解决？
+    
+    首先，Kotlin中的字段是可以自动注入的，但是注入代码为了减少反射，使用的字段赋值的方式来注入的，Kotlin默认会生成set/get方法，并把属性设置为private
+    所以只要保证Kotlin中字段可见性不是private即可，简单解决可以在字段上添加 @JvmField 
 
 #### 八、其他
 
