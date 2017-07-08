@@ -13,6 +13,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
@@ -47,6 +48,7 @@ import javax.lang.model.util.Types;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.AROUTER_MAP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.FRAGMENT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
@@ -178,14 +180,16 @@ public class RouteProcessor extends AbstractProcessor {
 
                ```Map<String, Class<? extends IRouteGroup>>```
              */
-            ParameterizedTypeName inputMapTypeOfRoot = ParameterizedTypeName.get(
-                    ClassName.get(Map.class),
-                    ClassName.get(String.class),
-                    ParameterizedTypeName.get(
-                            ClassName.get(Class.class),
-                            WildcardTypeName.subtypeOf(ClassName.get(type_IRouteGroup))
-                    )
-            );
+//            ParameterizedTypeName inputMapTypeOfRoot = ParameterizedTypeName.get(
+//                    ClassName.get(Map.class),
+//                    ClassName.get(String.class),
+//                    ParameterizedTypeName.get(
+//                            ClassName.get(Class.class),
+//                            WildcardTypeName.subtypeOf(ClassName.get(type_IRouteGroup))
+//                    )
+//            );
+            TypeMirror rootParam = elements.getTypeElement(AROUTER_MAP).asType();
+            TypeName inputMapTypeOfRoot = ParameterizedTypeName.get(rootParam);
 
             /*
 
@@ -267,7 +271,19 @@ public class RouteProcessor extends AbstractProcessor {
                 for (RouteMeta routeMeta : groupData) {
                     switch (routeMeta.getType()) {
                         case PROVIDER:  // Need cache provider's super class
-                            List<? extends TypeMirror> interfaces = ((TypeElement) routeMeta.getRawType()).getInterfaces();
+
+                            TypeElement typeElement = (TypeElement) routeMeta.getRawType();
+                            List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
+
+                            while (interfaces.size() == 0){
+                                TypeMirror tm = typeElement.getSuperclass();
+                                typeElement = elements.getTypeElement(tm.toString());
+
+                                if(types.isSubtype(tm, iProvider)){
+                                    interfaces = typeElement.getInterfaces();
+                                }
+                            }
+
                             for (TypeMirror tm : interfaces) {
                                 if (types.isSameType(tm, iProvider)) {   // Its implements iProvider interface himself.
                                     // This interface extend the IProvider, so it can be used for mark provider
@@ -318,7 +334,7 @@ public class RouteProcessor extends AbstractProcessor {
                 }
 
                 // Generate groups
-                String groupFileName = NAME_OF_GROUP + groupName;
+                String groupFileName = NAME_OF_GROUP + groupName + SEPARATOR + moduleName;
                 JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                         TypeSpec.classBuilder(groupFileName)
                                 .addJavadoc(WARNING_TIPS)
