@@ -267,7 +267,19 @@ public class RouteProcessor extends AbstractProcessor {
                 for (RouteMeta routeMeta : groupData) {
                     switch (routeMeta.getType()) {
                         case PROVIDER:  // Need cache provider's super class
-                            List<? extends TypeMirror> interfaces = ((TypeElement) routeMeta.getRawType()).getInterfaces();
+
+                            TypeElement typeElement = (TypeElement) routeMeta.getRawType();
+                            List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
+
+                            while (interfaces.size() == 0){
+                                TypeMirror tm = typeElement.getSuperclass();
+                                typeElement = elements.getTypeElement(tm.toString());
+
+                                if(types.isSubtype(tm, iProvider)){
+                                    interfaces = typeElement.getInterfaces();
+                                }
+                            }
+
                             for (TypeMirror tm : interfaces) {
                                 if (types.isSameType(tm, iProvider)) {   // Its implements iProvider interface himself.
                                     // This interface extend the IProvider, so it can be used for mark provider
