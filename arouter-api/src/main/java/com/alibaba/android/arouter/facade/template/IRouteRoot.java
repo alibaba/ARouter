@@ -1,6 +1,6 @@
 package com.alibaba.android.arouter.facade.template;
 
-import java.util.Map;
+import com.alibaba.android.arouter.base.RouteGroupMap;
 
 /**
  * Root element.
@@ -15,5 +15,5 @@ public interface IRouteRoot {
      * Load routes to input
      * @param routes input
      */
-    void loadInto(Map<String, Class<? extends IRouteGroup>> routes);
+    void loadInto(RouteGroupMap routes);
 }

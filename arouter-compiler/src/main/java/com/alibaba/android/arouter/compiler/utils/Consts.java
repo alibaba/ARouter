@@ -63,4 +63,6 @@ public class Consts {
     public static final String ANNOTATION_TYPE_INTECEPTOR = FACADE_PACKAGE + ".annotation.Interceptor";
     public static final String ANNOTATION_TYPE_ROUTE = FACADE_PACKAGE + ".annotation.Route";
     public static final String ANNOTATION_TYPE_AUTOWIRED = FACADE_PACKAGE + ".annotation.Autowired";
+
+    public static final String AROUTER_MAP = "com.alibaba.android.arouter.base.RouteGroupMap";
 }

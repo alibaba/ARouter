@@ -114,7 +114,7 @@ public class LogisticsCenter {
 
         RouteMeta routeMeta = Warehouse.routes.get(postcard.getPath());
         if (null == routeMeta) {    // Maybe its does't exist, or didn't load.
-            Class<? extends IRouteGroup> groupMeta = Warehouse.groupsIndex.get(postcard.getGroup());  // Load route meta.
+            List<Class<? extends IRouteGroup>> groupMeta = Warehouse.groupsIndex.get(postcard.getGroup());  // Load route meta.
             if (null == groupMeta) {
                 throw new NoRouteFoundException(TAG + "There is no route match the path [" + postcard.getPath() + "], in group [" + postcard.getGroup() + "]");
             } else {
@@ -124,8 +124,10 @@ public class LogisticsCenter {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] starts loading, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
                     }
 
-                    IRouteGroup iGroupInstance = groupMeta.getConstructor().newInstance();
-                    iGroupInstance.loadInto(Warehouse.routes);
+                    for(Class<? extends IRouteGroup> group : groupMeta){
+                        IRouteGroup iGroupInstance = group.getConstructor().newInstance();
+                        iGroupInstance.loadInto(Warehouse.routes);
+                    }
                     Warehouse.groupsIndex.remove(postcard.getGroup());
 
                     if (ARouter.debuggable()) {

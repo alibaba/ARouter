@@ -1,10 +1,10 @@
 package com.alibaba.android.arouter.core;
 
+import com.alibaba.android.arouter.base.RouteGroupMap;
 import com.alibaba.android.arouter.base.UniqueKeyTreeMap;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.template.IInterceptor;
 import com.alibaba.android.arouter.facade.template.IProvider;
-import com.alibaba.android.arouter.facade.template.IRouteGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.Map;
  */
 class Warehouse {
     // Cache route and metas
-    static Map<String, Class<? extends IRouteGroup>> groupsIndex = new HashMap<>();
+    static RouteGroupMap groupsIndex = new RouteGroupMap();
     static Map<String, RouteMeta> routes = new HashMap<>();
 
     // Cache provider
