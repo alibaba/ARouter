@@ -64,6 +64,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .build("/test/activity2")
                         .navigation();
                 break;
+            case R.id.kotlinNavigation:
+                ARouter.getInstance()
+                        .build("/test/kotlin")
+                        .withString("name", "老王")
+                        .withInt("age", 23)
+                        .navigation();
+                break;
             case R.id.normalNavigationWithParams:
                 // ARouter.getInstance()
                 //         .build("/test/activity2")
