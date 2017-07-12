@@ -283,7 +283,6 @@ public class RouteProcessor extends AbstractProcessor {
                                     // This interface extend the IProvider, so it can be used for mark provider
                                     loadIntoMethodOfProviderBuilder.addStatement(
                                             "providers.put($S, $T.build($T." + routeMeta.getType() + ", $T.class, $S, $S, null, " + routeMeta.getPriority() + ", " + routeMeta.getExtra() + "))",
-                                            // tm.toString().substring(tm.toString().lastIndexOf(".") + 1),    // Spite unuseless name
                                             tm.toString(),    // So stupid, will duplicate only save class name.
                                             routeMetaCn,
                                             routeTypeCn,
@@ -333,7 +332,7 @@ public class RouteProcessor extends AbstractProcessor {
             }
 
             if (MapUtils.isNotEmpty(rootMap)) {
-                // Generate root meta by group name, it must be generated before root, then I can findout the class of group.
+                // Generate root meta by group name, it must be generated before root, then I can find out the class of group.
                 for (Map.Entry<String, String> entry : rootMap.entrySet()) {
                     loadIntoMethodOfRootBuilder.addStatement("routes.put($S, $T.class)", entry.getKey(), ClassName.get(PACKAGE_OF_GENERATE_FILE, entry.getValue()));
                 }
