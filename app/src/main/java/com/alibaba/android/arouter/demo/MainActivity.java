@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.kotlinNavigation:
                 ARouter.getInstance()
-                        .build("/test/kotlin")
+                        .build("/kotlin/test")
                         .withString("name", "老王")
                         .withInt("age", 23)
                         .navigation();

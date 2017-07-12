@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 
-@Route(path = "/test/normal/activity")
+@Route(path = "/kotlin/java")
 public class TestNormalActivity extends AppCompatActivity {
 
     @Override

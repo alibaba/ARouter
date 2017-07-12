@@ -7,7 +7,7 @@ import com.alibaba.android.arouter.facade.annotation.Route
 import com.alibaba.android.arouter.launcher.ARouter
 import kotlinx.android.synthetic.main.activity_kotlin_test.*
 
-@Route(path = "/test/kotlin")
+@Route(path = "/kotlin/test")
 class KotlinTestActivity : Activity() {
 
     @Autowired
