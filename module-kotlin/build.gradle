@@ -1,0 +1,42 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+
+kapt {
+    arguments {
+        arg("moduleName", project.getName())
+    }
+}
+
+dependencies {
+    compile project(':arouter-api')
+    compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    kapt 'com.alibaba:arouter-compiler:1.0.3'
+}
+android {
+    compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
+    buildToolsVersion BUILDTOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        lintOptions { abortOnError false }
+    }
+}

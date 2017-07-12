@@ -30,7 +30,7 @@
 9. 页面、拦截器、服务等组件均自动注册到框架
 10. 支持多种方式配置转场动画
 11. 支持获取Fragment
-12. 完全支持Kotlin(配置见文末 其他#5)
+12. 完全支持Kotlin以及混编(配置见文末 其他#5)
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -75,7 +75,7 @@ public class YourActivity extend Activity {
 
 3. 初始化SDK
 ``` java
-if (isDebug()) {
+if (isDebug()) {           // 这两行必须写在init之前，否则这些配置在init过程中将无效
     ARouter.openLog();     // 打印日志
     ARouter.openDebug();   // 开启调试模式(如果在InstantRun模式下运行，必须开启调试模式！线上版本需要关闭,否则有安全风险)
 }
@@ -454,6 +454,7 @@ dependencies {
 
 5. Kotlin项目中的配置方式
 ```
+// 可以参考 module-kotlin 模块中的写法
 apply plugin: 'kotlin-kapt'
 
 kapt {

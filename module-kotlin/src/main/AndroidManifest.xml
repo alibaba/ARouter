@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.alibaba.android.arouter.demo.kotlin">
+
+    <!-- 读写存储的权限 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <application>
+        <activity android:name=".KotlinTestActivity"/>
+        <activity android:name=".TestNormalActivity">
+        </activity>
+    </application>
+
+</manifest>
