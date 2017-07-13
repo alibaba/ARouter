@@ -503,6 +503,11 @@ dependencies {
     首先，Kotlin中的字段是可以自动注入的，但是注入代码为了减少反射，使用的字段赋值的方式来注入的，Kotlin默认会生成set/get方法，并把属性设置为private
     所以只要保证Kotlin中字段可见性不是private即可，简单解决可以在字段上添加 @JvmField 
 
+6. 通过URL跳转之后，在intent中拿不到参数如何解决？
+    
+    需要注意的是，如果不使用自动注入，那么可以不写 `ARouter.getInstance().inject(this)`，但是需要取值的字段仍然需要标上 `@Autowired` 注解，因为
+    只有标上注解之后，ARouter才能知道以哪一种数据类型提取URL中的参数并放入Intent中，这样您才能在intent中获取到对应的参数
+    
 #### 八、其他
 
 1. 沟通和交流
