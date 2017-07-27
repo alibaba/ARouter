@@ -263,6 +263,20 @@ final class _ARouter {
         }
     }
 
+    protected Object navigation(Context context, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return navigation(null, context, postcard, requestCode, callback);
+    }
+
+    protected Object navigation(Object fragment, Postcard postcard, int requestCode, NavigationCallback callback) {
+        Context context = null;
+        if (fragment instanceof Fragment) {
+            context = ((Fragment)fragment).getActivity();
+        } else if (fragment instanceof android.support.v4.app.Fragment) {
+            context = ((android.support.v4.app.Fragment)fragment).getActivity();
+        }
+        return navigation(fragment, context, postcard, requestCode, callback);
+    }
+
     /**
      * Use router navigation.
      *
@@ -271,7 +285,7 @@ final class _ARouter {
      * @param requestCode RequestCode
      * @param callback    cb
      */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    protected Object navigation(final Object fragment, final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         try {
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
@@ -308,7 +322,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode, callback);
+                    _navigation(fragment, context, postcard, requestCode, callback);
                 }
 
                 /**
@@ -326,13 +340,13 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode, callback);
+            return _navigation(fragment, context, postcard, requestCode, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    private Object _navigation(final Object fragment, final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         final Context currentContext = null == context ? mContext : context;
 
         switch (postcard.getType()) {
@@ -354,7 +368,16 @@ final class _ARouter {
                     @Override
                     public void run() {
                         if (requestCode > 0) {  // Need start for result
-                            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+                            if (fragment != null) {
+                                if (fragment instanceof Fragment) {
+                                    intent.putExtras(postcard.getOptionsBundle());
+                                    ((Fragment)fragment).startActivityForResult(intent, requestCode);
+                                } else if (fragment instanceof android.support.v4.app.Fragment) {
+                                    ((android.support.v4.app.Fragment)fragment).startActivityForResult(intent, requestCode, postcard.getOptionsBundle());
+                                }
+                            } else {
+                                ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+                            }
                         } else {
                             ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
                         }
