@@ -17,4 +17,13 @@
         android:text="I am test2"
         android:textSize="18sp"/>
 
+    <FrameLayout
+        android:id="@+id/frame"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/bg_test_area">
+
+    </FrameLayout>
+
 </RelativeLayout>

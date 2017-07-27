@@ -10,6 +10,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.app.Fragment;
 import android.util.SparseArray;
 
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
@@ -162,11 +163,31 @@ public final class Postcard extends RouteMeta {
     /**
      * Navigation to the route with path in postcard.
      *
+     * @param fragment    Fragment and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Fragment fragment, int requestCode) {
+        navigation(fragment, requestCode, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
      * @param mContext    Activity and so on.
      * @param requestCode startActivityForResult's param
      */
     public void navigation(Activity mContext, int requestCode, NavigationCallback callback) {
         ARouter.getInstance().navigation(mContext, this, requestCode, callback);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param fragment    Fragment and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(fragment, this, requestCode, callback);
     }
 
     /**
