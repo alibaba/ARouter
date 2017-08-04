@@ -390,6 +390,22 @@ final class _ARouter {
                 }
             case METHOD:
             case SERVICE:
+                final Intent intent2 = new Intent(currentContext, postcard.getDestination());
+                intent2.putExtras(postcard.getExtras());
+
+                // Navigation in main looper.
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        currentContext.startService(intent2);
+
+                        if (null != callback) { // Navigation over.
+                            callback.onArrival(postcard);
+                        }
+                    }
+                });
+
+                break;
             default:
                 return null;
         }
