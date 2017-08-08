@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 ext {
     bintrayName = 'arouter-api'
@@ -42,6 +43,7 @@ dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:1.0.3'
     compile 'com.alibaba:arouter-annotation:1.0.3'
     compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'

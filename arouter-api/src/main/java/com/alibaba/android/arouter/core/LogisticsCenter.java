@@ -17,14 +17,18 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.alibaba.android.arouter.utils.ClassUtils;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.MapUtils;
+import com.alibaba.android.arouter.utils.PackageUtils;
 import com.alibaba.android.arouter.utils.TextUtils;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.alibaba.android.arouter.launcher.ARouter.logger;
+import static com.alibaba.android.arouter.utils.Consts.AROUTER_SP_CACHE_KEY;
+import static com.alibaba.android.arouter.utils.Consts.AROUTER_SP_KEY_MAP;
 import static com.alibaba.android.arouter.utils.Consts.DOT;
 import static com.alibaba.android.arouter.utils.Consts.ROUTE_ROOT_PAKCAGE;
 import static com.alibaba.android.arouter.utils.Consts.SDK_NAME;
@@ -57,11 +61,26 @@ public class LogisticsCenter {
         executor = tpe;
 
         try {
-            // These class was generate by arouter-compiler.
-            List<String> classFileNames = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
+            long startInit = System.currentTimeMillis();
+            Set<String> routerMap;
 
-            //
-            for (String className : classFileNames) {
+            // It will rebuild router map every times when debuggable.
+            if (ARouter.debuggable() || PackageUtils.INSTANCE.isNewVersion(context)) {
+                logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
+                // These class was generate by arouter-compiler.
+                routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
+                if (!routerMap.isEmpty()) {
+                    context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
+                }
+            } else {
+                logger.info(TAG, "Load router map from cache.");
+                routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
+            }
+
+            logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
+            startInit = System.currentTimeMillis();
+
+            for (String className : routerMap) {
                 if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
                     // This one of root elements, load root.
                     ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
@@ -73,6 +92,8 @@ public class LogisticsCenter {
                     ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
                 }
             }
+
+            logger.info(TAG, "Load root element finished, cost " + (System.currentTimeMillis() - startInit) + " ms.");
 
             if (Warehouse.groupsIndex.size() == 0) {
                 logger.error(TAG, "No mapping files were found, check your configuration please!");
@@ -157,7 +178,7 @@ public class LogisticsCenter {
                                 resultMap.get(params.getKey()));
                     }
 
-                    // Save params name which need autoinject.
+                    // Save params name which need auto inject.
                     postcard.getExtras().putStringArray(ARouter.AUTO_INJECT, paramsType.keySet().toArray(new String[]{}));
                 }
 

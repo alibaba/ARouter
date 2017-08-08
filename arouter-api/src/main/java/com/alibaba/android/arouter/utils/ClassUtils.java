@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +18,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,38 +57,52 @@ public class ClassUtils {
      * @param packageName 包名
      * @return 所有class的集合
      */
-    public static List<String> getFileNameByPackageName(Context context, String packageName) throws PackageManager.NameNotFoundException, IOException {
-        List<String> classNames = new ArrayList<>();
-        for (String path : getSourcePaths(context)) {
-            DexFile dexfile = null;
+    public static Set<String> getFileNameByPackageName(Context context, final String packageName) throws PackageManager.NameNotFoundException, IOException, InterruptedException {
+        final Set<String> classNames = new HashSet<>();
 
-            try {
-                if (path.endsWith(EXTRACTED_SUFFIX)) {
-                    //NOT use new DexFile(path), because it will throw "permission error in /data/dalvik-cache"
-                    dexfile = DexFile.loadDex(path, path + ".tmp", 0);
-                } else {
-                    dexfile = new DexFile(path);
-                }
-                Enumeration<String> dexEntries = dexfile.entries();
-                while (dexEntries.hasMoreElements()) {
-                    String className = dexEntries.nextElement();
-                    if (className.contains(packageName)) {
-                        classNames.add(className);
-                    }
-                }
-            } catch (Throwable ignore) {
-                Log.e("ARouter", "Scan map file in dex files made error.", ignore);
-            } finally {
-                if (null != dexfile) {
+        List<String> paths = getSourcePaths(context);
+        final CountDownLatch parserCtl = new CountDownLatch(paths.size());
+
+        for (final String path : paths) {
+            DefaultPoolExecutor.getInstance().execute(new Runnable() {
+                @Override
+                public void run() {
+                    DexFile dexfile = null;
+
                     try {
-                        dexfile.close();
+                        if (path.endsWith(EXTRACTED_SUFFIX)) {
+                            //NOT use new DexFile(path), because it will throw "permission error in /data/dalvik-cache"
+                            dexfile = DexFile.loadDex(path, path + ".tmp", 0);
+                        } else {
+                            dexfile = new DexFile(path);
+                        }
+
+                        Enumeration<String> dexEntries = dexfile.entries();
+                        while (dexEntries.hasMoreElements()) {
+                            String className = dexEntries.nextElement();
+                            if (className.startsWith(packageName)) {
+                                classNames.add(className);
+                            }
+                        }
                     } catch (Throwable ignore) {
+                        Log.e("ARouter", "Scan map file in dex files made error.", ignore);
+                    } finally {
+                        if (null != dexfile) {
+                            try {
+                                dexfile.close();
+                            } catch (Throwable ignore) {
+                            }
+                        }
+
+                        parserCtl.countDown();
                     }
                 }
-            }
+            });
         }
 
-        Log.d("ARouter", "Filter " + classNames.size() + " classes by packageName <" + packageName + ">");
+        parserCtl.await();
+
+        Log.d(Consts.TAG, "Filter " + classNames.size() + " classes by packageName <" + packageName + ">");
         return classNames;
     }
 
@@ -139,9 +157,9 @@ public class ClassUtils {
         List<String> instantRunSourcePaths = new ArrayList<>();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && null != applicationInfo.splitSourceDirs) {
-            // add the splite apk, normally for InstantRun, and newest version.
+            // add the split apk, normally for InstantRun, and newest version.
             instantRunSourcePaths.addAll(Arrays.asList(applicationInfo.splitSourceDirs));
-            Log.d("ARouter", "Found InstantRun support");
+            Log.d(Consts.TAG, "Found InstantRun support");
         } else {
             try {
                 // This man is reflection from Google instant run sdk, he will tell me where the dex files go.
@@ -157,11 +175,11 @@ public class ClassUtils {
                             instantRunSourcePaths.add(file.getAbsolutePath());
                         }
                     }
-                    Log.d("ARouter", "Found InstantRun support");
+                    Log.d(Consts.TAG, "Found InstantRun support");
                 }
 
             } catch (Exception e) {
-                Log.e("ARouter", "InstantRun support error, " + e.getMessage());
+                Log.e(Consts.TAG, "InstantRun support error, " + e.getMessage());
             }
         }
 
@@ -204,7 +222,7 @@ public class ClassUtils {
 
         }
 
-        Log.i("galaxy", "VM with name " + vmName + (isMultidexCapable ? " has multidex support" : " does not have multidex support"));
+        Log.i(Consts.TAG, "VM with name " + vmName + (isMultidexCapable ? " has multidex support" : " does not have multidex support"));
         return isMultidexCapable;
     }
 
