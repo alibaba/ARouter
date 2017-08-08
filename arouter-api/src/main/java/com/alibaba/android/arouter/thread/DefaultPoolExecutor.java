@@ -4,11 +4,12 @@ import com.alibaba.android.arouter.launcher.ARouter;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.TextUtils;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +25,7 @@ public class DefaultPoolExecutor extends ThreadPoolExecutor {
     //    Thread args
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     private static final int INIT_THREAD_COUNT = CPU_COUNT + 1;
-    private static final int MAX_THREAD_COUNT = 20;
+    private static final int MAX_THREAD_COUNT = INIT_THREAD_COUNT;
     private static final long SURPLUS_THREAD_LIFE = 30L;
 
     private static DefaultPoolExecutor instance;
@@ -38,7 +39,7 @@ public class DefaultPoolExecutor extends ThreadPoolExecutor {
                             MAX_THREAD_COUNT,
                             SURPLUS_THREAD_LIFE,
                             TimeUnit.SECONDS,
-                            new SynchronousQueue<Runnable>(),
+                            new ArrayBlockingQueue<Runnable>(64),
                             new DefaultThreadFactory());
                 }
             }
@@ -47,7 +48,12 @@ public class DefaultPoolExecutor extends ThreadPoolExecutor {
     }
 
     private DefaultPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
-        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, new RejectedExecutionHandler() {
+            @Override
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                ARouter.logger.error(Consts.TAG, "Task rejected, too many task!");
+            }
+        });
     }
 
     /*
