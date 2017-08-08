@@ -65,7 +65,7 @@ public class LogisticsCenter {
             Set<String> routerMap;
 
             // It will rebuild router map every times when debuggable.
-            if (ARouter.debuggable() || PackageUtils.INSTANCE.isNewVersion(context)) {
+            if (ARouter.debuggable() || PackageUtils.isNewVersion(context)) {
                 logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
                 // These class was generate by arouter-compiler.
                 routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
