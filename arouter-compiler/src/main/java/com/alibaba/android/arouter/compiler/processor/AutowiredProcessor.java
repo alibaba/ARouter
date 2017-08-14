@@ -139,7 +139,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                 FieldSpec jsonServiceField = FieldSpec.builder(TypeName.get(type_JsonService.asType()), "serializationService", Modifier.PRIVATE).build();
                 helper.addField(jsonServiceField);
 
-                injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class);", ARouterClass, ClassName.get(type_JsonService));
+                injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class)", ARouterClass, ClassName.get(type_JsonService));
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
                 // Generate method body, start inject.
