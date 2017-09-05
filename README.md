@@ -508,6 +508,11 @@ dependencies {
     需要注意的是，如果不使用自动注入，那么可以不写 `ARouter.getInstance().inject(this)`，但是需要取值的字段仍然需要标上 `@Autowired` 注解，因为
     只有标上注解之后，ARouter才能知道以哪一种数据类型提取URL中的参数并放入Intent中，这样您才能在intent中获取到对应的参数
 
+7. 新增页面之后，无法跳转？
+    
+    ARouter加载Dex中的映射文件会有一定耗时，所以ARouter会缓存映射文件，直到新版本升级(版本号或者versionCode变化)，而如果是开发版本(ARouter.openDebug())，
+    ARouter 每次启动都会重新加载映射文件，开发阶段一定要打开 Debug 功能
+
 #### 八、其他
 
 1. 沟通和交流

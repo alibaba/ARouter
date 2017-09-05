@@ -19,13 +19,25 @@ import com.alibaba.android.arouter.launcher.ARouter;
 public class Test1Activity extends AppCompatActivity {
 
     @Autowired
-    String name;
+    String name = "jack";
 
     @Autowired
-    int age;
+    int age = 10;
+
+    @Autowired
+    int height = 175;
 
     @Autowired(name = "boy")
     boolean girl;
+
+    @Autowired
+    char ch = 'A';
+
+    @Autowired
+    float fl = 12.00f;
+
+    @Autowired
+    double dou = 12.01d;
 
     @Autowired
     TestParcelable pac;
@@ -56,18 +68,22 @@ public class Test1Activity extends AppCompatActivity {
         // url = getIntent().getStringExtra("url");
 
         String params = String.format(
-                "name=%s,\n age=%s,\n girl=%s,\n high=%s,\n url=%s,\n pac=%s,\n obj=%s",
+                "name=%s,\n age=%s, \n height=%s,\n girl=%s,\n high=%s,\n url=%s,\n pac=%s,\n obj=%s \n ch=%s \n fl = %s, \n dou = %s",
                 name,
                 age,
+                height,
                 girl,
                 high,
                 url,
                 pac,
-                obj
+                obj,
+                ch,
+                fl,
+                dou
         );
         helloService.sayHello("Hello moto.");
 
-        ((TextView)findViewById(R.id.test)).setText("I am " + Test1Activity.class.getName());
-        ((TextView)findViewById(R.id.test2)).setText(params);
+        ((TextView) findViewById(R.id.test)).setText("I am " + Test1Activity.class.getName());
+        ((TextView) findViewById(R.id.test2)).setText(params);
     }
 }

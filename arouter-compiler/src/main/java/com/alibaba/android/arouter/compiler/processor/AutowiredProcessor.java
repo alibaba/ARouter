@@ -139,7 +139,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                 FieldSpec jsonServiceField = FieldSpec.builder(TypeName.get(type_JsonService.asType()), "serializationService", Modifier.PRIVATE).build();
                 helper.addField(jsonServiceField);
 
-                injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class);", ARouterClass, ClassName.get(type_JsonService));
+                injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class)", ARouterClass, ClassName.get(type_JsonService));
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
                 // Generate method body, start inject.
@@ -173,6 +173,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                             injectMethodBuilder.endControlFlow();
                         }
                     } else {    // It's normal intent value
+                        String originalValue = "substitute." + fieldName;
                         String statment = "substitute." + fieldName + " = substitute.";
                         boolean isActivity = false;
                         if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
@@ -184,7 +185,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
-                        statment = buildStatement(statment, typeUtils.typeExchange(element), isActivity);
+                        statment = buildStatement(originalValue, statment, typeUtils.typeExchange(element), isActivity);
                         if (statment.startsWith("serializationService.")) {   // Not mortals
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
@@ -194,7 +195,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                             );
                             injectMethodBuilder.nextControlFlow("else");
                             injectMethodBuilder.addStatement(
-                                    "$T.e(\"" + Consts.TAG +  "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
+                                    "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         } else {
                             injectMethodBuilder.addStatement(statment, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
@@ -204,7 +205,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
                             injectMethodBuilder.beginControlFlow("if (null == substitute." + fieldName + ")");
                             injectMethodBuilder.addStatement(
-                                    "$T.e(\"" + Consts.TAG +  "\", \"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", AndroidLog, ClassName.get(parent));
+                                    "$T.e(\"" + Consts.TAG + "\", \"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         }
                     }
@@ -222,30 +223,32 @@ public class AutowiredProcessor extends AbstractProcessor {
         }
     }
 
-    private String buildStatement(String statment, int type, boolean isActivity) {
+    private String buildStatement(String originalValue, String statement, int type, boolean isActivity) {
         if (type == TypeKind.BOOLEAN.ordinal()) {
-            statment += (isActivity ? ("getBooleanExtra($S, false)") : ("getBoolean($S)"));
+            statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
         } else if (type == TypeKind.BYTE.ordinal()) {
-            statment += (isActivity ? ("getByteExtra($S, (byte) 0)") : ("getByte($S)"));
+            statement += (isActivity ? ("getByteExtra($S, " + originalValue + "") : ("getByte($S)"));
         } else if (type == TypeKind.SHORT.ordinal()) {
-            statment += (isActivity ? ("getShortExtra($S, (short) 0)") : ("getShort($S)"));
+            statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
         } else if (type == TypeKind.INT.ordinal()) {
-            statment += (isActivity ? ("getIntExtra($S, 0)") : ("getInt($S)"));
+            statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
         } else if (type == TypeKind.LONG.ordinal()) {
-            statment += (isActivity ? ("getLongExtra($S, 0)") : ("getLong($S)"));
+            statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
+        }else if(type == TypeKind.CHAR.ordinal()){
+            statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
         } else if (type == TypeKind.FLOAT.ordinal()) {
-            statment += (isActivity ? ("getFloatExtra($S, 0)") : ("getFloat($S)"));
+            statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
         } else if (type == TypeKind.DOUBLE.ordinal()) {
-            statment += (isActivity ? ("getDoubleExtra($S, 0)") : ("getDouble($S)"));
+            statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
         } else if (type == TypeKind.STRING.ordinal()) {
-            statment += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+            statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
-            statment += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
+            statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
-            statment = "serializationService.json2Object(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", $T.class)";
+            statement = "serializationService.json2Object(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", $T.class)";
         }
 
-        return statment;
+        return statement;
     }
 
     /**
