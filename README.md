@@ -97,7 +97,7 @@ ARouter.getInstance().build("/test/1")
 
 5. 添加混淆规则(如果使用了Proguard)
 ``` 
--keep public class com.alibaba.android.arouter.routes.**{*;}
+-keep public class com.alibaba.android.arouter.**{*;}
 -keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
 ```
 
