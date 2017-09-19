@@ -16,6 +16,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
 
+import org.androidannotations.annotations.EActivity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -98,13 +100,13 @@ public class RouteProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
+        logger = new Logger(processingEnv.getMessager());   // Package the log utils.
 
         mFiler = processingEnv.getFiler();                  // Generate class.
         types = processingEnv.getTypeUtils();            // Get type utils.
         elements = processingEnv.getElementUtils();      // Get class meta.
 
         typeUtils = new TypeUtils(types, elements);
-        logger = new Logger(processingEnv.getMessager());   // Package the log utils.
 
         // Attempt to get user configuration [moduleName]
         Map<String, String> options = processingEnv.getOptions();
@@ -127,7 +129,6 @@ public class RouteProcessor extends AbstractProcessor {
         }
 
         iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
-
         logger.info(">>> RouteProcessor init. <<<");
     }
 
@@ -141,7 +142,18 @@ public class RouteProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (CollectionUtils.isNotEmpty(annotations)) {
             Set<? extends Element> routeElements = roundEnv.getElementsAnnotatedWith(Route.class);
+            Set<? extends Element> eActivityElements = roundEnv.getElementsAnnotatedWith(EActivity.class);
             try {
+                Iterator<? extends Element> iterator = routeElements.iterator();
+                for (int i = 0; i < routeElements.size(); i++) {
+                    Element next = iterator.next();
+                    for (Element eActivityElement : eActivityElements) {
+                        if (next != null && eActivityElement != null && next.asType().toString().equals(eActivityElement.asType().toString())) {
+                            routeElements.remove(next);
+                            i--;
+                        }
+                    }
+                }
                 logger.info(">>> Found routes, start... <<<");
                 this.parseRoutes(routeElements);
 
@@ -158,7 +170,7 @@ public class RouteProcessor extends AbstractProcessor {
         if (CollectionUtils.isNotEmpty(routeElements)) {
             // Perpare the type an so on.
 
-            logger.info(">>> Found routes, size is " + routeElements.size() + " <<<");
+            logger.info(">>> Found routes, size is " + routeElements.size() + " <<-----<");
 
             rootMap.clear();
 
@@ -213,6 +225,8 @@ public class RouteProcessor extends AbstractProcessor {
                     .addParameter(rootParamSpec);
 
             //  Follow a sequence, find out metas of group first, generate java file, then statistics them as root.
+
+
             for (Element element : routeElements) {
                 TypeMirror tm = element.asType();
                 Route route = element.getAnnotation(Route.class);
@@ -325,7 +339,8 @@ public class RouteProcessor extends AbstractProcessor {
                                 .addModifiers(PUBLIC)
                                 .addMethod(loadIntoMethodOfGroupBuilder.build())
                                 .build()
-                ).build().writeTo(mFiler);
+                ).build()
+                        .writeTo(mFiler);
 
                 logger.info(">>> Generated group: " + groupName + "<<<");
                 rootMap.put(groupName, groupFileName);
