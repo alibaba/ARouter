@@ -174,22 +174,22 @@ public class AutowiredProcessor extends AbstractProcessor {
                         }
                     } else {    // It's normal intent value
                         String originalValue = "substitute." + fieldName;
-                        String statment = "substitute." + fieldName + " = substitute.";
+                        String statement = "substitute." + fieldName + " = substitute.";
                         boolean isActivity = false;
                         if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
                             isActivity = true;
-                            statment += "getIntent().";
+                            statement += "getIntent().";
                         } else if (types.isSubtype(parent.asType(), fragmentTm) || types.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
-                            statment += "getArguments().";
+                            statement += "getArguments().";
                         } else {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
-                        statment = buildStatement(originalValue, statment, typeUtils.typeExchange(element), isActivity);
-                        if (statment.startsWith("serializationService.")) {   // Not mortals
+                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity);
+                        if (statement.startsWith("serializationService.")) {   // Not mortals
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = " + statment,
+                                    "substitute." + fieldName + " = " + statement,
                                     (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
                                     ClassName.get(element.asType())
                             );
@@ -198,7 +198,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                                     "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         } else {
-                            injectMethodBuilder.addStatement(statment, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                            injectMethodBuilder.addStatement(statement, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
                         }
 
                         // Validator
@@ -245,7 +245,7 @@ public class AutowiredProcessor extends AbstractProcessor {
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
-            statement = "serializationService.json2Object(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", $T.class)";
+            statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new com.alibaba.android.arouter.facade.model.TypeWrapper<$T>(){}.getType())";
         }
 
         return statement;
@@ -262,7 +262,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                 TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
 
                 if (element.getModifiers().contains(Modifier.PRIVATE)) {
-                    throw new IllegalAccessException("The autowired fields CAN NOT BE 'private'!!! please check field ["
+                    throw new IllegalAccessException("The inject fields CAN NOT BE 'private'!!! please check field ["
                             + element.getSimpleName() + "] in class [" + enclosingElement.getQualifiedName() + "]");
                 }
 
