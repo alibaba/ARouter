@@ -14,7 +14,7 @@ compileJava {
 }
 
 dependencies {
-    compile 'com.alibaba:arouter-annotation:1.0.3'
+    compile 'com.alibaba:arouter-annotation:1.0.4'
 
     compile 'com.google.auto.service:auto-service:1.0-rc2'
     compile 'com.squareup:javapoet:1.7.0'

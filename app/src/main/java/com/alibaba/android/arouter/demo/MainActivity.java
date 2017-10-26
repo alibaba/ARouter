@@ -20,6 +20,11 @@ import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static Activity activity;
@@ -126,6 +131,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.autoInject:
                 TestParcelable testParcelable = new TestParcelable("jack", 666);
                 TestObj testObj = new TestObj("Rose", 777);
+                List<TestObj> objList = new ArrayList<>();
+                objList.add(testObj);
+
+                Map<String, List<TestObj>> map = new HashMap<>();
+                map.put("testMap", objList);
 
                 ARouter.getInstance().build("/test/activity1")
                         .withString("name", "老王")
@@ -135,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .withString("url", "https://a.b.c")
                         .withParcelable("pac", testParcelable)
                         .withObject("obj", testObj)
+                        .withObject("objList", objList)
+                        .withObject("map", map)
                         .navigation();
                 break;
             case R.id.navByName:
