@@ -240,6 +240,8 @@ public class RouteProcessor extends AbstractProcessor {
                 } else if (types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
                     logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
                     routeMete = new RouteMeta(route, element, RouteType.parse(FRAGMENT), null);
+                } else {
+                    throw new RuntimeException("ARouter::Compiler >>> Found unsupported class type, type = [" + types.toString() + "].");
                 }
 
                 categories(routeMete);
