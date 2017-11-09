@@ -517,4 +517,10 @@ dependencies {
 
 1. 沟通和交流
 
-    ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
+    1. 交流群1 (已满，请加2群)
+    
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
+
+    2. 交流群2
+        
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)

@@ -72,6 +72,8 @@ public class LogisticsCenter {
                 if (!routerMap.isEmpty()) {
                     context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
                 }
+
+                PackageUtils.updateVersion(context);    // Save new version name when router map update finish.
             } else {
                 logger.info(TAG, "Load router map from cache.");
                 routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
