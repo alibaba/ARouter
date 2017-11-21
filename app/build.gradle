@@ -37,8 +37,9 @@ android {
         }
 
         release {
-            minifyEnabled false
-            signingConfig null
+            minifyEnabled true
+            signingConfig signingConfigs.debug
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
