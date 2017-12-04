@@ -14,28 +14,15 @@ import com.alibaba.android.arouter.facade.template.IProviderGroup;
 import com.alibaba.android.arouter.facade.template.IRouteGroup;
 import com.alibaba.android.arouter.facade.template.IRouteRoot;
 import com.alibaba.android.arouter.launcher.ARouter;
-import com.alibaba.android.arouter.utils.ClassUtils;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.MapUtils;
-import com.alibaba.android.arouter.utils.PackageUtils;
 import com.alibaba.android.arouter.utils.TextUtils;
 
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.alibaba.android.arouter.launcher.ARouter.logger;
-import static com.alibaba.android.arouter.utils.Consts.AROUTER_SP_CACHE_KEY;
-import static com.alibaba.android.arouter.utils.Consts.AROUTER_SP_KEY_MAP;
-import static com.alibaba.android.arouter.utils.Consts.DOT;
-import static com.alibaba.android.arouter.utils.Consts.ROUTE_ROOT_PAKCAGE;
-import static com.alibaba.android.arouter.utils.Consts.SDK_NAME;
-import static com.alibaba.android.arouter.utils.Consts.SEPARATOR;
-import static com.alibaba.android.arouter.utils.Consts.SUFFIX_INTERCEPTORS;
-import static com.alibaba.android.arouter.utils.Consts.SUFFIX_PROVIDERS;
-import static com.alibaba.android.arouter.utils.Consts.SUFFIX_ROOT;
 import static com.alibaba.android.arouter.utils.Consts.TAG;
 
 /**
@@ -53,6 +40,28 @@ public class LogisticsCenter {
     private static Context mContext;
     static ThreadPoolExecutor executor;
 
+    private static void loadRootElement() {
+
+    }
+
+    private static void registerRouteRoot(IRouteRoot routeRoot) {
+        if (routeRoot != null) {
+            routeRoot.loadInto(Warehouse.groupsIndex);
+        }
+    }
+
+    private static void registerInterceptor(IInterceptorGroup interceptorGroup) {
+        if (interceptorGroup != null) {
+            interceptorGroup.loadInto(Warehouse.interceptorsIndex);
+        }
+    }
+
+    private static void registerProvider(IProviderGroup providerGroup) {
+        if (providerGroup != null) {
+            providerGroup.loadInto(Warehouse.providersIndex);
+        }
+    }
+
     /**
      * LogisticsCenter init, load all metas in memory. Demand initialization
      */
@@ -62,39 +71,7 @@ public class LogisticsCenter {
 
         try {
             long startInit = System.currentTimeMillis();
-            Set<String> routerMap;
-
-            // It will rebuild router map every times when debuggable.
-            if (ARouter.debuggable() || PackageUtils.isNewVersion(context)) {
-                logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
-                // These class was generate by arouter-compiler.
-                routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
-                if (!routerMap.isEmpty()) {
-                    context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
-                }
-
-                PackageUtils.updateVersion(context);    // Save new version name when router map update finish.
-            } else {
-                logger.info(TAG, "Load router map from cache.");
-                routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
-            }
-
-            logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
-            startInit = System.currentTimeMillis();
-
-            for (String className : routerMap) {
-                if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
-                    // This one of root elements, load root.
-                    ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
-                } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
-                    // Load interceptorMeta
-                    ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
-                } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
-                    // Load providerIndex
-                    ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
-                }
-            }
-
+            loadRootElement();
             logger.info(TAG, "Load root element finished, cost " + (System.currentTimeMillis() - startInit) + " ms.");
 
             if (Warehouse.groupsIndex.size() == 0) {
