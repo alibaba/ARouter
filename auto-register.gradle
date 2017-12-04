@@ -1,0 +1,36 @@
+
+apply plugin: 'auto-register'
+autoregister {
+    registerInfo = [
+        [
+            'scanInterface'             : 'com.alibaba.android.arouter.facade.template.IRouteRoot'
+            , 'codeInsertToClassName'   : 'com.alibaba.android.arouter.core.LogisticsCenter'
+            , 'codeInsertToMethodName'  : 'loadRootElement'//static方法
+            , 'registerMethodName'      : 'registerRouteRoot' //static方法
+            , 'include'                 : [
+                //只在这些路径下扫描（包分隔符需要用/表示，不能用.）
+                'com/alibaba/android/arouter/routes/.*'
+            ]
+        ],
+        [
+            'scanInterface'             : 'com.alibaba.android.arouter.facade.template.IInterceptorGroup'
+            , 'codeInsertToClassName'   : 'com.alibaba.android.arouter.core.LogisticsCenter'
+            , 'codeInsertToMethodName'  : 'loadRootElement'//static方法
+            , 'registerMethodName'      : 'registerInterceptor' //static方法
+            , 'include'                 : [
+                //只在这些路径下扫描（包分隔符需要用/表示，不能用.）
+                'com/alibaba/android/arouter/routes/.*'
+            ]
+        ],
+        [
+            'scanInterface'             : 'com.alibaba.android.arouter.facade.template.IProviderGroup'
+            , 'codeInsertToClassName'   : 'com.alibaba.android.arouter.core.LogisticsCenter'
+            , 'codeInsertToMethodName'  : 'loadRootElement'//static方法
+            , 'registerMethodName'      : 'registerProvider' //static方法
+            , 'include'                 : [
+                //只在这些路径下扫描（包分隔符需要用/表示，不能用.）
+                'com/alibaba/android/arouter/routes/.*'
+            ]
+        ]
+    ]
+}

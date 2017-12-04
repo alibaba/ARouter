@@ -39,7 +39,17 @@
 4. 跨模块API调用，通过控制反转来做组件解耦
 
 #### 三、基础功能
-1. 添加依赖和配置
+1. 在工程根目录build.gradle中添加依赖
+``` gradle
+buildscript {
+    ...
+    dependencies {
+        ...
+        classpath 'com.billy.android:autoregister:1.0.4'
+    }
+}
+```
+2. 在module的build.gradle中添加依赖和配置
 ``` gradle
 android {
     defaultConfig {
@@ -59,11 +69,13 @@ dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
     ...
 }
+//在application的module中再加上下面一行，完成Router的自动注册
+apply from: 'https://raw.githubusercontent.com/alibaba/ARouter/master/auto-register.gradle'
 // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'
 // Kotlin配置参考文末'其他#5'
 ```
 
-2. 添加注解
+3. 添加注解
 ``` java
 // 在支持路由的页面上添加注解(必选)
 // 这里的路径需要注意的是至少需要有两级，/xx/xx
@@ -73,7 +85,7 @@ public class YourActivity extend Activity {
 }
 ```
 
-3. 初始化SDK
+4. 初始化SDK
 ``` java
 if (isDebug()) {           // 这两行必须写在init之前，否则这些配置在init过程中将无效
     ARouter.openLog();     // 打印日志
@@ -82,7 +94,7 @@ if (isDebug()) {           // 这两行必须写在init之前，否则这些配�
 ARouter.init(mApplication); // 尽可能早，推荐在Application中初始化
 ```
 
-4. 发起路由操作
+5. 发起路由操作
 ``` java
 // 1. 应用内简单的跳转(通过URL跳转在'进阶用法'中)
 ARouter.getInstance().build("/test/activity").navigation();
@@ -95,7 +107,7 @@ ARouter.getInstance().build("/test/1")
 			.navigation();
 ```
 
-5. 添加混淆规则(如果使用了Proguard)
+6. 添加混淆规则(如果使用了Proguard)
 ``` 
 -keep public class com.alibaba.android.arouter.routes.**{*;}
 -keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
