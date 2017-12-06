@@ -62,3 +62,4 @@ dependencies {
     compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
     compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
 }
+apply plugin: 'auto-register-for-arouter'

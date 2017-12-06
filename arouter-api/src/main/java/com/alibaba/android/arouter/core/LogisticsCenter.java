@@ -52,6 +52,42 @@ import static com.alibaba.android.arouter.utils.Consts.TAG;
 public class LogisticsCenter {
     private static Context mContext;
     static ThreadPoolExecutor executor;
+    private static boolean registedByPlugin;
+
+    private static void loadRootElement() {
+        registedByPlugin = false;
+        //auto generate register code by gradle plugin: auto-register-for-arouter
+        // looks like below:
+        // registerRouteRoot(new ARouter..Root..modulejava());
+        // registerRouteRoot(new ARouter..Root..modulekotlin());
+    }
+
+    private static void registerRouteRoot(IRouteRoot routeRoot) {
+        markRegisteredByPlugin();
+        if (routeRoot != null) {
+            routeRoot.loadInto(Warehouse.groupsIndex);
+        }
+    }
+
+    private static void registerInterceptor(IInterceptorGroup interceptorGroup) {
+        markRegisteredByPlugin();
+        if (interceptorGroup != null) {
+            interceptorGroup.loadInto(Warehouse.interceptorsIndex);
+        }
+    }
+
+    private static void registerProvider(IProviderGroup providerGroup) {
+        markRegisteredByPlugin();
+        if (providerGroup != null) {
+            providerGroup.loadInto(Warehouse.providersIndex);
+        }
+    }
+
+    private static void markRegisteredByPlugin() {
+        if (!registedByPlugin) {
+            registedByPlugin = true;
+        }
+    }
 
     /**
      * LogisticsCenter init, load all metas in memory. Demand initialization
@@ -62,36 +98,41 @@ public class LogisticsCenter {
 
         try {
             long startInit = System.currentTimeMillis();
-            Set<String> routerMap;
+            loadRootElement();
+            if (registedByPlugin) {
+                logger.info(TAG, "Load router map by auto-register-for-arouter plugin.");
+            } else {
+                Set<String> routerMap;
 
-            // It will rebuild router map every times when debuggable.
-            if (ARouter.debuggable() || PackageUtils.isNewVersion(context)) {
-                logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
-                // These class was generate by arouter-compiler.
-                routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
-                if (!routerMap.isEmpty()) {
-                    context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
+                // It will rebuild router map every times when debuggable.
+                if (ARouter.debuggable() || PackageUtils.isNewVersion(context)) {
+                    logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
+                    // These class was generate by arouter-compiler.
+                    routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
+                    if (!routerMap.isEmpty()) {
+                        context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
+                    }
+
+                    PackageUtils.updateVersion(context);    // Save new version name when router map update finish.
+                } else {
+                    logger.info(TAG, "Load router map from cache.");
+                    routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
                 }
 
-                PackageUtils.updateVersion(context);    // Save new version name when router map update finish.
-            } else {
-                logger.info(TAG, "Load router map from cache.");
-                routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
-            }
+                logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
+                startInit = System.currentTimeMillis();
 
-            logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
-            startInit = System.currentTimeMillis();
-
-            for (String className : routerMap) {
-                if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
-                    // This one of root elements, load root.
-                    ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
-                } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
-                    // Load interceptorMeta
-                    ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
-                } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
-                    // Load providerIndex
-                    ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
+                for (String className : routerMap) {
+                    if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
+                        // This one of root elements, load root.
+                        ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
+                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
+                        // Load interceptorMeta
+                        ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
+                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
+                        // Load providerIndex
+                        ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
+                    }
                 }
             }
 
