@@ -45,7 +45,7 @@ buildscript {
     ...
     dependencies {
         ...
-        classpath 'com.billy.android:autoregister:1.0.4'
+        classpath 'com.billy.android:auto-register-for-arouter:1.0.0'
     }
 }
 ```
@@ -69,11 +69,12 @@ dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:x.x.x'
     ...
 }
-//在application的module中再加上下面一行，完成Router的自动注册
-apply from: 'https://raw.githubusercontent.com/alibaba/ARouter/master/auto-register.gradle'
+//在application的module中需要再apply自动注册插件，完成Router的自动注册
+apply plugin: 'auto-register-for-arouter'
 // 旧版本gradle插件(< 2.2)，可以使用apt插件，配置方法见文末'其他#4'
 // Kotlin配置参考文末'其他#5'
 ```
+自动注册插件[AutoRegister](https://github.com/luckybilly/AutoRegister),[原理说明](http://blog.csdn.net/cdecde111/article/details/78074692)
 
 3. 添加注解
 ``` java
