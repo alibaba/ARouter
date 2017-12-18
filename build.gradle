@@ -11,7 +11,7 @@ buildscript {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.alibaba:arouter-register:1.0.0"
+        classpath 'com.alibaba:arouter-register:1.0.0'
     }
 }
 

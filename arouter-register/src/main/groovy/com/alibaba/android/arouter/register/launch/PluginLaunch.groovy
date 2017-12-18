@@ -21,7 +21,7 @@ public class PluginLaunch implements Plugin<Project> {
         if (isApp) {
             Logger.make(project)
 
-            Logger.i('project(' + project.name + ') apply arouter-register plugin')
+            Logger.i('Project enable arouter-register plugin')
 
             def android = project.extensions.getByType(AppExtension)
             def transformImpl = new RegisterTransform(project)

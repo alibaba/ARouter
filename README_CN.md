@@ -10,9 +10,9 @@
 
 #### 最新版本
 
-模块|arouter-api|arouter-compiler|arouter-annotation
----|---|---|---
-最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)
+模块|arouter-api|arouter-compiler|arouter-annotation|arouter-register
+---|---|---|---|---
+最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
 
 #### Demo展示
 
@@ -31,6 +31,7 @@
 10. 支持多种方式配置转场动画
 11. 支持获取Fragment
 12. 完全支持Kotlin以及混编(配置见文末 其他#5)
+13. **支持第三方 App 加固**(使用 arouter-register 实现自动注册)
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -106,6 +107,24 @@ ARouter.getInstance().build("/test/1")
 # 如果使用了 单类注入，即不定义接口实现 IProvider，需添加下面规则，保护实现
 -keep class * implements com.alibaba.android.arouter.facade.template.IProvider
 ```
+
+6. 使用 Gradle 插件实现路由表的自动加载
+```gradle
+apply plugin: 'com.alibaba.arouter'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.alibaba:arouter-register:1.0.0"
+    }
+}
+```
+可选使用，通过 ARouter 提供的注册插件进行路由表的自动加载，默认通过扫描 dex 的方式
+进行加载通过 gradle 插件进行自动注册可以缩短初始化时间解决应用加固导致无法直接访问
+dex 文件，初始化失败的问题，需要注意的是，该插件必须搭配 api 1.3.0 使用！
 
 #### 四、进阶用法
 1. 通过URL跳转
