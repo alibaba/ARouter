@@ -1,5 +1,7 @@
-package com.billy.android.register
+package com.alibaba.android.arouter.register.core
 
+import com.alibaba.android.arouter.register.utils.Logger
+import com.alibaba.android.arouter.register.utils.ScanSetting
 import org.apache.commons.io.IOUtils
 import org.objectweb.asm.*
 
@@ -11,17 +13,17 @@ import java.util.zip.ZipEntry
  * generate register code into LogisticsCenter.class
  * @author billy.qi email: qiyilike@163.com
  */
-class RouterRegisterCodeGenerator {
-    RouterRegisterSetting extension
+class RegisterCodeGenerator {
+    ScanSetting extension
 
-    private RouterRegisterCodeGenerator(RouterRegisterSetting extension) {
+    private RegisterCodeGenerator(ScanSetting extension) {
         this.extension = extension
     }
 
-    static void insertInitCodeTo(RouterRegisterSetting registerSetting) {
+    static void insertInitCodeTo(ScanSetting registerSetting) {
         if (registerSetting != null && !registerSetting.classList.isEmpty()) {
-            RouterRegisterCodeGenerator processor = new RouterRegisterCodeGenerator(registerSetting)
-            File file = RouterRegisterTransform.fileContainsInitClass
+            RegisterCodeGenerator processor = new RegisterCodeGenerator(registerSetting)
+            File file = RegisterTransform.fileContainsInitClass
             if (file.getName().endsWith('.jar'))
                 processor.insertInitCodeIntoJarFile(file)
         }
@@ -47,8 +49,10 @@ class RouterRegisterCodeGenerator {
                 ZipEntry zipEntry = new ZipEntry(entryName)
                 InputStream inputStream = file.getInputStream(jarEntry)
                 jarOutputStream.putNextEntry(zipEntry)
-                if (RouterRegisterSetting.GENERATE_TO_CLASS_FILE_NAME == entryName) {
-                    println('codeInsertToClassName:' + entryName)
+                if (ScanSetting.GENERATE_TO_CLASS_FILE_NAME == entryName) {
+
+                    Logger.i('Insert init code to class >> ' + entryName)
+
                     def bytes = referHackWhenInit(inputStream)
                     jarOutputStream.write(bytes)
                 } else {
@@ -92,16 +96,16 @@ class RouterRegisterCodeGenerator {
                                   String signature, String[] exceptions) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions)
             //generate code into this method
-            if (name == RouterRegisterSetting.GENERATE_TO_METHOD_NAME) {
-                mv = new MyMethodVisitor(Opcodes.ASM5, mv)
+            if (name == ScanSetting.GENERATE_TO_METHOD_NAME) {
+                mv = new RouteMethodVisitor(Opcodes.ASM5, mv)
             }
             return mv
         }
     }
 
-    class MyMethodVisitor extends MethodVisitor {
+    class RouteMethodVisitor extends MethodVisitor {
 
-        MyMethodVisitor(int api, MethodVisitor mv) {
+        RouteMethodVisitor(int api, MethodVisitor mv) {
             super(api, mv)
         }
 
@@ -116,7 +120,7 @@ class RouterRegisterCodeGenerator {
                     mv.visitMethodInsn(Opcodes.INVOKESPECIAL, name, "<init>", "()V", false)
                     // generate invoke register method into LogisticsCenter.loadRouterMap()
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC
-                            , RouterRegisterSetting.GENERATE_TO_CLASS_NAME
+                            , ScanSetting.GENERATE_TO_CLASS_NAME
                             , extension.registerMethodName
                             , "(L${extension.interfaceName};)V"
                             , false)

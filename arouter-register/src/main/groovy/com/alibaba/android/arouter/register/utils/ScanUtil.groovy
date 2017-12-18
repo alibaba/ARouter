@@ -1,5 +1,6 @@
-package com.billy.android.register
+package com.alibaba.android.arouter.register.utils
 
+import com.alibaba.android.arouter.register.core.RegisterTransform
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -14,7 +15,7 @@ import java.util.jar.JarFile
  * @author billy.qi email: qiyilike@163.com
  * @since 17/3/20 11:48
  */
-class RouterScanUtil {
+class ScanUtil {
 
     /**
      * scan jar file
@@ -28,14 +29,14 @@ class RouterScanUtil {
             while (enumeration.hasMoreElements()) {
                 JarEntry jarEntry = (JarEntry) enumeration.nextElement()
                 String entryName = jarEntry.getName()
-                if (entryName.startsWith(RouterRegisterSetting.ROUTER_CLASS_PACKAGE_NAME)) {
+                if (entryName.startsWith(ScanSetting.ROUTER_CLASS_PACKAGE_NAME)) {
                     InputStream inputStream = file.getInputStream(jarEntry)
                     scanClass(inputStream)
                     inputStream.close()
-                } else if (RouterRegisterSetting.GENERATE_TO_CLASS_FILE_NAME == entryName) {
+                } else if (ScanSetting.GENERATE_TO_CLASS_FILE_NAME == entryName) {
                     // mark this jar file contains LogisticsCenter.class
                     // After the scan is complete, we will generate register code into this file
-                    RouterRegisterTransform.fileContainsInitClass = destFile
+                    RegisterTransform.fileContainsInitClass = destFile
                 }
             }
             file.close()
@@ -47,7 +48,7 @@ class RouterScanUtil {
     }
 
     static boolean shouldProcessClass(String entryName) {
-        return entryName != null && entryName.startsWith(RouterRegisterSetting.ROUTER_CLASS_PACKAGE_NAME)
+        return entryName != null && entryName.startsWith(ScanSetting.ROUTER_CLASS_PACKAGE_NAME)
     }
 
     /**
@@ -75,7 +76,7 @@ class RouterScanUtil {
         void visit(int version, int access, String name, String signature,
                    String superName, String[] interfaces) {
             super.visit(version, access, name, signature, superName, interfaces)
-            RouterRegisterTransform.registerList.each { ext ->
+            RegisterTransform.registerList.each { ext ->
                 if (ext.interfaceName && interfaces != null) {
                     interfaces.each { itName ->
                         if (itName == ext.interfaceName) {

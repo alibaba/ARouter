@@ -1,10 +1,11 @@
-package com.billy.android.register
+package com.alibaba.android.arouter.register.utils
 /**
  * register setting
  * @author billy.qi email: qiyilike@163.com
  * @since 17/3/28 11:48
  */
-class RouterRegisterSetting {
+class ScanSetting {
+    static final String PLUGIN_NAME = "com.alibaba.arouter"
     /**
      * The register code is generated into this class
      */
@@ -50,7 +51,7 @@ class RouterRegisterSetting {
      * @param interfaceName interface to scan
      * @param registerMethod method to generate code into
      */
-    RouterRegisterSetting(String interfaceName, String registerMethod){
+    ScanSetting(String interfaceName, String registerMethod){
         this.interfaceName = INTERFACE_PACKAGE_NAME + interfaceName
         this.registerMethodName = registerMethod
     }
