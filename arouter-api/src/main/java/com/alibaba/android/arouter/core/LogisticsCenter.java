@@ -2,6 +2,7 @@ package com.alibaba.android.arouter.core;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.alibaba.android.arouter.exception.HandlerException;
 import com.alibaba.android.arouter.exception.NoRouteFoundException;
@@ -86,9 +87,12 @@ public class LogisticsCenter {
                     registerProvider((IProviderGroup) obj);
                 } else if (obj instanceof IInterceptorGroup) {
                     registerInterceptor((IInterceptorGroup) obj);
+                } else {
+                    logger.info(TAG, "register failed, class name: " + className
+                            + " should implements one of IRouteRoot/IProviderGroup/IInterceptorGroup.");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e("ARouter", "register class error:" + className, e);
             }
         }
     }
