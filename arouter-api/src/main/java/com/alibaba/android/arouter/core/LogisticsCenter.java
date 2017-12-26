@@ -69,6 +69,34 @@ public class LogisticsCenter {
     }
 
     /**
+     * register by class name
+     * Sacrificing a bit of efficiency to solve
+     * the problem that the main dex file size is too large
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @param className class name
+     */
+    private static void register(String className) {
+        if (!TextUtils.isEmpty(className)) {
+            try {
+                Class<?> clazz = Class.forName(className);
+                Object obj = clazz.getConstructor().newInstance();
+                if (obj instanceof IRouteRoot) {
+                    registerRouteRoot((IRouteRoot) obj);
+                } else if (obj instanceof IProviderGroup) {
+                    registerProvider((IProviderGroup) obj);
+                } else if (obj instanceof IInterceptorGroup) {
+                    registerInterceptor((IInterceptorGroup) obj);
+                } else {
+                    logger.info(TAG, "register failed, class name: " + className
+                            + " should implements one of IRouteRoot/IProviderGroup/IInterceptorGroup.");
+                }
+            } catch (Exception e) {
+                logger.error(TAG,"register class error:" + className);
+            }
+        }
+    }
+
+    /**
      * method for arouter-auto-register plugin to register Routers
      * @param routeRoot IRouteRoot implementation class in the package: com.alibaba.android.arouter.core.routers
      * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>

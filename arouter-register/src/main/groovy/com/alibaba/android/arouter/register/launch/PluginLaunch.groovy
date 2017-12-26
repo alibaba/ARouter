@@ -28,9 +28,9 @@ public class PluginLaunch implements Plugin<Project> {
 
             //init arouter-auto-register settings
             ArrayList<ScanSetting> list = new ArrayList<>(3)
-            list.add(new ScanSetting('IRouteRoot', 'registerRouteRoot'))
-            list.add(new ScanSetting('IInterceptorGroup', 'registerInterceptor'))
-            list.add(new ScanSetting('IProviderGroup', 'registerProvider'))
+            list.add(new ScanSetting('IRouteRoot'))
+            list.add(new ScanSetting('IInterceptorGroup'))
+            list.add(new ScanSetting('IProviderGroup'))
             RegisterTransform.registerList = list
             //register this plugin
             android.registerTransform(transformImpl)

@@ -26,15 +26,15 @@ class ScanSetting {
      * The package name of the interfaces
      */
     private static final INTERFACE_PACKAGE_NAME = 'com/alibaba/android/arouter/facade/template/'
+
+    /**
+     * register method name in class: {@link #GENERATE_TO_CLASS_NAME}
+     */
+    static final String REGISTER_METHOD_NAME = 'register'
     /**
      * scan for classes which implements this interface
      */
     String interfaceName = ''
-    /**
-     * register method name in class: {@link #GENERATE_TO_CLASS_NAME}
-     * for {@link #interfaceName}
-     */
-    String registerMethodName = ''
 
     /**
      * jar file which contains class: {@link #GENERATE_TO_CLASS_NAME}
@@ -49,11 +49,9 @@ class ScanSetting {
     /**
      * constructor for arouter-auto-register settings
      * @param interfaceName interface to scan
-     * @param registerMethod method to generate code into
      */
-    ScanSetting(String interfaceName, String registerMethod){
+    ScanSetting(String interfaceName){
         this.interfaceName = INTERFACE_PACKAGE_NAME + interfaceName
-        this.registerMethodName = registerMethod
     }
 
 }

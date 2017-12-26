@@ -114,15 +114,13 @@ class RegisterCodeGenerator {
             //generate code before return
             if ((opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN)) {
                 extension.classList.each { name ->
-                    //new a object for the specified class
-                    mv.visitTypeInsn(Opcodes.NEW, name)
-                    mv.visitInsn(Opcodes.DUP)
-                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, name, "<init>", "()V", false)
+                    name = name.replaceAll("/", ".")
+                    mv.visitLdcInsn(name)//类名
                     // generate invoke register method into LogisticsCenter.loadRouterMap()
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC
                             , ScanSetting.GENERATE_TO_CLASS_NAME
-                            , extension.registerMethodName
-                            , "(L${extension.interfaceName};)V"
+                            , ScanSetting.REGISTER_METHOD_NAME
+                            , "(Ljava/lang/String;)V"
                             , false)
                 }
             }
