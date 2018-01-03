@@ -359,7 +359,7 @@ final class _ARouter {
                             ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
                         }
 
-                        if ((0 != postcard.getEnterAnim() || 0 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
+                        if ((-1 != postcard.getEnterAnim() && -1 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
                             ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
                         }
 

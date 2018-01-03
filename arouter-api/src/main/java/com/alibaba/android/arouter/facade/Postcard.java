@@ -43,8 +43,8 @@ public final class Postcard extends RouteMeta {
 
     // Animation
     private Bundle optionsCompat;    // The transition animation of activity
-    private int enterAnim;
-    private int exitAnim;
+    private int enterAnim = -1;
+    private int exitAnim = -1;
 
     public Bundle getOptionsBundle() {
         return optionsCompat;
