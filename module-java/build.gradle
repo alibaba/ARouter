@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     compile project(':arouter-api')
     compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
-    annotationProcessor 'com.alibaba:arouter-compiler:1.0.3'
+    annotationProcessor project(':arouter-compiler')
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
