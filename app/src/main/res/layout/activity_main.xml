@@ -146,6 +146,20 @@
                 android:text="通过URL跳转" />
 
             <Button
+                android:id="@+id/navByPathVariable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="path中包含变量的跳转" />
+
+            <Button
+                android:id="@+id/navByPathVariable2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="path中包含变量和通配符的跳转" />
+
+            <Button
                 android:id="@+id/interceptor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

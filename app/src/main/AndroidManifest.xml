@@ -53,6 +53,10 @@
         </activity>
         <activity android:name=".testactivity.Test4Activity">
         </activity>
+        <activity android:name=".testactivity.Test5Activity">
+        </activity>
+        <activity android:name=".testactivity.Test6Activity">
+        </activity>
     </application>
 
 </manifest>

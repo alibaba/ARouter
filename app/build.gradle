@@ -56,6 +56,7 @@ dependencies {
     compile project(':module-java')
     compile project(':module-kotlin')
     compile project(':arouter-annotation')
+    compile project(':arouter-path-variable')
 
     compile 'com.alibaba:fastjson:1.2.9'
 
