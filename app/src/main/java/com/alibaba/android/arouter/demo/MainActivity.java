@@ -128,6 +128,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .withString("url", "file:///android_asset/schame-test.html")
                         .navigation();
                 break;
+            case R.id.navByPathVariable:
+                /*
+                 * 使用这个功能需要依赖arouter-path-variable模块
+                 * 另外加一个PathReplaceService在init中调用ArouterPathVariableUtil.init(context)  另外在forUri(Uri)方法中调用ArouterPathVariableUtil.forUri(uri)
+                 */
+                ARouter.getInstance()
+                        .build(Uri.parse("/users/typ0520"))
+                        .navigation();
+                break;
+            case R.id.navByPathVariable2:
+                ARouter.getInstance()
+                        .build(Uri.parse("/repos/alibaba/arouter/branches"))
+                        .navigation();
+                break;
             case R.id.autoInject:
                 TestParcelable testParcelable = new TestParcelable("jack", 666);
                 TestObj testObj = new TestObj("Rose", 777);
