@@ -549,3 +549,15 @@ dependencies {
     2. 交流群2
         
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
+
+#### 九、代码贡献 (排名不分先后，时间顺序)
+
+1. [imknown](https://github.com/alibaba/ARouter/commits?author=imknown) : 优化文档格式
+
+2. [crazy1235](https://github.com/crazy1235) : 自动注入支持优先使用默认值
+
+3. [luckybilly](https://github.com/luckybilly) : 通过 Transform API 实现路由表自动注册
+
+4. [LinXiaoTao](https://github.com/LinXiaoTao) : postcard transition support 0
+
+5. [tanglie1993](https://github.com/tanglie1993) : 修正拼写和语法错误
