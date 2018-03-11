@@ -10,9 +10,9 @@
 
 #### 最新版本
 
-模块|arouter-api|arouter-compiler|arouter-annotation
----|---|---|---
-最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)
+模块|arouter-api|arouter-compiler|arouter-annotation|arouter-register
+---|---|---|---|---
+最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
 
 #### Demo展示
 
@@ -31,6 +31,7 @@
 10. 支持多种方式配置转场动画
 11. 支持获取Fragment
 12. 完全支持Kotlin以及混编(配置见文末 其他#5)
+13. **支持第三方 App 加固**(使用 arouter-register 实现自动注册)
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -106,6 +107,24 @@ ARouter.getInstance().build("/test/1")
 # 如果使用了 单类注入，即不定义接口实现 IProvider，需添加下面规则，保护实现
 -keep class * implements com.alibaba.android.arouter.facade.template.IProvider
 ```
+
+6. 使用 Gradle 插件实现路由表的自动加载
+```gradle
+apply plugin: 'com.alibaba.arouter'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.alibaba:arouter-register:1.0.0"
+    }
+}
+```
+可选使用，通过 ARouter 提供的注册插件进行路由表的自动加载，默认通过扫描 dex 的方式
+进行加载通过 gradle 插件进行自动注册可以缩短初始化时间解决应用加固导致无法直接访问
+dex 文件，初始化失败的问题，需要注意的是，该插件必须搭配 api 1.3.0 使用！
 
 #### 四、进阶用法
 1. 通过URL跳转
@@ -508,14 +527,14 @@ dependencies {
     
     首先，Kotlin中的字段是可以自动注入的，但是注入代码为了减少反射，使用的字段赋值的方式来注入的，Kotlin默认会生成set/get方法，并把属性设置为private
     所以只要保证Kotlin中字段可见性不是private即可，简单解决可以在字段上添加 @JvmField
-     
+
 6. 通过URL跳转之后，在intent中拿不到参数如何解决？
-    
+
     需要注意的是，如果不使用自动注入，那么可以不写 `ARouter.getInstance().inject(this)`，但是需要取值的字段仍然需要标上 `@Autowired` 注解，因为
     只有标上注解之后，ARouter才能知道以哪一种数据类型提取URL中的参数并放入Intent中，这样您才能在intent中获取到对应的参数
 
 7. 新增页面之后，无法跳转？
-    
+
     ARouter加载Dex中的映射文件会有一定耗时，所以ARouter会缓存映射文件，直到新版本升级(版本号或者versionCode变化)，而如果是开发版本(ARouter.openDebug())，
     ARouter 每次启动都会重新加载映射文件，开发阶段一定要打开 Debug 功能
 
@@ -524,9 +543,21 @@ dependencies {
 1. 沟通和交流
 
     1. 交流群1 (已满，请加2群)
-    
+
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
 
     2. 交流群2
-        
+
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
+
+#### 九、代码贡献 (排名不分先后，时间顺序)
+
+1. [imknown](https://github.com/alibaba/ARouter/commits?author=imknown) : 优化文档格式
+
+2. [crazy1235](https://github.com/crazy1235) : 自动注入支持优先使用默认值
+
+3. [luckybilly](https://github.com/luckybilly) : 通过 Transform API 实现路由表自动注册
+
+4. [LinXiaoTao](https://github.com/LinXiaoTao) : postcard transition support 0
+
+5. [tanglie1993](https://github.com/tanglie1993) : 修正拼写和语法错误

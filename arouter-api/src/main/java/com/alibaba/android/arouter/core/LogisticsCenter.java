@@ -39,9 +39,9 @@ import static com.alibaba.android.arouter.utils.Consts.SUFFIX_ROOT;
 import static com.alibaba.android.arouter.utils.Consts.TAG;
 
 /**
- * LogisticsCenter contain all of the map.
+ * LogisticsCenter contains all of the map.
  * <p>
- * 1. Create instance when it first used.
+ * 1. Creates instance when it is first used.
  * 2. Handler Multi-Module relationship map(*)
  * 3. Complex logic to solve duplicate group definition
  *
@@ -52,6 +52,99 @@ import static com.alibaba.android.arouter.utils.Consts.TAG;
 public class LogisticsCenter {
     private static Context mContext;
     static ThreadPoolExecutor executor;
+    private static boolean registerByPlugin;
+
+    /**
+     * arouter-auto-register plugin will generate code inside this method
+     * call this method to register all Routers, Interceptors and Providers
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @since 2017-12-06
+     */
+    private static void loadRouterMap() {
+        registerByPlugin = false;
+        //auto generate register code by gradle plugin: arouter-auto-register
+        // looks like below:
+        // registerRouteRoot(new ARouter..Root..modulejava());
+        // registerRouteRoot(new ARouter..Root..modulekotlin());
+    }
+
+    /**
+     * register by class name
+     * Sacrificing a bit of efficiency to solve
+     * the problem that the main dex file size is too large
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @param className class name
+     */
+    private static void register(String className) {
+        if (!TextUtils.isEmpty(className)) {
+            try {
+                Class<?> clazz = Class.forName(className);
+                Object obj = clazz.getConstructor().newInstance();
+                if (obj instanceof IRouteRoot) {
+                    registerRouteRoot((IRouteRoot) obj);
+                } else if (obj instanceof IProviderGroup) {
+                    registerProvider((IProviderGroup) obj);
+                } else if (obj instanceof IInterceptorGroup) {
+                    registerInterceptor((IInterceptorGroup) obj);
+                } else {
+                    logger.info(TAG, "register failed, class name: " + className
+                            + " should implements one of IRouteRoot/IProviderGroup/IInterceptorGroup.");
+                }
+            } catch (Exception e) {
+                logger.error(TAG,"register class error:" + className);
+            }
+        }
+    }
+
+    /**
+     * method for arouter-auto-register plugin to register Routers
+     * @param routeRoot IRouteRoot implementation class in the package: com.alibaba.android.arouter.core.routers
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @since 2017-12-06
+     */
+    private static void registerRouteRoot(IRouteRoot routeRoot) {
+        markRegisteredByPlugin();
+        if (routeRoot != null) {
+            routeRoot.loadInto(Warehouse.groupsIndex);
+        }
+    }
+
+    /**
+     * method for arouter-auto-register plugin to register Interceptors
+     * @param interceptorGroup IInterceptorGroup implementation class in the package: com.alibaba.android.arouter.core.routers
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @since 2017-12-06
+     */
+    private static void registerInterceptor(IInterceptorGroup interceptorGroup) {
+        markRegisteredByPlugin();
+        if (interceptorGroup != null) {
+            interceptorGroup.loadInto(Warehouse.interceptorsIndex);
+        }
+    }
+
+    /**
+     * method for arouter-auto-register plugin to register Providers
+     * @param providerGroup IProviderGroup implementation class in the package: com.alibaba.android.arouter.core.routers
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @since 2017-12-06
+     */
+    private static void registerProvider(IProviderGroup providerGroup) {
+        markRegisteredByPlugin();
+        if (providerGroup != null) {
+            providerGroup.loadInto(Warehouse.providersIndex);
+        }
+    }
+
+    /**
+     * mark already registered by arouter-auto-register plugin
+     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
+     * @since 2017-12-06
+     */
+    private static void markRegisteredByPlugin() {
+        if (!registerByPlugin) {
+            registerByPlugin = true;
+        }
+    }
 
     /**
      * LogisticsCenter init, load all metas in memory. Demand initialization
@@ -62,36 +155,43 @@ public class LogisticsCenter {
 
         try {
             long startInit = System.currentTimeMillis();
-            Set<String> routerMap;
+            //billy.qi modified at 2017-12-06
+            //load by plugin first
+            loadRouterMap();
+            if (registerByPlugin) {
+                logger.info(TAG, "Load router map by arouter-auto-register plugin.");
+            } else {
+                Set<String> routerMap;
 
-            // It will rebuild router map every times when debuggable.
-            if (ARouter.debuggable() || PackageUtils.isNewVersion(context)) {
-                logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
-                // These class was generate by arouter-compiler.
-                routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
-                if (!routerMap.isEmpty()) {
-                    context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
+                // It will rebuild router map every times when debuggable.
+                if (ARouter.debuggable() || PackageUtils.isNewVersion(context)) {
+                    logger.info(TAG, "Run with debug mode or new install, rebuild router map.");
+                    // These class was generated by arouter-compiler.
+                    routerMap = ClassUtils.getFileNameByPackageName(mContext, ROUTE_ROOT_PAKCAGE);
+                    if (!routerMap.isEmpty()) {
+                        context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).edit().putStringSet(AROUTER_SP_KEY_MAP, routerMap).apply();
+                    }
+
+                    PackageUtils.updateVersion(context);    // Save new version name when router map update finishes.
+                } else {
+                    logger.info(TAG, "Load router map from cache.");
+                    routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
                 }
 
-                PackageUtils.updateVersion(context);    // Save new version name when router map update finish.
-            } else {
-                logger.info(TAG, "Load router map from cache.");
-                routerMap = new HashSet<>(context.getSharedPreferences(AROUTER_SP_CACHE_KEY, Context.MODE_PRIVATE).getStringSet(AROUTER_SP_KEY_MAP, new HashSet<String>()));
-            }
+                logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
+                startInit = System.currentTimeMillis();
 
-            logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
-            startInit = System.currentTimeMillis();
-
-            for (String className : routerMap) {
-                if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
-                    // This one of root elements, load root.
-                    ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
-                } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
-                    // Load interceptorMeta
-                    ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
-                } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
-                    // Load providerIndex
-                    ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
+                for (String className : routerMap) {
+                    if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
+                        // This one of root elements, load root.
+                        ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
+                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
+                        // Load interceptorMeta
+                        ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
+                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
+                        // Load providerIndex
+                        ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
+                    }
                 }
             }
 
@@ -128,7 +228,7 @@ public class LogisticsCenter {
     /**
      * Completion the postcard by route metas
      *
-     * @param postcard Incomplete postcard, should completion by this method.
+     * @param postcard Incomplete postcard, should complete by this method.
      */
     public synchronized static void completion(Postcard postcard) {
         if (null == postcard) {
@@ -190,7 +290,7 @@ public class LogisticsCenter {
 
             switch (routeMeta.getType()) {
                 case PROVIDER:  // if the route is provider, should find its instance
-                    // Its provider, so it must be implememt IProvider
+                    // Its provider, so it must implement IProvider
                     Class<? extends IProvider> providerMeta = (Class<? extends IProvider>) routeMeta.getDestination();
                     IProvider instance = Warehouse.providers.get(providerMeta);
                     if (null == instance) { // There's no instance of this provider

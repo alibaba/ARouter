@@ -1,0 +1,21 @@
+apply plugin: 'groovy'
+
+ext {
+    bintrayName = 'arouter-register'
+    artifact = bintrayName
+    libraryName = 'ARouter register gradle plugin'
+    libraryDescription = 'A gradle plugin used for arouter route map register'
+    libraryVersion = arouter_register_version
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+dependencies {
+    compile 'com.android.tools.build:gradle:2.1.3'
+}
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
