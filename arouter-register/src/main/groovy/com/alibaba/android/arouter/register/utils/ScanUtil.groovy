@@ -44,7 +44,7 @@ class ScanUtil {
     }
 
     static boolean shouldProcessPreDexJar(String path) {
-        return path.endsWith("classes.jar") && !path.contains("com.android.support") && !path.contains("/android/m2repository")
+        return !path.contains("com.android.support") && !path.contains("/android/m2repository")
     }
 
     static boolean shouldProcessClass(String entryName) {

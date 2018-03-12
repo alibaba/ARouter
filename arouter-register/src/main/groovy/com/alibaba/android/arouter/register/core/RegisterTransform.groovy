@@ -65,6 +65,7 @@ class RegisterTransform extends Transform {
         Logger.i('Start scan register info in jar file.')
 
         long startTime = System.currentTimeMillis()
+        boolean leftSlash = File.separator == '/'
 
         inputs.each { TransformInput input ->
 
@@ -96,6 +97,9 @@ class RegisterTransform extends Transform {
                     root += File.separator
                 directoryInput.file.eachFileRecurse { File file ->
                     def path = file.absolutePath.replace(root, '')
+                    if (!leftSlash) {
+                        path = path.replaceAll("\\\\", "/")
+                    }
                     if(file.isFile() && ScanUtil.shouldProcessClass(path)){
                         ScanUtil.scanClass(file)
                     }
