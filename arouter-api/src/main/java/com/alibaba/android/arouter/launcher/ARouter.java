@@ -104,6 +104,14 @@ public final class ARouter {
         return _ARouter.canAutoInject();
     }
 
+    public static synchronized void enablePathVariable() {
+        _ARouter.enablePathVariable();
+    }
+
+    public static boolean canEnablePathVariable() {
+        return _ARouter.canEnablePathVariable();
+    }
+
     /**
      * The interface is not stable enough, use 'ARouter.inject();';
      */

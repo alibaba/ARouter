@@ -37,7 +37,17 @@ public class TextUtils {
      * @return map with params
      */
     public static Map<String, String> splitQueryParameters(Uri rawUri) {
-        String query = rawUri.getEncodedQuery();
+        return splitQueryParameters(rawUri, true);
+    }
+
+    /**
+     * Split query parameters
+     * @param rawUri raw uri
+     * @param useEncodedQuery useEncodedQuery
+     * @return map with params
+     */
+    public static Map<String, String> splitQueryParameters(Uri rawUri,boolean useEncodedQuery) {
+        String query = useEncodedQuery ? rawUri.getEncodedQuery() : rawUri.getQuery();
 
         if (query == null) {
             return Collections.emptyMap();
@@ -66,6 +76,24 @@ public class TextUtils {
         } while (start < query.length());
 
         return Collections.unmodifiableMap(paramMap);
+    }
+
+    /**
+     * join query string
+     * @param map map
+     * @return joined string
+     */
+    public static String joinQueryString(Map<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append("&");
+            }
+            sb.append(entry.getKey());
+            sb.append("=");
+            sb.append(entry.getValue());
+        }
+        return sb.toString();
     }
 
     /**
