@@ -1,6 +1,5 @@
 package com.alibaba.android.arouter.facade;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -134,39 +133,39 @@ public final class Postcard extends RouteMeta {
     /**
      * Navigation to the route with path in postcard.
      *
-     * @param context Activity and so on.
+     * @param t Activity and so on.
      */
-    public Object navigation(Context context) {
-        return navigation(context, null);
+    public <T> Object navigation(T t) {
+        return navigation(t, null);
     }
 
     /**
      * Navigation to the route with path in postcard.
      *
-     * @param context Activity and so on.
+     * @param t Activity and so on.
      */
-    public Object navigation(Context context, NavigationCallback callback) {
-        return ARouter.getInstance().navigation(context, this, -1, callback);
+    public <T> Object navigation(T t, NavigationCallback callback) {
+        return ARouter.getInstance().navigation(t, this, -1, callback);
     }
 
     /**
      * Navigation to the route with path in postcard.
      *
-     * @param mContext    Activity and so on.
+     * @param t           Activity and so on.
      * @param requestCode startActivityForResult's param
      */
-    public void navigation(Activity mContext, int requestCode) {
-        navigation(mContext, requestCode, null);
+    public <T> void navigation(T t, int requestCode) {
+        navigation(t, requestCode, null);
     }
 
     /**
      * Navigation to the route with path in postcard.
      *
-     * @param mContext    Activity and so on.
+     * @param t           Activity and so on.
      * @param requestCode startActivityForResult's param
      */
-    public void navigation(Activity mContext, int requestCode, NavigationCallback callback) {
-        ARouter.getInstance().navigation(mContext, this, requestCode, callback);
+    public <T> void navigation(T t, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(t, this, requestCode, callback);
     }
 
     /**

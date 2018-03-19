@@ -1,16 +1,9 @@
 package com.alibaba.android.arouter.launcher;
 
-import android.app.Activity;
 import android.app.Application;
-import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.alibaba.android.arouter.core.InstrumentationHook;
 import com.alibaba.android.arouter.core.LogisticsCenter;
@@ -18,10 +11,7 @@ import com.alibaba.android.arouter.exception.HandlerException;
 import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
-import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
-import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.facade.service.AutowiredService;
-import com.alibaba.android.arouter.facade.service.DegradeService;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.service.PathReplaceService;
 import com.alibaba.android.arouter.facade.template.ILogger;
@@ -49,9 +39,9 @@ final class _ARouter {
     private volatile static _ARouter instance = null;
     private volatile static boolean hasInit = false;
     private volatile static ThreadPoolExecutor executor = DefaultPoolExecutor.getInstance();
-    private static Context mContext;
+    static Context mContext;
 
-    private static InterceptorService interceptorService;
+    static InterceptorService interceptorService;
 
     private _ARouter() {
     }
@@ -261,139 +251,5 @@ final class _ARouter {
             logger.warning(Consts.TAG, ex.getMessage());
             return null;
         }
-    }
-
-    /**
-     * Use router navigation.
-     *
-     * @param context     Activity or null.
-     * @param postcard    Route metas
-     * @param requestCode RequestCode
-     * @param callback    cb
-     */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
-        try {
-            LogisticsCenter.completion(postcard);
-        } catch (NoRouteFoundException ex) {
-            logger.warning(Consts.TAG, ex.getMessage());
-
-            if (debuggable()) { // Show friendly tips for user.
-                Toast.makeText(mContext, "There's no route matched!\n" +
-                        " Path = [" + postcard.getPath() + "]\n" +
-                        " Group = [" + postcard.getGroup() + "]", Toast.LENGTH_LONG).show();
-            }
-
-            if (null != callback) {
-                callback.onLost(postcard);
-            } else {    // No callback for this invoke, then we use the global degrade service.
-                DegradeService degradeService = ARouter.getInstance().navigation(DegradeService.class);
-                if (null != degradeService) {
-                    degradeService.onLost(context, postcard);
-                }
-            }
-
-            return null;
-        }
-
-        if (null != callback) {
-            callback.onFound(postcard);
-        }
-
-        if (!postcard.isGreenChannel()) {   // It must be run in async thread, maybe interceptor cost too mush time made ANR.
-            interceptorService.doInterceptions(postcard, new InterceptorCallback() {
-                /**
-                 * Continue process
-                 *
-                 * @param postcard route meta
-                 */
-                @Override
-                public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode, callback);
-                }
-
-                /**
-                 * Interrupt process, pipeline will be destory when this method called.
-                 *
-                 * @param exception Reson of interrupt.
-                 */
-                @Override
-                public void onInterrupt(Throwable exception) {
-                    if (null != callback) {
-                        callback.onInterrupt(postcard);
-                    }
-
-                    logger.info(Consts.TAG, "Navigation failed, termination by interceptor : " + exception.getMessage());
-                }
-            });
-        } else {
-            return _navigation(context, postcard, requestCode, callback);
-        }
-
-        return null;
-    }
-
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
-        final Context currentContext = null == context ? mContext : context;
-
-        switch (postcard.getType()) {
-            case ACTIVITY:
-                // Build intent
-                final Intent intent = new Intent(currentContext, postcard.getDestination());
-                intent.putExtras(postcard.getExtras());
-
-                // Set flags.
-                int flags = postcard.getFlags();
-                if (-1 != flags) {
-                    intent.setFlags(flags);
-                } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                }
-
-                // Navigation in main looper.
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (requestCode > 0) {  // Need start for result
-                            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
-                        } else {
-                            ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
-                        }
-
-                        if ((-1 != postcard.getEnterAnim() && -1 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
-                            ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
-                        }
-
-                        if (null != callback) { // Navigation over.
-                            callback.onArrival(postcard);
-                        }
-                    }
-                });
-
-                break;
-            case PROVIDER:
-                return postcard.getProvider();
-            case BOARDCAST:
-            case CONTENT_PROVIDER:
-            case FRAGMENT:
-                Class fragmentMeta = postcard.getDestination();
-                try {
-                    Object instance = fragmentMeta.getConstructor().newInstance();
-                    if (instance instanceof Fragment) {
-                        ((Fragment) instance).setArguments(postcard.getExtras());
-                    } else if (instance instanceof android.support.v4.app.Fragment) {
-                        ((android.support.v4.app.Fragment) instance).setArguments(postcard.getExtras());
-                    }
-
-                    return instance;
-                } catch (Exception ex) {
-                    logger.error(Consts.TAG, "Fetch fragment instance error, " + TextUtils.formatStackTrace(ex.getStackTrace()));
-                }
-            case METHOD:
-            case SERVICE:
-            default:
-                return null;
-        }
-
-        return null;
     }
 }

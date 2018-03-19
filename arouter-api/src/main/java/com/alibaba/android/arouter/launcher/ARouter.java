@@ -1,8 +1,8 @@
 package com.alibaba.android.arouter.launcher;
 
 import android.app.Application;
-import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.facade.Postcard;
@@ -172,14 +172,14 @@ public final class ARouter {
     }
 
     /**
-     * Launch the navigation.
-     *
-     * @param mContext    .
-     * @param postcard    .
-     * @param requestCode Set for startActivityForResult
-     * @param callback    cb
+     * @param t           support @null,{@link android.app.Activity},{@link android.app.Fragment},{@link android.support.v4.app.Fragment},{@link com.alibaba.android.arouter.launcher.engine.Caller}
+     * @param postcard
+     * @param requestCode
+     * @param callback
+     * @param <T>
+     * @return
      */
-    public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
-        return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
+    public <T> Object navigation(@Nullable T t, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return EngineFactory.createCaller(t).navigation(postcard, requestCode, callback);
     }
 }
