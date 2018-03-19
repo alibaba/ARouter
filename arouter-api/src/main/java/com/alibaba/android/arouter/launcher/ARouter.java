@@ -1,7 +1,6 @@
 package com.alibaba.android.arouter.launcher;
 
 import android.app.Application;
-import android.content.Context;
 import android.net.Uri;
 
 import com.alibaba.android.arouter.exception.InitException;
@@ -171,15 +170,7 @@ public final class ARouter {
         return _ARouter.getInstance().navigation(service);
     }
 
-    /**
-     * Launch the navigation.
-     *
-     * @param mContext    .
-     * @param postcard    .
-     * @param requestCode Set for startActivityForResult
-     * @param callback    cb
-     */
-    public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
-        return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
+    public <T> Object navigation(T t, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return EngineFactory.createCaller(t).navigation(postcard, requestCode, callback);
     }
 }
