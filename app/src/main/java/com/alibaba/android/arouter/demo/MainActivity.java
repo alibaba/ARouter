@@ -8,12 +8,14 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alibaba.android.arouter.demo.testcaller.CallerFragment;
+import com.alibaba.android.arouter.demo.testcaller.NormalFragment;
+import com.alibaba.android.arouter.demo.testcaller.SupportFragment;
 import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testservice.HelloService;
@@ -37,9 +39,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             FragmentManager supportFragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
-            fragmentTransaction.add(R.id.fl_fragment, new StartFragment());
-            fragmentTransaction.commit();
+            supportFragmentManager.beginTransaction().add(R.id.fl_fragment_support, new SupportFragment()).commit();
+            supportFragmentManager.beginTransaction().add(R.id.fl_caller, new CallerFragment()).commit();
+
+            getFragmentManager().beginTransaction().add(R.id.fl_fragment, new NormalFragment()).commit();
         }
         activity = this;
     }

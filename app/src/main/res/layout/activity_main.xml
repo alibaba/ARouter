@@ -161,7 +161,21 @@
         </LinearLayout>
 
         <FrameLayout
+            android:id="@+id/fl_fragment_support"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </FrameLayout>
+
+        <FrameLayout
             android:id="@+id/fl_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/fl_caller"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 

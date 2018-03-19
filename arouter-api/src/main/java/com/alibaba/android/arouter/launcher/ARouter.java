@@ -2,6 +2,7 @@ package com.alibaba.android.arouter.launcher;
 
 import android.app.Application;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.facade.Postcard;
@@ -170,7 +171,15 @@ public final class ARouter {
         return _ARouter.getInstance().navigation(service);
     }
 
-    public <T> Object navigation(T t, Postcard postcard, int requestCode, NavigationCallback callback) {
+    /**
+     * @param t           support @null,{@link android.app.Activity},{@link android.app.Fragment},{@link android.support.v4.app.Fragment},{@link com.alibaba.android.arouter.launcher.engine.Caller}
+     * @param postcard
+     * @param requestCode
+     * @param callback
+     * @param <T>
+     * @return
+     */
+    public <T> Object navigation(@Nullable T t, Postcard postcard, int requestCode, NavigationCallback callback) {
         return EngineFactory.createCaller(t).navigation(postcard, requestCode, callback);
     }
 }
