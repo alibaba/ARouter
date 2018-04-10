@@ -37,5 +37,5 @@ public interface NavigationCallback {
      *
      * @param postcard meta
      */
-    void onInterrupt(Postcard postcard);
+    void onInterrupt(Postcard postcard,Throwable exception);
 }
