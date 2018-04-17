@@ -227,7 +227,7 @@ public class AutowiredProcessor extends AbstractProcessor {
         if (type == TypeKind.BOOLEAN.ordinal()) {
             statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
         } else if (type == TypeKind.BYTE.ordinal()) {
-            statement += (isActivity ? ("getByteExtra($S, " + originalValue + "") : ("getByte($S)"));
+            statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
         } else if (type == TypeKind.SHORT.ordinal()) {
             statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
         } else if (type == TypeKind.INT.ordinal()) {
