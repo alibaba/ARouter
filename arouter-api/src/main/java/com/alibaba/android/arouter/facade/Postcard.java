@@ -12,7 +12,12 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.util.SparseArray;
 
+import com.alibaba.android.arouter.facade.callback.ArrivalCallback;
+import com.alibaba.android.arouter.facade.callback.FoundCallback;
+import com.alibaba.android.arouter.facade.callback.InterruptCallback;
+import com.alibaba.android.arouter.facade.callback.LostCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.callback.NavigationCallbackWrapper;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.service.SerializationService;
 import com.alibaba.android.arouter.facade.template.IProvider;
@@ -152,6 +157,51 @@ public final class Postcard extends RouteMeta {
     /**
      * Navigation to the route with path in postcard.
      *
+     * @param context Activity and so on.
+     */
+    public Object navigation(Context context, FoundCallback callback) {
+        return navigation(context, callback, null, null, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context Activity and so on.
+     */
+    public Object navigation(Context context, LostCallback callback) {
+        return navigation(context, null, callback, null, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context Activity and so on.
+     */
+    public Object navigation(Context context, ArrivalCallback callback) {
+        return navigation(context, null, null, callback, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context Activity and so on.
+     */
+    public Object navigation(Context context, InterruptCallback callback) {
+        return navigation(context, null, null, null, callback);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param context Activity and so on.
+     */
+    public Object navigation(Context context, FoundCallback found, LostCallback lost, ArrivalCallback arrival, InterruptCallback interrupt) {
+        return ARouter.getInstance().navigation(context, this, -1, new NavigationCallbackWrapper(found, lost, arrival, interrupt));
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
      * @param mContext    Activity and so on.
      * @param requestCode startActivityForResult's param
      */
@@ -167,6 +217,56 @@ public final class Postcard extends RouteMeta {
      */
     public void navigation(Activity mContext, int requestCode, NavigationCallback callback) {
         ARouter.getInstance().navigation(mContext, this, requestCode, callback);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param mContext    Activity and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity mContext, int requestCode, FoundCallback callback) {
+        navigation(mContext, requestCode, callback, null, null, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param mContext    Activity and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity mContext, int requestCode, LostCallback callback) {
+        navigation(mContext, requestCode, null, callback, null, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param mContext    Activity and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity mContext, int requestCode, ArrivalCallback callback) {
+        navigation(mContext, requestCode, null, null, callback, null);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param mContext    Activity and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity mContext, int requestCode, InterruptCallback callback) {
+        navigation(mContext, requestCode, null, null, null, callback);
+    }
+
+    /**
+     * Navigation to the route with path in postcard.
+     *
+     * @param mContext    Activity and so on.
+     * @param requestCode startActivityForResult's param
+     */
+    public void navigation(Activity mContext, int requestCode, FoundCallback found, LostCallback lost, ArrivalCallback arrival, InterruptCallback interrupt) {
+        ARouter.getInstance().navigation(mContext, this, requestCode, new NavigationCallbackWrapper(found, lost, arrival, interrupt));
     }
 
     /**

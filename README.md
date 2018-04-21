@@ -229,18 +229,47 @@ public class TestInterceptor implements IInterceptor {
 
 4. 处理跳转结果
 ``` java
-// 使用两个参数的navigation方法，可以获取单次跳转的结果
+// 使用带Callback参数的navigation方法，可以获取单次跳转的结果
 ARouter.getInstance().build("/test/1").navigation(this, new NavigationCallback() {
     @Override
     public void onFound(Postcard postcard) {
-      ...
+        Log.d("ARouter", "找到了");
     }
 
     @Override
     public void onLost(Postcard postcard) {
-	...
+        Log.d("ARouter", "找不到了");
+    }
+    
+    @Override
+    public void onArrival(Postcard postcard) {
+        Log.d("ARouter", "跳转完了");
+    }
+
+    @Override
+    public void onFound(Postcard postcard) {
+        Log.d("ARouter", "被拦截了");
     }
 });
+// 或
+ARouter.getInstance().build("/test/1").navigation(this, 
+        new FoundCallback() {...},
+        new LostCallback() {...},
+        new ArrivalCallback() {...}
+        new InterruptCallback() {...});
+// 也可获取单一的跳转结果
+ARouter.getInstance().build("/test/1").navigation(this, new FoundCallback() {...});
+ARouter.getInstance().build("/test/1").navigation(this, new LostCallback() {...});
+ARouter.getInstance().build("/test/1").navigation(this, new ArrivalCallback() {...});
+ARouter.getInstance().build("/test/1").navigation(this, new InterruptCallback() {...});
+```
+如果使用Java 8，Lambda表达式更清爽
+``` java
+ARouter.getInstance().build("/test/1").navigation(this,
+        postcard -> Log.d("ARouter", "找到了"),
+        postcard -> Log.d("ARouter", "找不到了"),
+        postcard -> Log.d("ARouter", "跳转完了"),
+        postcard -> Log.d("ARouter", "被拦截了"));
 ```
 
 5. 自定义全局降级策略

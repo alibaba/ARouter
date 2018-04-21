@@ -37,32 +37,14 @@ public class Test1Interceptor implements IInterceptor {
             ab.setCancelable(false);
             ab.setTitle("温馨提醒");
             ab.setMessage("想要跳转到Test4Activity么？(触发了\"/inter/test1\"拦截器，拦截了本次跳转)");
-            ab.setNegativeButton("继续", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    callback.onContinue(postcard);
-                }
-            });
-            ab.setNeutralButton("算了", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    callback.onInterrupt(null);
-                }
-            });
-            ab.setPositiveButton("加点料", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    postcard.withString("extra", "我是在拦截器中附加的参数");
-                    callback.onContinue(postcard);
-                }
+            ab.setNegativeButton("继续", (dialog, which) -> callback.onContinue(postcard));
+            ab.setNeutralButton("算了", (dialog, which) -> callback.onInterrupt(null));
+            ab.setPositiveButton("加点料", (dialog, which) -> {
+                postcard.withString("extra", "我是在拦截器中附加的参数");
+                callback.onContinue(postcard);
             });
 
-            MainLooper.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ab.create().show();
-                }
-            });
+            MainLooper.runOnUiThread(() -> ab.create().show());
         } else {
             callback.onContinue(postcard);
         }
