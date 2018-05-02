@@ -11,10 +11,10 @@ import kotlinx.android.synthetic.main.activity_kotlin_test.*
 class KotlinTestActivity : Activity() {
 
     @Autowired
-    var name: String? = null
+    lateinit var name: String
 
     @Autowired
-    var age: Int? = 0
+    var age: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ARouter.getInstance().inject(this)  // Start auto inject.

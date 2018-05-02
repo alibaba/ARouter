@@ -253,27 +253,37 @@ public class AutowiredProcessor extends AbstractProcessor {
 
     private String buildStatement(String originalValue, String statement, int type, boolean isActivity) {
         if (type == TypeKind.BOOLEAN.ordinal()) {
-            statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
+            statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")")
+                    : ("getBoolean($S, " + originalValue + ")"));
         } else if (type == TypeKind.BYTE.ordinal()) {
-            statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
+            statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")")
+                    : ("getByte($S, " + originalValue + ")"));
         } else if (type == TypeKind.SHORT.ordinal()) {
-            statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
+            statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")")
+                    : ("getShort($S, " + originalValue + ")"));
         } else if (type == TypeKind.INT.ordinal()) {
-            statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
+            statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")")
+                    : ("getInt($S, " + originalValue + ")"));
         } else if (type == TypeKind.LONG.ordinal()) {
-            statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
+            statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")")
+                    : ("getLong($S, " + originalValue + ")"));
         } else if (type == TypeKind.CHAR.ordinal()) {
-            statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
+            statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")")
+                    : ("getChar($S, " + originalValue + ")"));
         } else if (type == TypeKind.FLOAT.ordinal()) {
-            statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
+            statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")")
+                    : ("getFloat($S, " + originalValue + ")"));
         } else if (type == TypeKind.DOUBLE.ordinal()) {
-            statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
+            statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")")
+                    : ("getDouble($S, " + originalValue + ")"));
         } else if (type == TypeKind.STRING.ordinal()) {
             statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
-            statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new $T<$T>(){}.getType())";
+            statement = "serializationService.parseObject(substitute." +
+                    (isActivity ? "getIntent()." : "getArguments().") +
+                    (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new $T<$T>(){}.getType())";
         }
 
         return statement;
