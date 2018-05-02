@@ -14,7 +14,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    kapt 'com.alibaba:arouter-compiler:1.0.3'
+    kapt project(':arouter-compiler')
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)

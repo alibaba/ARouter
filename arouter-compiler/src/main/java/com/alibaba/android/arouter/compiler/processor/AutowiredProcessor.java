@@ -1,5 +1,6 @@
 package com.alibaba.android.arouter.compiler.processor;
 
+import com.alibaba.android.arouter.compiler.utils.ARouterAccessExecption;
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
 import com.alibaba.android.arouter.compiler.utils.TypeUtils;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +37,7 @@ import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -72,6 +75,9 @@ public class AutowiredProcessor extends AbstractProcessor {
     private Elements elements;
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
     private int tempVariableCount = 0;
+    // map method name to method
+    private Map<String, ExecutableElement> publicSetterMethods = new LinkedHashMap<>();
+    private Map<String, ExecutableElement> publicGetterMethods = new LinkedHashMap<>();
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -118,6 +124,9 @@ public class AutowiredProcessor extends AbstractProcessor {
 
         if (MapUtils.isNotEmpty(parentAndChild)) {
             for (Map.Entry<TypeElement, List<Element>> entry : parentAndChild.entrySet()) {
+
+                tempVariableCount = 0;
+
                 // Build method : 'inject'
                 MethodSpec.Builder injectMethodBuilder = MethodSpec.methodBuilder(METHOD_INJECT)
                         .addAnnotation(Override.class)
@@ -131,9 +140,9 @@ public class AutowiredProcessor extends AbstractProcessor {
                 String packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
                 String fileName = parent.getSimpleName() + NAME_OF_AUTOWIRED;
 
-                tempVariableCount = 0;
-
                 logger.info(">>> Start process " + childs.size() + " field in " + parent.getSimpleName() + " ... <<<");
+
+                findPublicSetterGetterMethods(parent);
 
                 TypeSpec.Builder helper = TypeSpec.classBuilder(fileName)
                         .addJavadoc(WARNING_TIPS)
@@ -155,14 +164,14 @@ public class AutowiredProcessor extends AbstractProcessor {
 
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = $T.getInstance().navigation($T.class)",
+                                    setValue("substitute", element, "$T.getInstance().navigation($T.class)"),
                                     ARouterClass,
                                     ClassName.get(element.asType())
                             );
                         } else {    // use byName
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = ($T)$T.getInstance().build($S).navigation();",
+                                    setValue("substitute", element, "($T)$T.getInstance().build($S).navigation()"),
                                     ClassName.get(element.asType()),
                                     ARouterClass,
                                     fieldConfig.name()
@@ -177,8 +186,8 @@ public class AutowiredProcessor extends AbstractProcessor {
                             injectMethodBuilder.endControlFlow();
                         }
                     } else {    // It's normal intent value
-                        String originalValue = "substitute." + fieldName;
-                        String statement = "substitute." + fieldName + " = substitute.";
+                        String originalValue = getValue("substitute", element);
+                        String statement = "substitute.";
                         boolean isActivity = false;
                         if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
                             isActivity = true;
@@ -201,7 +210,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                                     ClassName.get(element.asType())
                             );
                             injectMethodBuilder.beginControlFlow("if(null != " + tempVariable + ")")
-                                    .addStatement("substitute." + fieldName + " = " + tempVariable)
+                                    .addStatement(setValue("substitute", element, tempVariable))
                                     .endControlFlow();
 
                             injectMethodBuilder.nextControlFlow("else");
@@ -209,20 +218,20 @@ public class AutowiredProcessor extends AbstractProcessor {
                                     "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         } else if (element.asType().getKind().isPrimitive()) {
-                            injectMethodBuilder.addStatement("substitute." + fieldName + " = " + statement,
+                            injectMethodBuilder.addStatement(
+                                    setValue("substitute", element, statement),
                                     StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
                         } else {
                             injectMethodBuilder.addStatement("final $T " + tempVariable + " = " + statement,
                                     element.asType(),
                                     StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
                             injectMethodBuilder.beginControlFlow("if(null != " + tempVariable + ")")
-                                    .addStatement("substitute." + fieldName + " = " + tempVariable)
+                                    .addStatement(setValue("substitute", element, tempVariable))
                                     .endControlFlow();
                         }
-
                         // Validator
                         if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
-                            injectMethodBuilder.beginControlFlow("if (null == substitute." + fieldName + ")");
+                            injectMethodBuilder.beginControlFlow("if (null == " + originalValue + ")");
                             injectMethodBuilder.addStatement(
                                     "$T.e(\"" + Consts.TAG + "\", \"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
@@ -280,11 +289,6 @@ public class AutowiredProcessor extends AbstractProcessor {
             for (Element element : elements) {
                 TypeElement enclosingElement = (TypeElement) element.getEnclosingElement();
 
-                if (element.getModifiers().contains(Modifier.PRIVATE)) {
-                    throw new IllegalAccessException("The inject fields CAN NOT BE 'private'!!! please check field ["
-                            + element.getSimpleName() + "] in class [" + enclosingElement.getQualifiedName() + "]");
-                }
-
                 if (parentAndChild.containsKey(enclosingElement)) { // Has categries
                     parentAndChild.get(enclosingElement).add(element);
                 } else {
@@ -296,6 +300,67 @@ public class AutowiredProcessor extends AbstractProcessor {
 
             logger.info("categories finished.");
         }
+    }
+
+    private void findPublicSetterGetterMethods(TypeElement parentClz) {
+        publicSetterMethods.clear();
+        publicGetterMethods.clear();
+        for (Element ele : parentClz.getEnclosedElements()) {
+            if (ele instanceof ExecutableElement
+                    && ele.getModifiers().contains(Modifier.PUBLIC)) {
+                if (ele.toString().startsWith("set")) {
+                    publicSetterMethods.put(ele.getSimpleName().toString(), (ExecutableElement) ele);
+                } else if (ele.toString().startsWith("get")) {
+                    publicGetterMethods.put(ele.getSimpleName().toString(), (ExecutableElement) ele);
+                }
+            }
+        }
+    }
+
+    /**
+     * 把value赋值给element代表的成员变量，优先调用setter方法
+     */
+    private String setValue(String scope, Element element, String value) throws ARouterAccessExecption {
+        final String variableName = element.getSimpleName().toString();
+        final String methodName = "set" + toVarStr(variableName);
+        final ExecutableElement method = publicSetterMethods.get(methodName);
+        if (method != null && checkMethod(method, element.asType())) {
+            return scope + "." + methodName + "(" + value + ")";
+        } else {
+            if (element.getModifiers().contains(Modifier.PRIVATE)) {
+                throw new ARouterAccessExecption(element, "private or internal", methodName);
+            }
+            return scope + "." + variableName + " = " + value;
+        }
+    }
+
+    private String getValue(String scope, Element element) throws ARouterAccessExecption {
+        final String variableName = element.getSimpleName().toString();
+        final String methodName = "get" + toVarStr(variableName);
+        final ExecutableElement method = publicGetterMethods.get(methodName);
+        if (method != null && method.getParameters().isEmpty()) {
+            return scope + '.' + methodName + "()";
+        } else {
+            if (element.getModifiers().contains(Modifier.PRIVATE)) {
+                throw new ARouterAccessExecption(element, "private or internal", methodName);
+            }
+            return scope + "." + variableName;
+        }
+    }
+
+    private boolean checkMethod(ExecutableElement method, TypeMirror type) {
+        List<? extends Element> params = method.getParameters();
+        // it should just contain one parameter
+        return params.size() == 1 && params.get(0).asType().toString().equals(type.toString());
+    }
+
+    /**
+     * 首字母大写字符串
+     */
+    private String toVarStr(String str) {
+        if (str == null) return "";
+        if (str.length() <= 1) return str.toUpperCase();
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
 
     private String generateVariableName() {

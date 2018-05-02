@@ -60,13 +60,20 @@ public class Test1Activity extends AppCompatActivity {
     @Autowired
     Map<String, List<TestObj>> map;
 
-    private long high;
-
     @Autowired
     String url;
 
+    private long high;
+
     @Autowired
-    HelloService helloService;
+    private HelloService helloService;
+
+    public void setHelloService(HelloService service) {
+        if (service == null) {
+            throw new NullPointerException("you must implement the 'HelloService'");
+        }
+        helloService = service;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
