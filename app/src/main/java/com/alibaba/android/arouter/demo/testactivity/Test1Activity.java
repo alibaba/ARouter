@@ -40,6 +40,12 @@ public class Test1Activity extends AppCompatActivity {
     float fl = 12.00f;
 
     @Autowired
+    byte byt = 0;
+
+    @Autowired(required = true)
+    Byte bytObj = 0;
+
+    @Autowired
     double dou = 12.01d;
 
     @Autowired

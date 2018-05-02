@@ -62,14 +62,15 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_AUTOWIRED})
 public class AutowiredProcessor extends AbstractProcessor {
+    private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
+    private static final ClassName AndroidLog = ClassName.get("android.util", "Log");
+    private static final ClassName TypeWrapperClass = ClassName.get("com.alibaba.android.arouter.facade.model", "TypeWrapper");
     private Filer mFiler;       // File util, write class file into disk.
     private Logger logger;
     private Types types;
     private TypeUtils typeUtils;
     private Elements elements;
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
-    private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
-    private static final ClassName AndroidLog = ClassName.get("android.util", "Log");
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -191,6 +192,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                             injectMethodBuilder.addStatement(
                                     "substitute." + fieldName + " = " + statement,
                                     (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
+                                    TypeWrapperClass,
                                     ClassName.get(element.asType())
                             );
                             injectMethodBuilder.nextControlFlow("else");
@@ -227,14 +229,14 @@ public class AutowiredProcessor extends AbstractProcessor {
         if (type == TypeKind.BOOLEAN.ordinal()) {
             statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
         } else if (type == TypeKind.BYTE.ordinal()) {
-            statement += (isActivity ? ("getByteExtra($S, " + originalValue + "") : ("getByte($S)"));
+            statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
         } else if (type == TypeKind.SHORT.ordinal()) {
             statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
         } else if (type == TypeKind.INT.ordinal()) {
             statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
         } else if (type == TypeKind.LONG.ordinal()) {
             statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
-        }else if(type == TypeKind.CHAR.ordinal()){
+        } else if (type == TypeKind.CHAR.ordinal()) {
             statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
         } else if (type == TypeKind.FLOAT.ordinal()) {
             statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
@@ -245,7 +247,7 @@ public class AutowiredProcessor extends AbstractProcessor {
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
-            statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new com.alibaba.android.arouter.facade.model.TypeWrapper<$T>(){}.getType())";
+            statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new $T<$T>(){}.getType())";
         }
 
         return statement;
