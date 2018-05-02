@@ -1,6 +1,6 @@
 package com.alibaba.android.arouter.compiler.processor;
 
-import com.alibaba.android.arouter.compiler.utils.ARouterAccessExecption;
+import com.alibaba.android.arouter.compiler.utils.ARouterAccessException;
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
 import com.alibaba.android.arouter.compiler.utils.TypeUtils;
@@ -330,7 +330,7 @@ public class AutowiredProcessor extends AbstractProcessor {
     /**
      * 把value赋值给element代表的成员变量，优先调用setter方法
      */
-    private String setValue(String scope, Element element, String value) throws ARouterAccessExecption {
+    private String setValue(String scope, Element element, String value) throws ARouterAccessException {
         final String variableName = element.getSimpleName().toString();
         final String methodName = "set" + toVarStr(variableName);
         final ExecutableElement method = publicSetterMethods.get(methodName);
@@ -338,13 +338,13 @@ public class AutowiredProcessor extends AbstractProcessor {
             return scope + "." + methodName + "(" + value + ")";
         } else {
             if (element.getModifiers().contains(Modifier.PRIVATE)) {
-                throw new ARouterAccessExecption(element, "private or internal", methodName);
+                throw new ARouterAccessException(element, "private or internal", methodName);
             }
             return scope + "." + variableName + " = " + value;
         }
     }
 
-    private String getValue(String scope, Element element) throws ARouterAccessExecption {
+    private String getValue(String scope, Element element) throws ARouterAccessException {
         final String variableName = element.getSimpleName().toString();
         final String methodName = "get" + toVarStr(variableName);
         final ExecutableElement method = publicGetterMethods.get(methodName);
@@ -352,7 +352,7 @@ public class AutowiredProcessor extends AbstractProcessor {
             return scope + '.' + methodName + "()";
         } else {
             if (element.getModifiers().contains(Modifier.PRIVATE)) {
-                throw new ARouterAccessExecption(element, "private or internal", methodName);
+                throw new ARouterAccessException(element, "private or internal", methodName);
             }
             return scope + "." + variableName;
         }

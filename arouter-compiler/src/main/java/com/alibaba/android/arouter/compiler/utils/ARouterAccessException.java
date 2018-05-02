@@ -9,9 +9,9 @@ import javax.lang.model.element.TypeElement;
  * YY: 909017428
  */
 
-public class ARouterAccessExecption extends IllegalAccessException {
+public class ARouterAccessException extends IllegalAccessException {
 
-    public ARouterAccessExecption(Element field, String modifier, String method) {
+    public ARouterAccessException(Element field, String modifier, String method) {
         super("The autowired fields CAN NOT BE '" + modifier + "' unless you provide a public " + method + " method!!! please check field ["
                 + field.getSimpleName() + "] in class [" + ((TypeElement) field.getEnclosingElement()).getQualifiedName() + "]");
     }
