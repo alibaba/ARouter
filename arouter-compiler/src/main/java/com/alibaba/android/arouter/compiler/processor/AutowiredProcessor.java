@@ -71,6 +71,7 @@ public class AutowiredProcessor extends AbstractProcessor {
     private TypeUtils typeUtils;
     private Elements elements;
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
+    private int tempVariableCount = 0;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -130,6 +131,8 @@ public class AutowiredProcessor extends AbstractProcessor {
                 String packageName = qualifiedName.substring(0, qualifiedName.lastIndexOf("."));
                 String fileName = parent.getSimpleName() + NAME_OF_AUTOWIRED;
 
+                tempVariableCount = 0;
+
                 logger.info(">>> Start process " + childs.size() + " field in " + parent.getSimpleName() + " ... <<<");
 
                 TypeSpec.Builder helper = TypeSpec.classBuilder(fileName)
@@ -186,21 +189,35 @@ public class AutowiredProcessor extends AbstractProcessor {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
+                        final String tempVariable = generateVariableName();
                         statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity);
                         if (statement.startsWith("serializationService.")) {   // Not mortals
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = " + statement,
-                                    (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
+                                    "final $T " + tempVariable + " = " + statement,
+                                    element.asType(),
+                                    StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name(),
                                     TypeWrapperClass,
                                     ClassName.get(element.asType())
                             );
+                            injectMethodBuilder.beginControlFlow("if(null != " + tempVariable + ")")
+                                    .addStatement("substitute." + fieldName + " = " + tempVariable)
+                                    .endControlFlow();
+
                             injectMethodBuilder.nextControlFlow("else");
                             injectMethodBuilder.addStatement(
                                     "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
+                        } else if (element.asType().getKind().isPrimitive()) {
+                            injectMethodBuilder.addStatement("substitute." + fieldName + " = " + statement,
+                                    StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
                         } else {
-                            injectMethodBuilder.addStatement(statement, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                            injectMethodBuilder.addStatement("final $T " + tempVariable + " = " + statement,
+                                    element.asType(),
+                                    StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                            injectMethodBuilder.beginControlFlow("if(null != " + tempVariable + ")")
+                                    .addStatement("substitute." + fieldName + " = " + tempVariable)
+                                    .endControlFlow();
                         }
 
                         // Validator
@@ -279,5 +296,9 @@ public class AutowiredProcessor extends AbstractProcessor {
 
             logger.info("categories finished.");
         }
+    }
+
+    private String generateVariableName() {
+        return "tempValue_" + tempVariableCount++;
     }
 }
