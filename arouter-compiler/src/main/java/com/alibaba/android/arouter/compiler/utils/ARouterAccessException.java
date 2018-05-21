@@ -3,12 +3,6 @@ package com.alibaba.android.arouter.compiler.utils;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
-/**
- * Created by 张宇 on 2018/5/2.
- * E-mail: zhangyu4@yy.com
- * YY: 909017428
- */
-
 public class ARouterAccessException extends IllegalAccessException {
 
     public ARouterAccessException(Element field, String modifier, String method) {

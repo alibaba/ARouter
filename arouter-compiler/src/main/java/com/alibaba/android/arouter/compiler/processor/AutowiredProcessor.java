@@ -320,7 +320,8 @@ public class AutowiredProcessor extends AbstractProcessor {
                     && ele.getModifiers().contains(Modifier.PUBLIC)) {
                 if (ele.toString().startsWith("set")) {
                     publicSetterMethods.put(ele.getSimpleName().toString(), (ExecutableElement) ele);
-                } else if (ele.toString().startsWith("get")) {
+                } else if (ele.toString().startsWith("get")
+                        || ele.toString().startsWith("is")) {
                     publicGetterMethods.put(ele.getSimpleName().toString(), (ExecutableElement) ele);
                 }
             }
@@ -332,7 +333,9 @@ public class AutowiredProcessor extends AbstractProcessor {
      */
     private String setValue(String scope, Element element, String value) throws ARouterAccessException {
         final String variableName = element.getSimpleName().toString();
-        final String methodName = "set" + toVarStr(variableName);
+        final String methodName = isVar(variableName)
+                ? "set" + toVarStr(variableName.substring(2))
+                : "set" + toVarStr(variableName);
         final ExecutableElement method = publicSetterMethods.get(methodName);
         if (method != null && checkMethod(method, element.asType())) {
             return scope + "." + methodName + "(" + value + ")";
@@ -346,7 +349,9 @@ public class AutowiredProcessor extends AbstractProcessor {
 
     private String getValue(String scope, Element element) throws ARouterAccessException {
         final String variableName = element.getSimpleName().toString();
-        final String methodName = "get" + toVarStr(variableName);
+        final String methodName = isVar(variableName)
+                ? variableName
+                : "get" + toVarStr(variableName);
         final ExecutableElement method = publicGetterMethods.get(methodName);
         if (method != null && method.getParameters().isEmpty()) {
             return scope + '.' + methodName + "()";
@@ -356,6 +361,13 @@ public class AutowiredProcessor extends AbstractProcessor {
             }
             return scope + "." + variableName;
         }
+    }
+
+    /**
+     * 变量名是否符合is..的规则
+     */
+    private boolean isVar(String variableName) {
+        return variableName.startsWith("is") && variableName.length() > 2;
     }
 
     private boolean checkMethod(ExecutableElement method, TypeMirror type) {

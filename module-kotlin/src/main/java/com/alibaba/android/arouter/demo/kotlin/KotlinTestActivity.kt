@@ -16,6 +16,12 @@ class KotlinTestActivity : Activity() {
     @Autowired
     var age: Int = 0
 
+    @Autowired
+    var isSth = false
+
+    @Autowired(name = "systemIs")
+    var `is` = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
         ARouter.getInstance().inject(this)  // Start auto inject.
 
