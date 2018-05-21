@@ -19,7 +19,7 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 public class BlankFragment extends Fragment {
 
     @Autowired
-    String name;
+    String name = "";
 
     @Autowired(required = true)
     TestObj obj;

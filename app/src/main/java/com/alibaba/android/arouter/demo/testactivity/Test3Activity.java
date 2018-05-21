@@ -21,7 +21,7 @@ public class Test3Activity extends AppCompatActivity {
     int age;
 
     @Autowired(name = "boy")
-    boolean girl;
+    private boolean girl;
 
     // 这个字段没有注解，是不会自动注入的
     private long high;
@@ -33,7 +33,19 @@ public class Test3Activity extends AppCompatActivity {
 
         String params = String.format("name=%s, age=%s, girl=%s, high=%s", name, age, girl, high);
 
-        ((TextView)findViewById(R.id.test)).setText("I am " + Test3Activity.class.getName());
-        ((TextView)findViewById(R.id.test2)).setText(params);
+        ((TextView) findViewById(R.id.test)).setText("I am " + Test3Activity.class.getName());
+        ((TextView) findViewById(R.id.test2)).setText(params);
+    }
+
+    public void setGirl(boolean boy) {
+        girl = boy;
+    }
+
+    public boolean getGirl() {
+        return girl;
+    }
+
+    public int getAge() {
+        return age;
     }
 }
