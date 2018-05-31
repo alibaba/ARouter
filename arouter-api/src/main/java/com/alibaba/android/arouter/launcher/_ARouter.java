@@ -348,6 +348,12 @@ final class _ARouter {
                 } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
+                
+                // Set Actions
+                String action=postcard.getAction();
+                if (!TextUtils.isEmpty(action)){
+                    intent.setAction(action);
+                }
 
                 // Navigation in main looper.
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
