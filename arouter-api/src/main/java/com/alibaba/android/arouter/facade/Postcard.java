@@ -605,4 +605,13 @@ public final class Postcard extends RouteMeta {
                 "}\n" +
                 super.toString();
     }
+    //增加设置intent的action
+    private String action;
+    public String getAction(){
+        return action;
+    }
+    public Postcard withAction(String action){
+        this.action=action;
+        return this;
+    }
 }
