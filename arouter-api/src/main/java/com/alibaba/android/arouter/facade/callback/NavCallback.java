@@ -9,6 +9,7 @@ import com.alibaba.android.arouter.facade.Postcard;
  * @version 1.0
  * @since 2017/4/10 下午12:59
  */
+@Deprecated
 public abstract class NavCallback implements NavigationCallback {
     @Override
     public void onFound(Postcard postcard) {

@@ -16,8 +16,7 @@ import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testservice.HelloService;
 import com.alibaba.android.arouter.demo.testservice.SingleService;
-import com.alibaba.android.arouter.facade.Postcard;
-import com.alibaba.android.arouter.facade.callback.NavCallback;
+import com.alibaba.android.arouter.facade.callback.InterruptCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
 
 import java.util.ArrayList;
@@ -110,17 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.interceptor:
                 ARouter.getInstance()
                         .build("/test/activity4")
-                        .navigation(this, new NavCallback() {
-                            @Override
-                            public void onArrival(Postcard postcard) {
-
-                            }
-
-                            @Override
-                            public void onInterrupt(Postcard postcard) {
-                                Log.d("ARouter", "被拦截了");
-                            }
-                        });
+                        .navigation(this, (InterruptCallback) postcard -> Log.d("ARouter", "被拦截了"));
                 break;
             case R.id.navByUrl:
                 ARouter.getInstance()
@@ -166,27 +155,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance().destroy();
                 break;
             case R.id.failNav:
-                ARouter.getInstance().build("/xxx/xxx").navigation(this, new NavCallback() {
-                    @Override
-                    public void onFound(Postcard postcard) {
-                        Log.d("ARouter", "找到了");
-                    }
-
-                    @Override
-                    public void onLost(Postcard postcard) {
-                        Log.d("ARouter", "找不到了");
-                    }
-
-                    @Override
-                    public void onArrival(Postcard postcard) {
-                        Log.d("ARouter", "跳转完了");
-                    }
-
-                    @Override
-                    public void onInterrupt(Postcard postcard) {
-                        Log.d("ARouter", "被拦截了");
-                    }
-                });
+                ARouter.getInstance().build("/xxx/xxx").navigation(this,
+                        postcard -> Log.d("ARouter", "找到了"),
+                        postcard -> Log.d("ARouter", "找不到了"),
+                        postcard -> Log.d("ARouter", "跳转完了"),
+                        postcard -> Log.d("ARouter", "被拦截了"));
                 break;
             case R.id.callSingle:
                 ARouter.getInstance().navigation(SingleService.class).sayHello("Mike");

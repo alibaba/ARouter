@@ -1,41 +1,12 @@
 package com.alibaba.android.arouter.facade.callback;
 
-import com.alibaba.android.arouter.facade.Postcard;
-
 /**
  * Callback after navigation.
  *
  * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
- * @version 1.0
+ * @version 1.3.2
  * @since 2016/9/22 14:15
  */
-public interface NavigationCallback {
+public interface NavigationCallback extends FoundCallback, LostCallback, ArrivalCallback, InterruptCallback {
 
-    /**
-     * Callback when find the destination.
-     *
-     * @param postcard meta
-     */
-    void onFound(Postcard postcard);
-
-    /**
-     * Callback after lose your way.
-     *
-     * @param postcard meta
-     */
-    void onLost(Postcard postcard);
-
-    /**
-     * Callback after navigation.
-     *
-     * @param postcard meta
-     */
-    void onArrival(Postcard postcard);
-
-    /**
-     * Callback on interrupt.
-     *
-     * @param postcard meta
-     */
-    void onInterrupt(Postcard postcard);
 }
