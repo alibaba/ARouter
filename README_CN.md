@@ -1,5 +1,5 @@
 ```
-    Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
+    一个用于帮助 Android App 进行组件化改造的框架 —— 支持模块间的路由、通信、解耦
 ```
 
 [English](https://raw.githubusercontent.com/alibaba/ARouter/master/README.md)
