@@ -1,5 +1,3 @@
-## English version is being re-translated, coming soon...
-
 ```
     Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
 ```
