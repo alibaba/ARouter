@@ -1,37 +1,34 @@
-## English version is being re-translated, coming soon...
-
 ```
-    Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
+    A framework for assisting in the renovation of Android app componentization
 ```
 
 ##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 ---
 
-#### 最新版本
+#### Lastest version
 
-模块|arouter-api|arouter-compiler|arouter-annotation|arouter-register
+module|arouter-api|arouter-compiler|arouter-annotation|arouter-register
 ---|---|---|---|---
-最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
+lastest version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
 
-#### Demo展示
+#### Demo
 
-##### [Demo apk下载](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
+##### [Demo apk download](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
-#### 一、功能介绍
-1. **支持直接解析标准URL进行跳转，并自动注入参数到目标页面中**
-2. **支持多模块工程使用**
-3. **支持添加多个拦截器，自定义拦截顺序**
-4. **支持依赖注入，可单独作为依赖注入框架使用**
-5. **支持InstantRun**
-6. **支持MultiDex**(Google方案)
-7. 映射关系按组分类、多级管理，按需初始化
-8. 支持用户指定全局降级与局部降级策略
-9. 页面、拦截器、服务等组件均自动注册到框架
-10. 支持多种方式配置转场动画
-11. 支持获取Fragment
-12. 完全支持Kotlin以及混编(配置见文末 其他#5)
-13. **支持第三方 App 加固**(使用 arouter-register 实现自动注册)
+#### I. Feature
+1. **Supports direct parsing of standard URLs for jumps and automatic injection of parameters into target pages**
+2. **Support for multi-module**
+3. **Support for interceptor**
+4. **Support for dependency injection**
+5. **InstantRun support**
+6. **MultiDex support**
+7. Mappings are grouped by group, multi-level management, on-demand initialization
+8. Supports users to specify global demotion and local demotion strategies
+9. Activity, interceptor and service can be automatically registered to the framework
+10. Support multiple ways to configure transition animation
+11. Support for fragement
+12. Full kotlin support (Look at Other#5)
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -526,15 +523,15 @@ dependencies {
 5. Kotlin类中的字段无法注入如何解决？
     
     首先，Kotlin中的字段是可以自动注入的，但是注入代码为了减少反射，使用的字段赋值的方式来注入的，Kotlin默认会生成set/get方法，并把属性设置为private
-    所以只要保证Kotlin中字段可见性不是private即可，简单解决可以在字段上添加 @JvmField
+    所以只要保证Kotlin中字段可见性不是private即可，简单解决可以在字段上添加 @JvmField 
 
 6. 通过URL跳转之后，在intent中拿不到参数如何解决？
-
+    
     需要注意的是，如果不使用自动注入，那么可以不写 `ARouter.getInstance().inject(this)`，但是需要取值的字段仍然需要标上 `@Autowired` 注解，因为
     只有标上注解之后，ARouter才能知道以哪一种数据类型提取URL中的参数并放入Intent中，这样您才能在intent中获取到对应的参数
-
+    
 7. 新增页面之后，无法跳转？
-
+    
     ARouter加载Dex中的映射文件会有一定耗时，所以ARouter会缓存映射文件，直到新版本升级(版本号或者versionCode变化)，而如果是开发版本(ARouter.openDebug())，
     ARouter 每次启动都会重新加载映射文件，开发阶段一定要打开 Debug 功能
 
@@ -543,11 +540,11 @@ dependencies {
 1. 沟通和交流
 
     1. 交流群1 (已满，请加2群)
-
+    
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
 
     2. 交流群2
-
+        
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
 
 #### 九、代码贡献 (排名不分先后，时间顺序)
