@@ -38,6 +38,7 @@ public class Consts {
     public static final String FLOAT = LANG + ".Float";
     public static final String DOUBEL = LANG + ".Double";
     public static final String BOOLEAN = LANG + ".Boolean";
+    public static final String CHAR = LANG + ".Character";
     public static final String STRING = LANG + ".String";
 
     // Custom interface

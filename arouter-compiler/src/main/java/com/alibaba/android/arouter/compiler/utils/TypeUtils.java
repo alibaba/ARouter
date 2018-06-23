@@ -16,6 +16,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.LONG;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PARCELABLE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SHORT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.STRING;
+import static com.alibaba.android.arouter.compiler.utils.Consts.CHAR;
 
 /**
  * Utils for type exchange
@@ -66,6 +67,8 @@ public class TypeUtils {
                 return TypeKind.DOUBLE.ordinal();
             case BOOLEAN:
                 return TypeKind.BOOLEAN.ordinal();
+            case CHAR:
+                return TypeKind.CHAR.ordinal();
             case STRING:
                 return TypeKind.STRING.ordinal();
             default:    // Other side, maybe the PARCELABLE or OBJECT.
