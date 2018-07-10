@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.alibaba.android.arouter.demo.R;
 import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
+import com.alibaba.android.arouter.demo.testinject.TestSerializable;
 import com.alibaba.android.arouter.demo.testservice.HelloService;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
@@ -43,6 +44,9 @@ public class Test1Activity extends AppCompatActivity {
     double dou = 12.01d;
 
     @Autowired
+    TestSerializable ser;
+
+    @Autowired
     TestParcelable pac;
 
     @Autowired
@@ -77,13 +81,14 @@ public class Test1Activity extends AppCompatActivity {
         // url = getIntent().getStringExtra("url");
 
         String params = String.format(
-                "name=%s,\n age=%s, \n height=%s,\n girl=%s,\n high=%s,\n url=%s,\n pac=%s,\n obj=%s \n ch=%s \n fl = %s, \n dou = %s, \n objList=%s, \n map=%s",
+                "name=%s,\n age=%s, \n height=%s,\n girl=%s,\n high=%s,\n url=%s,\n ser=%s,\n pac=%s,\n obj=%s \n ch=%s \n fl = %s, \n dou = %s, \n objList=%s, \n map=%s",
                 name,
                 age,
                 height,
                 girl,
                 high,
                 url,
+                ser,
                 pac,
                 obj,
                 ch,

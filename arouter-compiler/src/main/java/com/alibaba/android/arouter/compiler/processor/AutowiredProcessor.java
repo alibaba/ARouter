@@ -7,6 +7,7 @@ import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -174,7 +175,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         }
                     } else {    // It's normal intent value
                         String originalValue = "substitute." + fieldName;
-                        String statement = "substitute." + fieldName + " = substitute.";
+                        String statement = "substitute." + fieldName + " = " + buildCastCode(element) + "substitute.";
                         boolean isActivity = false;
                         if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
                             isActivity = true;
@@ -223,6 +224,13 @@ public class AutowiredProcessor extends AbstractProcessor {
         }
     }
 
+    private String buildCastCode(Element element) {
+        if (typeUtils.typeExchange(element) == TypeKind.SERIALIZABLE.ordinal()) {
+            return CodeBlock.builder().add("($T) ", ClassName.get(element.asType())).build().toString();
+        }
+        return "";
+    }
+
     private String buildStatement(String originalValue, String statement, int type, boolean isActivity) {
         if (type == TypeKind.BOOLEAN.ordinal()) {
             statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
@@ -242,6 +250,8 @@ public class AutowiredProcessor extends AbstractProcessor {
             statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
         } else if (type == TypeKind.STRING.ordinal()) {
             statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+        } else if (type == TypeKind.SERIALIZABLE.ordinal()) {
+            statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
         } else if (type == TypeKind.OBJECT.ordinal()) {
