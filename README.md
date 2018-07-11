@@ -2,7 +2,7 @@
     A framework for assisting in the renovation of Android app componentization
 ```
 
-[中文文档](https://raw.githubusercontent.com/alibaba/ARouter/master/README_CN.md)
+[中文文档](https://github.com/alibaba/ARouter/blob/master/README_CN.md)
 
 ##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
