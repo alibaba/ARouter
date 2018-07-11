@@ -106,6 +106,26 @@ public class ClassUtils {
         return classNames;
     }
 
+    public static List<String> fixAppShield(Context context, List<String> paths) throws IOException {
+        String appshield = context.getApplicationInfo().dataDir + "/.cache/classes";
+
+        int idx = 0;
+        while (true) {
+
+            String id = appshield + (idx == 0 ? "":String.valueOf(idx+1)) + ".jar";
+
+            if (new File(id).exists()) {
+                paths.add(id);
+            } else {
+                break;
+            }
+
+            idx++;
+        }
+
+        return paths;
+}
+
     /**
      * get all the dex path
      *
@@ -147,7 +167,7 @@ public class ClassUtils {
         if (ARouter.debuggable()) { // Search instant run support only debuggable
             sourcePaths.addAll(tryLoadInstantRunDexFile(applicationInfo));
         }
-        return sourcePaths;
+        return fixAppShield(context,sourcePaths);
     }
 
     /**
