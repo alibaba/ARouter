@@ -158,7 +158,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         } else {    // use byName
                             // Getter
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = ($T)$T.getInstance().build($S).navigation();",
+                                    "substitute." + fieldName + " = ($T)$T.getInstance().build($S).navigation()",
                                     ClassName.get(element.asType()),
                                     ARouterClass,
                                     fieldConfig.name()
