@@ -40,6 +40,7 @@ public class Consts {
     public static final String BOOLEAN = LANG + ".Boolean";
     public static final String CHAR = LANG + ".Character";
     public static final String STRING = LANG + ".String";
+    public static final String SERIALIZABLE = "java.io.Serializable";
 
     // Custom interface
     private static final String FACADE_PACKAGE = "com.alibaba.android.arouter.facade";

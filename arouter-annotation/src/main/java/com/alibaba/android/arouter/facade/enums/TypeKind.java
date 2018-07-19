@@ -20,6 +20,7 @@ public enum TypeKind {
 
     // Other type
     STRING,
+    SERIALIZABLE,
     PARCELABLE,
     OBJECT;
 }
