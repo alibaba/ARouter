@@ -185,7 +185,7 @@ public class Test1Activity extends Activity {
 }
 
 
-// 如果需要传递自定义对象，需要实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
+// 如果需要传递自定义对象，新建一个类（并非自定义对象类），然后实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
 @Route(path = "/service/json")
 public class JsonServiceImpl implements SerializationService {
     @Override

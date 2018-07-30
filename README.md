@@ -187,7 +187,7 @@ public class Test1Activity extends Activity {
     }
 }
 
-// If you need to pass a custom object, Need to implement the SerializationService, And use the @Route annotation annotation, E.g:
+// If you need to pass a custom object, Create a new class(Not the custom object class),implement the SerializationService, And use the @Route annotation annotation, E.g:
 @Route(path = "/service/json")
 public class JsonServiceImpl implements SerializationService {
     @Override
