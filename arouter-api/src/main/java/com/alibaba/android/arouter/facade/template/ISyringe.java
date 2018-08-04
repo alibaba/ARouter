@@ -1,5 +1,7 @@
 package com.alibaba.android.arouter.facade.template;
 
+import java.io.Serializable;
+
 /**
  * Template of syringe
  *
@@ -9,4 +11,8 @@ package com.alibaba.android.arouter.facade.template;
  */
 public interface ISyringe {
     void inject(Object target);
+
+    default <T extends Serializable> T primitiveParse(Serializable value){
+        return (T) value;
+    }
 }

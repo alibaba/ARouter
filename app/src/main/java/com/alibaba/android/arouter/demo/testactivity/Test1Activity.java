@@ -33,7 +33,7 @@ public class Test1Activity extends AppCompatActivity {
     @Autowired(name = "boy")
     boolean girl;
 
-    @Autowired
+    @Autowired(name = "boyyuu",required = true)
     char ch = 'A';
 
     @Autowired
