@@ -212,7 +212,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         // Validator
                         if (fieldConfig.required()) {  // Primitive wont be check.
                             injectMethodBuilder.beginControlFlow(String.format(Locale.CHINA, "if (null == %s)", judgeStr));
-                            injectMethodBuilder.addStatement(String.format(Locale.CHINA, "throw new RuntimeException( \"%s::::-> the field '%s' is not inject,in class '%s'!\")", Consts.TAG, fieldName, ClassName.get(parent).getClass().getName()));
+                            injectMethodBuilder.addStatement(String.format(Locale.CHINA, "throw new RuntimeException( \"%s::::-> the field '%s' is not inject,in class '%s'!\")", Consts.TAG, fieldName, ClassName.get(parent)));
                             injectMethodBuilder.endControlFlow();
                         }
                     }
