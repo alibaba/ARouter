@@ -133,8 +133,8 @@ Performing an auto-registration via the gradle plugin can shorten the initializa
 #### IV. Advanced usage
 1. Jump via URL
 ``` java
-// Create a new Activity for monitoring Schame events, and then directly pass url to ARouter
-public class SchameFilterActivity extends Activity {
+// Create a new Activity for monitoring Scheme events, and then directly pass url to ARouter
+public class SchemeFilterActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,8 +148,8 @@ public class SchameFilterActivity extends Activity {
 
 AndroidManifest.xml
 ``` xml
-<activity android:name=".activity.SchameFilterActivity">
-	<!-- Schame -->
+<activity android:name=".activity.SchemeFilterActivity">
+	<!-- Scheme -->
 	<intent-filter>
 	    <data
             android:host="m.aliyun.com"
