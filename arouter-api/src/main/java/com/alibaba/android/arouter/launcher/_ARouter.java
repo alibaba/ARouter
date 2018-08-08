@@ -49,6 +49,7 @@ final class _ARouter {
     private volatile static _ARouter instance = null;
     private volatile static boolean hasInit = false;
     private volatile static ThreadPoolExecutor executor = DefaultPoolExecutor.getInstance();
+    private static Handler mHandler;
     private static Context mContext;
 
     private static InterceptorService interceptorService;
@@ -61,6 +62,7 @@ final class _ARouter {
         LogisticsCenter.init(mContext, executor);
         logger.info(Consts.TAG, "ARouter init success!");
         hasInit = true;
+        mHandler = new Handler(Looper.getMainLooper());
 
         // It's not a good idea.
         // if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -356,24 +358,16 @@ final class _ARouter {
                 }
 
                 // Navigation in main looper.
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (requestCode > 0) {  // Need start for result
-                            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
-                        } else {
-                            ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
+                if (Looper.getMainLooper().getThread() != Thread.currentThread()){
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            startActivity(requestCode, currentContext, intent, postcard, callback);
                         }
-
-                        if ((-1 != postcard.getEnterAnim() && -1 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
-                            ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
-                        }
-
-                        if (null != callback) { // Navigation over.
-                            callback.onArrival(postcard);
-                        }
-                    }
-                });
+                    });
+                } else {
+                    startActivity(requestCode, currentContext, intent, postcard, callback);
+                }
 
                 break;
             case PROVIDER:
@@ -401,5 +395,21 @@ final class _ARouter {
         }
 
         return null;
+    }
+
+    private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
+        if (requestCode > 0) {  // Need start for result
+            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+        } else {
+            ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
+        }
+
+        if ((-1 != postcard.getEnterAnim() && -1 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
+            ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
+        }
+
+        if (null != callback) { // Navigation over.
+            callback.onArrival(postcard);
+        }
     }
 }
