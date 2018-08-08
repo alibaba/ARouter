@@ -24,6 +24,7 @@ import com.alibaba.android.arouter.facade.service.AutowiredService;
 import com.alibaba.android.arouter.facade.service.DegradeService;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.service.PathReplaceService;
+import com.alibaba.android.arouter.facade.service.PathVariableService;
 import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
@@ -48,6 +49,7 @@ final class _ARouter {
     private volatile static boolean autoInject = false;
     private volatile static _ARouter instance = null;
     private volatile static boolean hasInit = false;
+    private volatile static boolean pathVariableEnabled = false;
     private volatile static ThreadPoolExecutor executor = DefaultPoolExecutor.getInstance();
     private static Handler mHandler;
     private static Context mContext;
@@ -107,6 +109,15 @@ final class _ARouter {
     static synchronized void openLog() {
         logger.showLog(true);
         logger.info(Consts.TAG, "ARouter openLog");
+    }
+
+    static synchronized void enablePathVariable() {
+        pathVariableEnabled = true;
+        logger.info(Consts.TAG, "ARouter enablePathVariable");
+    }
+
+    static boolean canEnablePathVariable() {
+        return pathVariableEnabled;
     }
 
     @Deprecated
@@ -202,6 +213,12 @@ final class _ARouter {
             PathReplaceService pService = ARouter.getInstance().navigation(PathReplaceService.class);
             if (null != pService) {
                 uri = pService.forUri(uri);
+            }
+            if (pathVariableEnabled) {
+                PathVariableService pvService = (PathVariableService) ARouter.getInstance().build("/aroute_path_variable/service/pathvariable").navigation();
+                if (null != pvService) {
+                    uri = pvService.forUri(uri);
+                }
             }
             return new Postcard(uri.getPath(), extractGroup(uri.getPath()), uri, null);
         }

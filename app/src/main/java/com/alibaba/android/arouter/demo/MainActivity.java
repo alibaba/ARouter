@@ -56,6 +56,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.openDebug:
                 ARouter.openDebug();
                 break;
+            case R.id.openPathVariable:
+                //支持路径中包含参数的场景
+                ARouter.enablePathVariable();
+                break;
             case R.id.init:
                 // 调试模式不是必须开启，但是为了防止有用户开启了InstantRun，但是
                 // 忘了开调试模式，导致无法使用Demo，如果使用了InstantRun，必须在
@@ -127,6 +131,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance()
                         .build("/test/webview")
                         .withString("url", "file:///android_asset/schame-test.html")
+                        .navigation();
+                break;
+            case R.id.navByPathVariable:
+                /*
+                 * 使用这个功能需要依赖arouter-path-variable模块,另外需要在初始化的时候调用ARouter.enablePathVariable();
+                 */
+                ARouter.getInstance()
+                        .build(Uri.parse("/users/typ0520"))
+                        .navigation();
+                break;
+            case R.id.navByPathVariable2:
+                 /*
+                 * 使用这个功能需要依赖arouter-path-variable模块,另外需要在初始化的时候调用ARouter.enablePathVariable();
+                 */
+                ARouter.getInstance()
+                        .build(Uri.parse("/repos/alibaba/arouter/branches"))
                         .navigation();
                 break;
             case R.id.autoInject:

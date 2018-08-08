@@ -54,6 +54,7 @@ dependencies {
 
     annotationProcessor project(':arouter-compiler')
     compile project(':arouter-api')
+    compile project(':arouter-path-variable')
     compile project(':module-java')
     compile project(':module-kotlin')
     compile project(':arouter-annotation')
