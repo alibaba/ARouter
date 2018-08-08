@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,6 +142,7 @@ public class AutowiredProcessor extends AbstractProcessor {
 
                 injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class)", ARouterClass, ClassName.get(type_JsonService));
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
+                injectMethodBuilder.addStatement("java.io.Serializable temp = null");
 
                 // Generate method body, start inject.
                 for (Element element : childs) {
@@ -174,7 +176,7 @@ public class AutowiredProcessor extends AbstractProcessor {
                         }
                     } else {    // It's normal intent value
                         String originalValue = "substitute." + fieldName;
-                        String statement = "substitute." + fieldName + " = substitute.";
+                        String statement = "substitute.";
                         boolean isActivity = false;
                         if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
                             isActivity = true;
@@ -185,11 +187,13 @@ public class AutowiredProcessor extends AbstractProcessor {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
-                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity);
-                        if (statement.startsWith("serializationService.")) {   // Not mortals
+                        String judgeStr;
+                        if (typeUtils.typeExchange(element) == TypeKind.OBJECT.ordinal()) {
+                            judgeStr = originalValue;
+                            String right = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new com.alibaba.android.arouter.facade.model.TypeWrapper<$T>(){}.getType())";
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = " + statement,
+                                    "substitute." + fieldName + " = " + right,
                                     (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
                                     ClassName.get(element.asType())
                             );
@@ -198,14 +202,17 @@ public class AutowiredProcessor extends AbstractProcessor {
                                     "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
                         } else {
-                            injectMethodBuilder.addStatement(statement, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                            judgeStr = "temp";
+                            injectMethodBuilder.addStatement(buildStatement(statement, typeUtils.typeExchange(element), isActivity), StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                            injectMethodBuilder.beginControlFlow("if (null != temp) ");
+                            injectMethodBuilder.addStatement(String.format(Locale.CHINA, "%s = primitiveParse(%s)", originalValue, "temp"));
+                            injectMethodBuilder.endControlFlow();
                         }
 
                         // Validator
-                        if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
-                            injectMethodBuilder.beginControlFlow("if (null == substitute." + fieldName + ")");
-                            injectMethodBuilder.addStatement(
-                                    "$T.e(\"" + Consts.TAG + "\", \"The field '" + fieldName + "' is null, in class '\" + $T.class.getName() + \"!\")", AndroidLog, ClassName.get(parent));
+                        if (fieldConfig.required()) {  // Primitive wont be check.
+                            injectMethodBuilder.beginControlFlow(String.format(Locale.CHINA, "if (null == %s)", judgeStr));
+                            injectMethodBuilder.addStatement(String.format(Locale.CHINA, "throw new RuntimeException( \"%s::::-> the field '%s' is not inject,in class '%s'!\")", Consts.TAG, fieldName, ClassName.get(parent)));
                             injectMethodBuilder.endControlFlow();
                         }
                     }
@@ -223,32 +230,22 @@ public class AutowiredProcessor extends AbstractProcessor {
         }
     }
 
-    private String buildStatement(String originalValue, String statement, int type, boolean isActivity) {
-        if (type == TypeKind.BOOLEAN.ordinal()) {
-            statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
-        } else if (type == TypeKind.BYTE.ordinal()) {
-            statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
-        } else if (type == TypeKind.SHORT.ordinal()) {
-            statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
-        } else if (type == TypeKind.INT.ordinal()) {
-            statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
-        } else if (type == TypeKind.LONG.ordinal()) {
-            statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
-        }else if(type == TypeKind.CHAR.ordinal()){
-            statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
-        } else if (type == TypeKind.FLOAT.ordinal()) {
-            statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
-        } else if (type == TypeKind.DOUBLE.ordinal()) {
-            statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
-        } else if (type == TypeKind.STRING.ordinal()) {
-            statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+    private String buildStatement(String statement, int type, boolean isActivity) {
+        String tempControl = "temp = ";
+        if (type == TypeKind.BOOLEAN.ordinal() ||
+                type == TypeKind.BYTE.ordinal() ||
+                type == TypeKind.INT.ordinal() ||
+                type == TypeKind.LONG.ordinal() ||
+                type == TypeKind.CHAR.ordinal() ||
+                type == TypeKind.SHORT.ordinal() ||
+                type == TypeKind.FLOAT.ordinal() ||
+                type == TypeKind.DOUBLE.ordinal() ||
+                type == TypeKind.STRING.ordinal()) {
+            statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
         } else if (type == TypeKind.PARCELABLE.ordinal()) {
             statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
-        } else if (type == TypeKind.OBJECT.ordinal()) {
-            statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new com.alibaba.android.arouter.facade.model.TypeWrapper<$T>(){}.getType())";
         }
-
-        return statement;
+        return tempControl + statement;
     }
 
     /**

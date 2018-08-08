@@ -33,8 +33,11 @@ public class Test1Activity extends AppCompatActivity {
     @Autowired(name = "boy")
     boolean girl;
 
-    @Autowired
-    char ch = 'A';
+    @Autowired(name = "teger", required = true)
+    Integer girlInteger = null;
+
+    @Autowired(name = "boyyuu", required = true)
+    Character ch = 'A';
 
     @Autowired
     float fl = 12.00f;
