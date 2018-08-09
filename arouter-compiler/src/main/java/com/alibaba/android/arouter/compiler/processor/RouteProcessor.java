@@ -51,6 +51,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.FRAGMENT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ITROUTE_ROOT;
+import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_GENERATE_DOC_NAME;
 import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
@@ -59,6 +60,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.VALUE_ENABLE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -83,6 +85,7 @@ public class RouteProcessor extends AbstractProcessor {
     private TypeUtils typeUtils;
     private String moduleName = null;   // Module name, maybe its 'app' or others
     private TypeMirror iProvider = null;
+    private boolean generateDoc;    // If need generate router doc
 
     /**
      * Initializes the processor with the processing environment by
@@ -110,6 +113,7 @@ public class RouteProcessor extends AbstractProcessor {
         Map<String, String> options = processingEnv.getOptions();
         if (MapUtils.isNotEmpty(options)) {
             moduleName = options.get(KEY_MODULE_NAME);
+            generateDoc = VALUE_ENABLE.equals(options.get(KEY_GENERATE_DOC_NAME));
         }
 
         if (StringUtils.isNotEmpty(moduleName)) {
@@ -156,7 +160,7 @@ public class RouteProcessor extends AbstractProcessor {
 
     private void parseRoutes(Set<? extends Element> routeElements) throws IOException {
         if (CollectionUtils.isNotEmpty(routeElements)) {
-            // Perpare the type an so on.
+            // prepare the type an so on.
 
             logger.info(">>> Found routes, size is " + routeElements.size() + " <<<");
 
@@ -216,7 +220,7 @@ public class RouteProcessor extends AbstractProcessor {
             for (Element element : routeElements) {
                 TypeMirror tm = element.asType();
                 Route route = element.getAnnotation(Route.class);
-                RouteMeta routeMeta = null;
+                RouteMeta routeMeta;
 
                 if (types.isSubtype(tm, type_Activity)) {                 // Activity
                     logger.info(">>> Found activity route: " + tm.toString() + " <<<");
@@ -340,7 +344,7 @@ public class RouteProcessor extends AbstractProcessor {
                 }
             }
 
-            // Wirte provider into disk
+            // Write provider into disk
             String providerMapFileName = NAME_OF_PROVIDER + SEPARATOR + moduleName;
             JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                     TypeSpec.classBuilder(providerMapFileName)
