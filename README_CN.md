@@ -4,7 +4,7 @@
     Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
 ```
 
-[English](https://raw.githubusercontent.com/alibaba/ARouter/master/README.md)
+[English](https://github.com/alibaba/ARouter/blob/develop/README.md)
 
 ##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
