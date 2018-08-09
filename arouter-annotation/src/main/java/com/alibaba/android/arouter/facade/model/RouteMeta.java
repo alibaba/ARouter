@@ -1,5 +1,6 @@
 package com.alibaba.android.arouter.facade.model;
 
+import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
 
@@ -23,6 +24,9 @@ public class RouteMeta {
     private int priority = -1;      // The smaller the number, the higher the priority
     private int extra;              // Extra data
     private Map<String, Integer> paramsType;  // Param type
+    private String name;
+
+    private Map<String, Autowired> injectConfig;  // Cache inject config.
 
     public RouteMeta() {
     }
@@ -39,7 +43,7 @@ public class RouteMeta {
      * @return this
      */
     public static RouteMeta build(RouteType type, Class<?> destination, String path, String group, int priority, int extra) {
-        return new RouteMeta(type, null, destination, path, group, null, priority, extra);
+        return new RouteMeta(type, null, destination, null, path, group, null, priority, extra);
     }
 
     /**
@@ -55,7 +59,7 @@ public class RouteMeta {
      * @return this
      */
     public static RouteMeta build(RouteType type, Class<?> destination, String path, String group, Map<String, Integer> paramsType, int priority, int extra) {
-        return new RouteMeta(type, null, destination, path, group, paramsType, priority, extra);
+        return new RouteMeta(type, null, destination, null, path, group, paramsType, priority, extra);
     }
 
     /**
@@ -66,7 +70,7 @@ public class RouteMeta {
      * @param type        type
      */
     public RouteMeta(Route route, Class<?> destination, RouteType type) {
-        this(type, null, destination, route.path(), route.group(), null, route.priority(), route.extras());
+        this(type, null, destination, route.name(), route.path(), route.group(), null, route.priority(), route.extras());
     }
 
     /**
@@ -78,7 +82,7 @@ public class RouteMeta {
      * @param paramsType paramsType
      */
     public RouteMeta(Route route, Element rawType, RouteType type, Map<String, Integer> paramsType) {
-        this(type, rawType, null, route.path(), route.group(), paramsType, route.priority(), route.extras());
+        this(type, rawType, null, route.name(), route.path(), route.group(), paramsType, route.priority(), route.extras());
     }
 
     /**
@@ -93,8 +97,9 @@ public class RouteMeta {
      * @param priority    priority
      * @param extra       extra
      */
-    public RouteMeta(RouteType type, Element rawType, Class<?> destination, String path, String group, Map<String, Integer> paramsType, int priority, int extra) {
+    public RouteMeta(RouteType type, Element rawType, Class<?> destination, String name, String path, String group, Map<String, Integer> paramsType, int priority, int extra) {
         this.type = type;
+        this.name = name;
         this.destination = destination;
         this.rawType = rawType;
         this.path = path;
@@ -111,6 +116,14 @@ public class RouteMeta {
     public RouteMeta setParamsType(Map<String, Integer> paramsType) {
         this.paramsType = paramsType;
         return this;
+    }
+
+    public Map<String, Autowired> getInjectConfig() {
+        return injectConfig;
+    }
+
+    public void setInjectConfig(Map<String, Autowired> injectConfig) {
+        this.injectConfig = injectConfig;
     }
 
     public Element getRawType() {
@@ -176,6 +189,14 @@ public class RouteMeta {
         return this;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "RouteMeta{" +
@@ -186,6 +207,8 @@ public class RouteMeta {
                 ", group='" + group + '\'' +
                 ", priority=" + priority +
                 ", extra=" + extra +
+                ", paramsType=" + paramsType +
+                ", name='" + name + '\'' +
                 '}';
     }
 }
