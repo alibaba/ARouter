@@ -128,8 +128,8 @@ buildscript {
 }
 ```
 
-Optional, use the registration plugin provided by the ARouter to automatically load the routing table. By default, the ARouter will scanned the dex files .
-Performing an auto-registration via the gradle plugin can shorten the initialization time , it should be noted that the plugin must be used with api 1.3.0!
+Optional, use the registration plugin provided by the ARouter to automatically load the routing table(power by [AutoRegister](https://github.com/luckybilly/AutoRegister)). By default, the ARouter will scanned the dex files .
+Performing an auto-registration via the gradle plugin can shorten the initialization time , it should be noted that the plugin must be used with api above 1.3.0!
 
 #### IV. Advanced usage
 1. Jump via URL
@@ -389,6 +389,9 @@ ARouter.getInstance().build("/home/main").greenChannel().navigation();
 
 // Use your own log tool to print logs
 ARouter.setLogger();
+
+// Use your custom thread pool
+ARouter.setExecutor();
 ```
 
 3. Get the original URI
@@ -425,7 +428,7 @@ public class PathReplaceServiceImpl implements PathReplaceService {
 
 5. Generate router doc
 ``` gradle
-## Edit build.gradle, add option 'AROUTER_GENERATE_DOC = enable'
+// Edit build.gradle, add option 'AROUTER_GENERATE_DOC = enable'
 android {
     defaultConfig {
         ...
@@ -436,6 +439,7 @@ android {
         }
     }
 }
+```
 
 #### VI. Other
 
@@ -495,15 +499,3 @@ dependencies {
     2. group2
         
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
-
-#### VIII. Contributions
-
-1. [imknown](https://github.com/alibaba/ARouter/commits?author=imknown)
-
-2. [crazy1235](https://github.com/crazy1235)
-
-3. [luckybilly](https://github.com/luckybilly)
-
-4. [LinXiaoTao](https://github.com/LinXiaoTao)
-
-5. [tanglie1993](https://github.com/tanglie1993)

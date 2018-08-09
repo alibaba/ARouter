@@ -2,7 +2,7 @@
     一个用于帮助 Android App 进行组件化改造的框架 —— 支持模块间的路由、通信、解耦
 ```
 
-[English](https://github.com/alibaba/ARouter/blob/develop/README.md)
+[English](https://github.com/alibaba/ARouter/blob/master/README.md)
 
 ##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -123,9 +123,10 @@ buildscript {
     }
 }
 ```
-可选使用，通过 ARouter 提供的注册插件进行路由表的自动加载，默认通过扫描 dex 的方式
+
+可选使用，通过 ARouter 提供的注册插件进行路由表的自动加载(power by [AutoRegister](https://github.com/luckybilly/AutoRegister))， 默认通过扫描 dex 的方式
 进行加载通过 gradle 插件进行自动注册可以缩短初始化时间解决应用加固导致无法直接访问
-dex 文件，初始化失败的问题，需要注意的是，该插件必须搭配 api 1.3.0 使用！
+dex 文件，初始化失败的问题，需要注意的是，该插件必须搭配 api 1.3.0 以上版本使用！
 
 #### 四、进阶用法
 1. 通过URL跳转
@@ -397,6 +398,9 @@ ARouter.getInstance().build("/home/main").greenChannel().navigation();
 
 // 使用自己的日志工具打印日志
 ARouter.setLogger();
+
+// 使用自己提供的线程池
+ARouter.setExecutor();
 ```
 
 3. 获取原始的URI
@@ -431,7 +435,7 @@ public class PathReplaceServiceImpl implements PathReplaceService {
 
 5. 生成路由文档
 ``` gradle
-## 更新 build.gradle, 添加参数 AROUTER_GENERATE_DOC = enable
+// 更新 build.gradle, 添加参数 AROUTER_GENERATE_DOC = enable
 android {
     defaultConfig {
         ...
@@ -442,7 +446,7 @@ android {
         }
     }
 }
-
+```
 
 #### 六、其他
 
@@ -565,15 +569,3 @@ dependencies {
     2. 交流群2
         
         ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
-
-#### 九、代码贡献 (排名不分先后，时间顺序)
-
-1. [imknown](https://github.com/alibaba/ARouter/commits?author=imknown) : 优化文档格式
-
-2. [crazy1235](https://github.com/crazy1235) : 自动注入支持优先使用默认值
-
-3. [luckybilly](https://github.com/luckybilly) : 通过 Transform API 实现路由表自动注册
-
-4. [LinXiaoTao](https://github.com/LinXiaoTao) : postcard transition support 0
-
-5. [tanglie1993](https://github.com/tanglie1993) : 修正拼写和语法错误
