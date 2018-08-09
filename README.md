@@ -429,6 +429,7 @@ public class PathReplaceServiceImpl implements PathReplaceService {
 5. Generate router doc
 ``` gradle
 // Edit build.gradle, add option 'AROUTER_GENERATE_DOC = enable'
+// Doc file : build/generated/source/apt/(debug or release)/com/alibaba/android/arouter/docs/arouter-map-of-${moduleName}.json
 android {
     defaultConfig {
         ...

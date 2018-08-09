@@ -436,6 +436,7 @@ public class PathReplaceServiceImpl implements PathReplaceService {
 5. 生成路由文档
 ``` gradle
 // 更新 build.gradle, 添加参数 AROUTER_GENERATE_DOC = enable
+// 生成的文档路径 : build/generated/source/apt/(debug or release)/com/alibaba/android/arouter/docs/arouter-map-of-${moduleName}.json
 android {
     defaultConfig {
         ...
