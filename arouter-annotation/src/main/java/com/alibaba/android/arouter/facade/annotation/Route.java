@@ -29,7 +29,7 @@ public @interface Route {
     /**
      * Name of route, used to generate javadoc.
      */
-    String name() default "undefined";
+    String name() default "";
 
     /**
      * Extra data, can be set by user.

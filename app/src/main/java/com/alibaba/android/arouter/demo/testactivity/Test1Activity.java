@@ -19,10 +19,10 @@ import java.util.Map;
 /**
  * https://m.aliyun.com/test/activity1?name=老王&age=23&boy=true&high=180
  */
-@Route(path = "/test/activity1")
+@Route(path = "/test/activity1", name = "测试用 Activity")
 public class Test1Activity extends AppCompatActivity {
 
-    @Autowired
+    @Autowired(desc = "姓名")
     String name = "jack";
 
     @Autowired
@@ -31,7 +31,7 @@ public class Test1Activity extends AppCompatActivity {
     @Autowired
     int height = 175;
 
-    @Autowired(name = "boy")
+    @Autowired(name = "boy", required = true)
     boolean girl;
 
     @Autowired

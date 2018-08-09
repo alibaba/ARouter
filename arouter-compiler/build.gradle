@@ -14,13 +14,15 @@ compileJava {
 }
 
 dependencies {
-    compile 'com.alibaba:arouter-annotation:1.0.5'
+    compile 'com.alibaba:arouter-annotation:1.0.6'
 
     compile 'com.google.auto.service:auto-service:1.0-rc2'
     compile 'com.squareup:javapoet:1.7.0'
 
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'org.apache.commons:commons-collections4:4.1'
+
+    compile 'com.alibaba:fastjson:1.2.48'
 }
 
 apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
