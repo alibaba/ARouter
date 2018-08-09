@@ -34,6 +34,7 @@
 11. 支持获取Fragment
 12. 完全支持Kotlin以及混编(配置见文末 其他#5)
 13. **支持第三方 App 加固**(使用 arouter-register 实现自动注册)
+14. **支持生成路由文档**
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -46,12 +47,12 @@
 ``` gradle
 android {
     defaultConfig {
-	...
-	javaCompileOptions {
-	    annotationProcessorOptions {
-		arguments = [ moduleName : project.getName() ]
-	    }
-	}
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
     }
 }
 
@@ -429,6 +430,21 @@ public class PathReplaceServiceImpl implements PathReplaceService {
    }
 }
 ```
+
+5. 生成路由文档
+``` gradle
+## 更新 build.gradle, 添加参数 AROUTER_GENERATE_DOC = enable
+android {
+    defaultConfig {
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName(), AROUTER_GENERATE_DOC: "enable"]
+            }
+        }
+    }
+}
+
 
 #### 六、其他
 
