@@ -21,6 +21,7 @@ public class Consts {
     public static final String NAME_OF_INTERCEPTOR = PROJECT + SEPARATOR + "Interceptors";
     public static final String NAME_OF_AUTOWIRED = SEPARATOR + PROJECT + SEPARATOR + "Autowired";
     public static final String PACKAGE_OF_GENERATE_FILE = "com.alibaba.android.arouter.routes";
+    public static final String PACKAGE_OF_GENERATE_DOCS = "com.alibaba.android.arouter.docs";
 
     // System interface
     public static final String ACTIVITY = "android.app.Activity";
@@ -38,7 +39,9 @@ public class Consts {
     public static final String FLOAT = LANG + ".Float";
     public static final String DOUBEL = LANG + ".Double";
     public static final String BOOLEAN = LANG + ".Boolean";
+    public static final String CHAR = LANG + ".Character";
     public static final String STRING = LANG + ".String";
+    public static final String SERIALIZABLE = "java.io.Serializable";
 
     // Custom interface
     private static final String FACADE_PACKAGE = "com.alibaba.android.arouter.facade";
@@ -57,7 +60,10 @@ public class Consts {
     static final String PREFIX_OF_LOGGER = PROJECT + "::Compiler ";
 
     // Options of processor
-    public static final String KEY_MODULE_NAME = "moduleName";
+    public static final String KEY_MODULE_NAME = "AROUTER_MODULE_NAME";
+    public static final String KEY_GENERATE_DOC_NAME = "AROUTER_GENERATE_DOC";
+
+    public static final String VALUE_ENABLE = "enable";
 
     // Annotation type
     public static final String ANNOTATION_TYPE_INTECEPTOR = FACADE_PACKAGE + ".annotation.Interceptor";

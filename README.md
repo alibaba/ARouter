@@ -10,9 +10,9 @@
 
 #### Lastest version
 
-module|arouter-api|arouter-compiler|arouter-annotation|arouter-register
----|---|---|---|---
-version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
+module|arouter-api|arouter-compiler|arouter-register
+---|---|---|---
+version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
 
 #### Demo
 
@@ -31,6 +31,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 10. Support multiple ways to configure transition animation
 11. Support for fragement
 12. Full kotlin support (Look at Other#2)
+13. **Generate route doc support**
 
 #### II. Classic Case
 1. Forward from external URLs to internal pages, and parsing parameters
@@ -43,12 +44,12 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 ``` gradle
 android {
     defaultConfig {
-	...
-	javaCompileOptions {
-	    annotationProcessorOptions {
-		arguments = [ moduleName : project.getName() ]
-	    }
-	}
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
     }
 }
 
@@ -421,6 +422,20 @@ public class PathReplaceServiceImpl implements PathReplaceService {
     }
 }
 ```
+
+5. Generate router doc
+``` gradle
+## Edit build.gradle, add option 'AROUTER_GENERATE_DOC = enable'
+android {
+    defaultConfig {
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName(), AROUTER_GENERATE_DOC: "enable"]
+            }
+        }
+    }
+}
 
 #### VI. Other
 

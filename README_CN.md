@@ -2,7 +2,7 @@
     一个用于帮助 Android App 进行组件化改造的框架 —— 支持模块间的路由、通信、解耦
 ```
 
-[English](https://raw.githubusercontent.com/alibaba/ARouter/master/README.md)
+[English](https://github.com/alibaba/ARouter/blob/develop/README.md)
 
 ##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -10,9 +10,9 @@
 
 #### 最新版本
 
-模块|arouter-api|arouter-compiler|arouter-annotation|arouter-register
----|---|---|---|---
-最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-annotation/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-annotation/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
+模块|arouter-api|arouter-compiler|arouter-register
+---|---|---|---
+最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
 
 #### Demo展示
 
@@ -32,6 +32,7 @@
 11. 支持获取Fragment
 12. 完全支持Kotlin以及混编(配置见文末 其他#5)
 13. **支持第三方 App 加固**(使用 arouter-register 实现自动注册)
+14. **支持生成路由文档**
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -44,12 +45,12 @@
 ``` gradle
 android {
     defaultConfig {
-	...
-	javaCompileOptions {
-	    annotationProcessorOptions {
-		arguments = [ moduleName : project.getName() ]
-	    }
-	}
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
     }
 }
 
@@ -427,6 +428,21 @@ public class PathReplaceServiceImpl implements PathReplaceService {
    }
 }
 ```
+
+5. 生成路由文档
+``` gradle
+## 更新 build.gradle, 添加参数 AROUTER_GENERATE_DOC = enable
+android {
+    defaultConfig {
+        ...
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName(), AROUTER_GENERATE_DOC: "enable"]
+            }
+        }
+    }
+}
+
 
 #### 六、其他
 

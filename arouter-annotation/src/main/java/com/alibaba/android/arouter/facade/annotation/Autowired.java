@@ -24,5 +24,5 @@ public @interface Autowired {
     boolean required() default false;
 
     // Description of the field
-    String desc() default "No desc.";
+    String desc() default "";
 }

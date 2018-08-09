@@ -14,8 +14,10 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.FLOAT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.INTEGER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.LONG;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PARCELABLE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.SERIALIZABLE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SHORT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.STRING;
+import static com.alibaba.android.arouter.compiler.utils.Consts.CHAR;
 
 /**
  * Utils for type exchange
@@ -29,12 +31,14 @@ public class TypeUtils {
     private Types types;
     private Elements elements;
     private TypeMirror parcelableType;
+    private TypeMirror serializableType;
 
     public TypeUtils(Types types, Elements elements) {
         this.types = types;
         this.elements = elements;
 
         parcelableType = this.elements.getTypeElement(PARCELABLE).asType();
+        serializableType = this.elements.getTypeElement(SERIALIZABLE).asType();
     }
 
     /**
@@ -66,11 +70,15 @@ public class TypeUtils {
                 return TypeKind.DOUBLE.ordinal();
             case BOOLEAN:
                 return TypeKind.BOOLEAN.ordinal();
+            case CHAR:
+                return TypeKind.CHAR.ordinal();
             case STRING:
                 return TypeKind.STRING.ordinal();
-            default:    // Other side, maybe the PARCELABLE or OBJECT.
+            default:    // Other side, maybe the PARCELABLE or SERIALIZABLE or OBJECT.
                 if (types.isSubtype(typeMirror, parcelableType)) {  // PARCELABLE
                     return TypeKind.PARCELABLE.ordinal();
+                } else if (types.isSubtype(typeMirror, serializableType)) {  // PARCELABLE
+                    return TypeKind.SERIALIZABLE.ordinal();
                 } else {    // For others
                     return TypeKind.OBJECT.ordinal();
                 }

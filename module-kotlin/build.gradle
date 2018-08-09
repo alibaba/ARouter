@@ -5,6 +5,7 @@ apply plugin: 'kotlin-android-extensions'
 
 kapt {
     arguments {
+        // 这里是旧版本写法！1.0.3 的用法， 用于测试兼容性，请按照文档填写参数
         arg("moduleName", project.getName())
     }
 }
