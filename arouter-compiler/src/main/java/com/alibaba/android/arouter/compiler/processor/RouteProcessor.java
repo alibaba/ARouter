@@ -1,12 +1,16 @@
 package com.alibaba.android.arouter.compiler.processor;
 
+import com.alibaba.android.arouter.compiler.entity.RouteDoc;
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.Logger;
 import com.alibaba.android.arouter.compiler.utils.TypeUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
+import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -21,6 +25,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +49,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.StandardLocation;
 
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
@@ -57,6 +64,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
+import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_DOCS;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
@@ -72,7 +80,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @since 16/8/15 下午10:08
  */
 @AutoService(Processor.class)
-@SupportedOptions(KEY_MODULE_NAME)
+@SupportedOptions({KEY_MODULE_NAME, KEY_GENERATE_DOC_NAME})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
 public class RouteProcessor extends AbstractProcessor {
@@ -86,6 +94,7 @@ public class RouteProcessor extends AbstractProcessor {
     private String moduleName = null;   // Module name, maybe its 'app' or others
     private TypeMirror iProvider = null;
     private boolean generateDoc;    // If need generate router doc
+    private Writer docWriter;       // Writer used for write doc
 
     /**
      * Initializes the processor with the processing environment by
@@ -128,6 +137,18 @@ public class RouteProcessor extends AbstractProcessor {
                     "    }\n" +
                     "}\n");
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
+        }
+
+        if (generateDoc) {
+            try {
+                docWriter = mFiler.createResource(
+                        StandardLocation.SOURCE_OUTPUT,
+                        PACKAGE_OF_GENERATE_DOCS,
+                        "arouter-map-of-" + moduleName + ".json"
+                ).openWriter();
+            } catch (IOException e) {
+                logger.error("Create doc writer failed, because " + e.getMessage());
+            }
         }
 
         iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
@@ -227,14 +248,18 @@ public class RouteProcessor extends AbstractProcessor {
 
                     // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
+                    Map<String, Autowired> injectConfig = new HashMap<>();
                     for (Element field : element.getEnclosedElements()) {
                         if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !types.isSubtype(field.asType(), iProvider)) {
                             // It must be field, then it has annotation, but it not be provider.
                             Autowired paramConfig = field.getAnnotation(Autowired.class);
-                            paramsType.put(StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name(), typeUtils.typeExchange(field));
+                            String injectName = StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name();
+                            paramsType.put(injectName, typeUtils.typeExchange(field));
+                            injectConfig.put(injectName, paramConfig);
                         }
                     }
                     routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
+                    routeMeta.setInjectConfig(injectConfig);
                 } else if (types.isSubtype(tm, iProvider)) {         // IProvider
                     logger.info(">>> Found provider route: " + tm.toString() + " <<<");
                     routeMeta = new RouteMeta(route, element, RouteType.PROVIDER, null);
@@ -249,15 +274,14 @@ public class RouteProcessor extends AbstractProcessor {
                 }
 
                 categories(routeMeta);
-                // if (StringUtils.isEmpty(moduleName)) {   // Hasn't generate the module name.
-                //     moduleName = ModuleUtils.generateModuleName(element, logger);
-                // }
             }
 
             MethodSpec.Builder loadIntoMethodOfProviderBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
                     .addAnnotation(Override.class)
                     .addModifiers(PUBLIC)
                     .addParameter(providerParamSpec);
+
+            Map<String, List<RouteDoc>> docSource = new HashMap<>();
 
             // Start generate java source, structure is divided into upper and lower levels, used for demand initialization.
             for (Map.Entry<String, Set<RouteMeta>> entry : groupMap.entrySet()) {
@@ -268,13 +292,21 @@ public class RouteProcessor extends AbstractProcessor {
                         .addModifiers(PUBLIC)
                         .addParameter(groupParamSpec);
 
+                List<RouteDoc> routeDocList = new ArrayList<>();
+
                 // Build group method body
                 Set<RouteMeta> groupData = entry.getValue();
                 for (RouteMeta routeMeta : groupData) {
+                    RouteDoc routeDoc = extractDocInfo(routeMeta);
+
+                    ClassName className = ClassName.get((TypeElement) routeMeta.getRawType());
+
                     switch (routeMeta.getType()) {
                         case PROVIDER:  // Need cache provider's super class
                             List<? extends TypeMirror> interfaces = ((TypeElement) routeMeta.getRawType()).getInterfaces();
                             for (TypeMirror tm : interfaces) {
+                                routeDoc.addPrototype(tm.toString());
+
                                 if (types.isSameType(tm, iProvider)) {   // Its implements iProvider interface himself.
                                     // This interface extend the IProvider, so it can be used for mark provider
                                     loadIntoMethodOfProviderBuilder.addStatement(
@@ -282,7 +314,7 @@ public class RouteProcessor extends AbstractProcessor {
                                             (routeMeta.getRawType()).toString(),
                                             routeMetaCn,
                                             routeTypeCn,
-                                            ClassName.get((TypeElement) routeMeta.getRawType()),
+                                            className,
                                             routeMeta.getPath(),
                                             routeMeta.getGroup());
                                 } else if (types.isSubtype(tm, iProvider)) {
@@ -292,7 +324,7 @@ public class RouteProcessor extends AbstractProcessor {
                                             tm.toString(),    // So stupid, will duplicate only save class name.
                                             routeMetaCn,
                                             routeTypeCn,
-                                            ClassName.get((TypeElement) routeMeta.getRawType()),
+                                            className,
                                             routeMeta.getPath(),
                                             routeMeta.getGroup());
                                 }
@@ -305,10 +337,24 @@ public class RouteProcessor extends AbstractProcessor {
                     // Make map body for paramsType
                     StringBuilder mapBodyBuilder = new StringBuilder();
                     Map<String, Integer> paramsType = routeMeta.getParamsType();
+                    Map<String, Autowired> injectConfigs = routeMeta.getInjectConfig();
                     if (MapUtils.isNotEmpty(paramsType)) {
+                        List<RouteDoc.Param> paramList = new ArrayList<>();
+
                         for (Map.Entry<String, Integer> types : paramsType.entrySet()) {
                             mapBodyBuilder.append("put(\"").append(types.getKey()).append("\", ").append(types.getValue()).append("); ");
+
+                            RouteDoc.Param param = new RouteDoc.Param();
+                            Autowired injectConfig = injectConfigs.get(types.getKey());
+                            param.setKey(types.getKey());
+                            param.setType(TypeKind.values()[types.getValue()].name().toLowerCase());
+                            param.setDescription(injectConfig.desc());
+                            param.setRequired(injectConfig.required());
+
+                            paramList.add(param);
                         }
+
+                        routeDoc.setParams(paramList);
                     }
                     String mapBody = mapBodyBuilder.toString();
 
@@ -317,9 +363,12 @@ public class RouteProcessor extends AbstractProcessor {
                             routeMeta.getPath(),
                             routeMetaCn,
                             routeTypeCn,
-                            ClassName.get((TypeElement) routeMeta.getRawType()),
+                            className,
                             routeMeta.getPath().toLowerCase(),
                             routeMeta.getGroup().toLowerCase());
+
+                    routeDoc.setClassName(className.toString());
+                    routeDocList.add(routeDoc);
                 }
 
                 // Generate groups
@@ -335,6 +384,7 @@ public class RouteProcessor extends AbstractProcessor {
 
                 logger.info(">>> Generated group: " + groupName + "<<<");
                 rootMap.put(groupName, groupFileName);
+                docSource.put(groupName, routeDocList);
             }
 
             if (MapUtils.isNotEmpty(rootMap)) {
@@ -342,6 +392,13 @@ public class RouteProcessor extends AbstractProcessor {
                 for (Map.Entry<String, String> entry : rootMap.entrySet()) {
                     loadIntoMethodOfRootBuilder.addStatement("routes.put($S, $T.class)", entry.getKey(), ClassName.get(PACKAGE_OF_GENERATE_FILE, entry.getValue()));
                 }
+            }
+
+            // Output route doc
+            if (generateDoc) {
+                docWriter.append(JSON.toJSONString(docSource, SerializerFeature.PrettyFormat));
+                docWriter.flush();
+                docWriter.close();
             }
 
             // Write provider into disk
@@ -370,6 +427,23 @@ public class RouteProcessor extends AbstractProcessor {
 
             logger.info(">>> Generated root, name is " + rootFileName + " <<<");
         }
+    }
+
+    /**
+     * Extra doc info from route meta
+     *
+     * @param routeMeta meta
+     * @return doc
+     */
+    private RouteDoc extractDocInfo(RouteMeta routeMeta) {
+        RouteDoc routeDoc = new RouteDoc();
+        routeDoc.setGroup(routeMeta.getGroup());
+        routeDoc.setPath(routeMeta.getPath());
+        routeDoc.setDescription(routeMeta.getName());
+        routeDoc.setType(routeMeta.getType().name().toLowerCase());
+        routeDoc.setMark(routeMeta.getExtra());
+
+        return routeDoc;
     }
 
     /**

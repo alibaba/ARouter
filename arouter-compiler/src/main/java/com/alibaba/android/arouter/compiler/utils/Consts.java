@@ -21,6 +21,7 @@ public class Consts {
     public static final String NAME_OF_INTERCEPTOR = PROJECT + SEPARATOR + "Interceptors";
     public static final String NAME_OF_AUTOWIRED = SEPARATOR + PROJECT + SEPARATOR + "Autowired";
     public static final String PACKAGE_OF_GENERATE_FILE = "com.alibaba.android.arouter.routes";
+    public static final String PACKAGE_OF_GENERATE_DOCS = "com.alibaba.android.arouter.docs";
 
     // System interface
     public static final String ACTIVITY = "android.app.Activity";
