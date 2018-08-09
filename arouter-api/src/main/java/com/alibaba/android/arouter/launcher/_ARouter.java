@@ -253,8 +253,14 @@ final class _ARouter {
             Postcard postcard = LogisticsCenter.buildProvider(service.getName());
 
             // Compatible 1.0.5 compiler sdk.
-            if (null == postcard) { // No service, or this service in old version.
+            // Earlier versions did not use the fully qualified name to get the service
+            if (null == postcard) {
+                // No service, or this service in old version.
                 postcard = LogisticsCenter.buildProvider(service.getSimpleName());
+            }
+
+            if (null == postcard) {
+                return null;
             }
 
             LogisticsCenter.completion(postcard);
@@ -350,15 +356,15 @@ final class _ARouter {
                 } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
-                
+
                 // Set Actions
-                String action=postcard.getAction();
-                if (!TextUtils.isEmpty(action)){
+                String action = postcard.getAction();
+                if (!TextUtils.isEmpty(action)) {
                     intent.setAction(action);
                 }
 
                 // Navigation in main looper.
-                if (Looper.getMainLooper().getThread() != Thread.currentThread()){
+                if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -398,7 +404,7 @@ final class _ARouter {
     }
 
     private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
-        if (requestCode > 0) {  // Need start for result
+        if (requestCode >= 0) {  // Need start for result
             ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
         } else {
             ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
