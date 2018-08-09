@@ -2,7 +2,7 @@
     A framework for assisting in the renovation of Android app componentization
 ```
 
-[中文文档](https://github.com/alibaba/ARouter/blob/develop/README_CN.md)
+[中文文档](https://github.com/alibaba/ARouter/blob/master/README_CN.md)
 
 ##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
@@ -188,7 +188,7 @@ public class Test1Activity extends Activity {
     }
 }
 
-// If you need to pass a custom object, Need to implement the SerializationService, And use the @Route annotation annotation, E.g:
+// If you need to pass a custom object, Create a new class(Not the custom object class),implement the SerializationService, And use the @Route annotation annotation, E.g:
 @Route(path = "/service/json")
 public class JsonServiceImpl implements SerializationService {
     @Override

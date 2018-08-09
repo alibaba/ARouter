@@ -1,7 +1,5 @@
-## English version is being re-translated, coming soon...
-
 ```
-    Android平台中对页面、服务提供路由功能的中间件，我的目标是 —— 简单且够用。
+    一个用于帮助 Android App 进行组件化改造的框架 —— 支持模块间的路由、通信、解耦
 ```
 
 [English](https://github.com/alibaba/ARouter/blob/develop/README.md)
@@ -188,7 +186,7 @@ public class Test1Activity extends Activity {
 }
 
 
-// 如果需要传递自定义对象，需要实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
+// 如果需要传递自定义对象，新建一个类（并非自定义对象类），然后实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
 @Route(path = "/service/json")
 public class JsonServiceImpl implements SerializationService {
     @Override
