@@ -460,7 +460,7 @@ buildscript {
 
 apt {
     arguments {
-    	moduleName project.getName();
+    	AROUTER_MODULE_NAME project.getName();
     }
 }
 
@@ -478,7 +478,7 @@ apply plugin: 'kotlin-kapt'
 
 kapt {
     arguments {
-        arg("moduleName", project.getName())
+        arg("AROUTER_MODULE_NAME", project.getName())
     }
 }
 
