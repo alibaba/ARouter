@@ -466,12 +466,7 @@ android {
 	- 拦截器因为其特殊性，会被任何一次路由所触发，拦截器会在ARouter初始化的时候异步初始化，如果第一次路由的时候拦截器还没有初始化结束，路由会等待，直到初始化完成。
 	- 服务没有该限制，某一服务可能在App整个生命周期中都不会用到，所以服务只有被调用的时候才会触发初始化操作
 
-3. Jack 编译链的支持
-
-	- ~~因为不想让用户主动设置一堆乱七八糟的参数，在获取模块名的时候使用javac的api，使用了Jack之后没有了javac，只能让用户稍稍动动手了~~
-	- 现在任何情况下都需要在build.gradle中配置moduleName了。。。。
-
-4. 旧版本gradle插件的配置方式
+3. 旧版本gradle插件的配置方式
 ``` gradle
 apply plugin: 'com.neenbedankt.android-apt'
 
@@ -487,7 +482,7 @@ buildscript {
 
 apt {
     arguments {
-	moduleName project.getName();
+	AROUTER_MODULE_NAME project.getName();
     }
 }
 
@@ -498,14 +493,14 @@ dependencies {
 }
 ```
 
-5. Kotlin项目中的配置方式
+4. Kotlin项目中的配置方式
 ```
 // 可以参考 module-kotlin 模块中的写法
 apply plugin: 'kotlin-kapt'
 
 kapt {
     arguments {
-        arg("moduleName", project.getName())
+        arg("AROUTER_MODULE_NAME", project.getName())
     }
 }
 
