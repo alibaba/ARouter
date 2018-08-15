@@ -6,7 +6,7 @@ import javax.annotation.processing.Messager;
 import javax.tools.Diagnostic;
 
 /**
- * Simplify the messager.
+ * Simplify the message print.
  *
  * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
  * @version 1.0
