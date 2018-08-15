@@ -119,7 +119,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.alibaba:arouter-register:1.0.0"
+        classpath "com.alibaba:arouter-register:?"
     }
 }
 ```
