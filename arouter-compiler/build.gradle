@@ -25,5 +25,5 @@ dependencies {
     compile 'com.alibaba:fastjson:1.2.48'
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+apply from: '../install.gradle'
+apply from: '../bintray.gradle'
