@@ -493,10 +493,14 @@ dependencies {
 
 1. Communication
 
-    1. group1 (Full)
+    1. DingDing group1
     
-        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
+        ![dingding](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/dingding-group-1.png)
 
-    2. group2
+    2. QQ group1
+    
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-group-1.png)
+
+    3. QQ group2
         
-        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-group-2.png)
