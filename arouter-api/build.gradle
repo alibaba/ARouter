@@ -44,5 +44,5 @@ dependencies {
     compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+apply from: '../install.gradle'
+apply from: '../bintray.gradle'

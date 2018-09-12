@@ -558,10 +558,14 @@ dependencies {
 
 1. 沟通和交流
 
-    1. 交流群1 (已满，请加2群)
+    1. 钉钉交流群1
     
-        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-qq-addr.png)
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/dingding-group-1.png)
 
-    2. 交流群2
+    2. QQ 交流群1
+    
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-group-1.png)
+
+    3. QQ 交流群2
         
-        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-qrcode-2.JPG)
+        ![qq](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/qq-group-2.png)
