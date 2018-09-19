@@ -107,6 +107,11 @@ ARouter.getInstance().build("/test/1")
 
 # 如果使用了 单类注入，即不定义接口实现 IProvider，需添加下面规则，保护实现
 -keep class * implements com.alibaba.android.arouter.facade.template.IProvider
+
+# 如果在非 Activity 的类中使用了 @Autowired 注解注入，需添加下面规则，以防注入失败
+-keepnames class * {
+    @com.alibaba.android.arouter.facade.annotation.Autowired <fields>;
+}
 ```
 
 6. 使用 Gradle 插件实现路由表的自动加载
