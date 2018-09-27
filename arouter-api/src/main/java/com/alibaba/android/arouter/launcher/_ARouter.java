@@ -42,7 +42,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @since 16/8/16 14:39
  */
 final class _ARouter {
-    static ILogger logger = new DefaultLogger(Consts.TAG); // 日志工具
+    static ILogger logger = new DefaultLogger(Consts.TAG);
     private volatile static boolean monitorMode = false;
     private volatile static boolean debuggable = false;
     private volatile static boolean autoInject = false;
@@ -64,10 +64,6 @@ final class _ARouter {
         hasInit = true;
         mHandler = new Handler(Looper.getMainLooper());
 
-        // It's not a good idea.
-        // if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-        //     application.registerActivityLifecycleCallbacks(new AutowiredLifecycleCallback());
-        // }
         return true;
     }
 
@@ -285,10 +281,16 @@ final class _ARouter {
         } catch (NoRouteFoundException ex) {
             logger.warning(Consts.TAG, ex.getMessage());
 
-            if (debuggable()) { // Show friendly tips for user.
-                Toast.makeText(mContext, "There's no route matched!\n" +
-                        " Path = [" + postcard.getPath() + "]\n" +
-                        " Group = [" + postcard.getGroup() + "]", Toast.LENGTH_LONG).show();
+            if (debuggable()) {
+                // Show friendly tips for user.
+                runInMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext, "There's no route matched!\n" +
+                                " Path = [" + postcard.getPath() + "]\n" +
+                                " Group = [" + postcard.getGroup() + "]", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             if (null != callback) {
@@ -364,16 +366,12 @@ final class _ARouter {
                 }
 
                 // Navigation in main looper.
-                if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            startActivity(requestCode, currentContext, intent, postcard, callback);
-                        }
-                    });
-                } else {
-                    startActivity(requestCode, currentContext, intent, postcard, callback);
-                }
+                runInMainThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(requestCode, currentContext, intent, postcard, callback);
+                    }
+                });
 
                 break;
             case PROVIDER:
@@ -403,6 +401,28 @@ final class _ARouter {
         return null;
     }
 
+    /**
+     * Be sure execute in main thread.
+     *
+     * @param runnable code
+     */
+    private void runInMainThread(Runnable runnable) {
+        if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
+            mHandler.post(runnable);
+        } else {
+            runnable.run();
+        }
+    }
+
+    /**
+     * Start activity
+     *
+     * @param requestCode
+     * @param currentContext
+     * @param intent
+     * @param postcard
+     * @param callback
+     */
     private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
         if (requestCode >= 0) {  // Need start for result
             ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
