@@ -40,9 +40,9 @@ android {
 
 dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:1.1.4'
-    compile 'com.alibaba:arouter-annotation:1.0.4'
-    compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
+    implementation 'com.alibaba:arouter-annotation:1.0.4'
+    implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
 }
 
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
