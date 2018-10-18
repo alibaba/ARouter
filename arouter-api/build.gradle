@@ -1,4 +1,8 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+
+
 
 ext {
     bintrayName = 'arouter-api'

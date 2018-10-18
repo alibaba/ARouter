@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
@@ -34,6 +36,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+
 /**
  * ARouter core (Facade patten)
  *
@@ -54,6 +58,8 @@ final class _ARouter {
 
     private static InterceptorService interceptorService;
 
+    private static CurrentActivityLifecycleCallback currentActivityLifecycleCallback;
+
     private _ARouter() {
     }
 
@@ -64,7 +70,22 @@ final class _ARouter {
         hasInit = true;
         mHandler = new Handler(Looper.getMainLooper());
 
+
+        if (Build.VERSION.SDK_INT >= ICE_CREAM_SANDWICH) {
+            currentActivityLifecycleCallback = new CurrentActivityLifecycleCallback();
+            application.registerActivityLifecycleCallbacks(currentActivityLifecycleCallback);
+        }
+
         return true;
+    }
+
+
+    static synchronized Activity getCurrentActivity() {
+        if (Build.VERSION.SDK_INT >= ICE_CREAM_SANDWICH && currentActivityLifecycleCallback != null) {
+            return currentActivityLifecycleCallback.getCurrentActivity();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -275,7 +296,9 @@ final class _ARouter {
      * @param requestCode RequestCode
      * @param callback    cb
      */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    protected Object navigation(final Context context, Object jumper, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        final Object _jumper = jumper == null ? context : jumper;
+
         try {
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
@@ -318,7 +341,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode, callback);
+                    _navigation(_jumper, postcard, requestCode, callback);
                 }
 
                 /**
@@ -336,14 +359,28 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode, callback);
+            return _navigation(_jumper, postcard, requestCode, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
-        final Context currentContext = null == context ? mContext : context;
+    /**
+     * @param jumper fragment或context
+     */
+    private Object _navigation(final Object jumper, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        final Context currentContext;
+
+        if (jumper instanceof Context) {
+            currentContext = (Context) jumper;
+        } else if (jumper instanceof android.support.v4.app.Fragment) {
+            currentContext = ((android.support.v4.app.Fragment) jumper).getContext();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && jumper instanceof Fragment) {
+            currentContext = ((Fragment) jumper).getContext();
+        } else {
+            Activity activity = getCurrentActivity();
+            currentContext = activity == null ? mContext : activity;
+        }
 
         switch (postcard.getType()) {
             case ACTIVITY:
@@ -355,7 +392,7 @@ final class _ARouter {
                 int flags = postcard.getFlags();
                 if (-1 != flags) {
                     intent.setFlags(flags);
-                } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
+                } else if (getActivity(jumper) == null) {    // Non activity, need less one flag.
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
@@ -369,7 +406,7 @@ final class _ARouter {
                 runInMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        startActivity(requestCode, currentContext, intent, postcard, callback);
+                        startActivity(requestCode, jumper, intent, postcard, callback);
                     }
                 });
 
@@ -418,24 +455,70 @@ final class _ARouter {
      * Start activity
      *
      * @param requestCode
-     * @param currentContext
+     * @param jumper
      * @param intent
      * @param postcard
      * @param callback
      */
-    private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
-        if (requestCode >= 0) {  // Need start for result
-            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+    private void startActivity(int requestCode, Object jumper, Intent intent, Postcard postcard, NavigationCallback callback) {
+        if (jumper instanceof Context) {
+            if (requestCode >= 0) {  // Need start for result
+                ActivityCompat.startActivityForResult((Activity) jumper, intent, requestCode, postcard.getOptionsBundle());
+            } else {
+                ActivityCompat.startActivity((Context) jumper, intent, postcard.getOptionsBundle());
+            }
+        } else if (jumper instanceof android.support.v4.app.Fragment) {
+            if (requestCode >= 0) {
+                ((android.support.v4.app.Fragment) jumper)
+                        .startActivityForResult(intent, requestCode, postcard.getOptionsBundle());
+            } else {
+                ((android.support.v4.app.Fragment) jumper).startActivity(intent, postcard.getOptionsBundle());
+            }
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && jumper instanceof Fragment) {
+            if (requestCode >= 0) {
+                ((Fragment) jumper)
+                        .startActivityForResult(intent, requestCode, postcard.getOptionsBundle());
+            } else {
+                ((Fragment) jumper).startActivity(intent, postcard.getOptionsBundle());
+            }
         } else {
-            ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
+            throw new RuntimeException("the jumper type must be Context or Fragment");
         }
 
-        if ((-1 != postcard.getEnterAnim() && -1 != postcard.getExitAnim()) && currentContext instanceof Activity) {    // Old version.
-            ((Activity) currentContext).overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
+        if ((-1 != postcard.getEnterAnim() && -1 != postcard.getExitAnim())) {    // Old version.
+            final Activity activity = getActivity(jumper);
+
+            if (activity != null) {
+                activity.overridePendingTransition(postcard.getEnterAnim(), postcard.getExitAnim());
+            }
         }
 
         if (null != callback) { // Navigation over.
             callback.onArrival(postcard);
         }
+    }
+
+    private Activity getActivity(Object obj) {
+        if (obj instanceof Activity) {
+            return (Activity) obj;
+        } else if (obj instanceof Context) {
+            Context context = (Context) obj;
+            Activity activity = null;
+            while (context instanceof ContextWrapper) {
+                if (context instanceof Activity) {
+                    activity = (Activity) context;
+                    break;
+                }
+
+                context = ((ContextWrapper) context).getBaseContext();
+            }
+
+            return activity;
+        } else if (obj instanceof android.support.v4.app.Fragment) {
+            return ((android.support.v4.app.Fragment) obj).getActivity();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && obj instanceof Fragment) {
+            return ((Fragment) obj).getActivity();
+        }
+        return null;
     }
 }

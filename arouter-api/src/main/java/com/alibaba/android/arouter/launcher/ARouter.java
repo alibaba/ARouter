@@ -1,8 +1,11 @@
 package com.alibaba.android.arouter.launcher;
 
 import android.app.Application;
+import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.facade.Postcard;
@@ -180,6 +183,17 @@ public final class ARouter {
      * @param callback    cb
      */
     public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
-        return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
+        return _ARouter.getInstance().navigation(mContext, null, postcard, requestCode, callback);
     }
+
+
+    public Object navigation(android.support.v4.app.Fragment fragment, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(fragment.getContext(), fragment, postcard, requestCode, callback);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public Object navigation(Fragment fragment, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(fragment.getContext(), fragment, postcard, requestCode, callback);
+    }
+
 }
