@@ -2,6 +2,20 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 
+group = 'com.alibaba'
+version = arouter_api_version
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+//提交到远程服务器：
+            repository(url: mavenUrl) {
+                authentication(userName: mavenUn, password: mavenPwd)
+            }
+        }
+    }
+}
+
 
 
 ext {
