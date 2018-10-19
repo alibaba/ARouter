@@ -265,6 +265,7 @@ final class _ARouter {
         interceptorService = (InterceptorService) ARouter.getInstance().build("/arouter/service/interceptor").navigation();
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> T navigation(Class<? extends T> service) {
         try {
             Postcard postcard = LogisticsCenter.buildProvider(service.getName());
@@ -292,6 +293,7 @@ final class _ARouter {
      * Use router navigation.
      *
      * @param context     Activity or null.
+     * @param jumper      Context or Fragment
      * @param postcard    Route metas
      * @param requestCode RequestCode
      * @param callback    cb
@@ -369,30 +371,33 @@ final class _ARouter {
      * @param jumper fragment或context
      */
     private Object _navigation(final Object jumper, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
-        final Context currentContext;
+        final Object _jumper;
 
-        if (jumper instanceof Context) {
-            currentContext = (Context) jumper;
-        } else if (jumper instanceof android.support.v4.app.Fragment) {
-            currentContext = ((android.support.v4.app.Fragment) jumper).getContext();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && jumper instanceof Fragment) {
-            currentContext = ((Fragment) jumper).getContext();
+        final Activity activity = getActivity(jumper);
+        boolean uiContext = activity != null;
+        if (uiContext) {
+            _jumper = jumper;
         } else {
-            Activity activity = getCurrentActivity();
-            currentContext = activity == null ? mContext : activity;
+            final Activity currentActivity = getCurrentActivity();
+            if (currentActivity == null) {
+                _jumper = mContext;
+            } else {
+                uiContext = true;
+                _jumper = currentActivity;
+            }
         }
 
         switch (postcard.getType()) {
             case ACTIVITY:
                 // Build intent
-                final Intent intent = new Intent(currentContext, postcard.getDestination());
+                final Intent intent = new Intent(mContext, postcard.getDestination());
                 intent.putExtras(postcard.getExtras());
 
                 // Set flags.
                 int flags = postcard.getFlags();
                 if (-1 != flags) {
                     intent.setFlags(flags);
-                } else if (getActivity(jumper) == null) {    // Non activity, need less one flag.
+                } else if (!uiContext) {    // Non activity, need less one flag.
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
@@ -406,7 +411,7 @@ final class _ARouter {
                 runInMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        startActivity(requestCode, jumper, intent, postcard, callback);
+                        startActivity(requestCode, _jumper, intent, postcard, callback);
                     }
                 });
 
@@ -463,7 +468,8 @@ final class _ARouter {
     private void startActivity(int requestCode, Object jumper, Intent intent, Postcard postcard, NavigationCallback callback) {
         if (jumper instanceof Context) {
             if (requestCode >= 0) {  // Need start for result
-                ActivityCompat.startActivityForResult((Activity) jumper, intent, requestCode, postcard.getOptionsBundle());
+                ActivityCompat.startActivityForResult(getActivityByContext((Context) jumper)
+                        , intent, requestCode, postcard.getOptionsBundle());
             } else {
                 ActivityCompat.startActivity((Context) jumper, intent, postcard.getOptionsBundle());
             }
@@ -502,23 +508,27 @@ final class _ARouter {
         if (obj instanceof Activity) {
             return (Activity) obj;
         } else if (obj instanceof Context) {
-            Context context = (Context) obj;
-            Activity activity = null;
-            while (context instanceof ContextWrapper) {
-                if (context instanceof Activity) {
-                    activity = (Activity) context;
-                    break;
-                }
-
-                context = ((ContextWrapper) context).getBaseContext();
-            }
-
-            return activity;
+            return getActivityByContext((Context) obj);
         } else if (obj instanceof android.support.v4.app.Fragment) {
             return ((android.support.v4.app.Fragment) obj).getActivity();
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && obj instanceof Fragment) {
             return ((Fragment) obj).getActivity();
         }
         return null;
+    }
+
+
+    private Activity getActivityByContext(Context context) {
+        Activity activity = null;
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                activity = (Activity) context;
+                break;
+            }
+
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+
+        return activity;
     }
 }
