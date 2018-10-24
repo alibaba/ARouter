@@ -96,9 +96,9 @@ public class InterceptorProcessor extends AbstractProcessor {
             logger.info("The user has configuration the module name, it was [" + moduleName + "]");
         } else {
             logger.error("These no module name, at 'build.gradle', like :\n" +
-                    "apt {\n" +
-                    "    arguments {\n" +
-                    "        moduleName project.getName();\n" +
+                    "javaCompileOptions {\n" +
+                    "    annotationProcessorOptions {\n" +
+                    "        arguments = [AROUTER_MODULE_NAME: project.getName()]\n" +
                     "    }\n" +
                     "}\n");
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
