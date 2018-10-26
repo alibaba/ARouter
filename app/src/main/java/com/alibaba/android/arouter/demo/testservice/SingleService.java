@@ -13,7 +13,7 @@ import com.alibaba.android.arouter.facade.template.IProvider;
  * @version 1.0
  * @since 2017/4/24 下午9:04
  */
-@Route(path = "/service/single")
+@Route(path = "/yourservicegroupname/single")
 public class SingleService implements IProvider {
 
     Context mContext;

@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation();
                 break;
             case R.id.navByName:
-                ((HelloService) ARouter.getInstance().build("/service/hello").navigation()).sayHello("mike");
+                ((HelloService) ARouter.getInstance().build("/yourservicegroupname/hello").navigation()).sayHello("mike");
                 break;
             case R.id.navByType:
                 ARouter.getInstance().navigation(HelloService.class).sayHello("mike");
