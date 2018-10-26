@@ -185,7 +185,7 @@ public class Test1Activity extends Activity {
 }
 
 // If you need to pass a custom object, Create a new class(Not the custom object class),implement the SerializationService, And use the @Route annotation annotation, E.g:
-@Route(path = "/service/json")
+@Route(path = "/yourservicegroupname/json")
 public class JsonServiceImpl implements SerializationService {
     @Override
     public void init(Context context) {
@@ -269,7 +269,7 @@ public interface HelloService extends IProvider {
     String sayHello(String name);
 }
 
-@Route(path = "/service/hello", name = "test service")
+@Route(path = "/yourservicegroupname/hello", name = "test service")
 public class HelloServiceImpl implements HelloService {
 
     @Override
@@ -290,7 +290,7 @@ public class Test {
     @Autowired
     HelloService helloService;
 
-    @Autowired(name = "/service/hello")
+    @Autowired(name = "/yourservicegroupname/hello")
     HelloService helloService2;
 
     HelloService helloService3;
@@ -308,7 +308,7 @@ public class Test {
 
         // 2. Discovering services using dependency lookup, the following two methods are byName and byType
         helloService3 = ARouter.getInstance().navigation(HelloService.class);
-        helloService4 = (HelloService) ARouter.getInstance().build("/service/hello").navigation();
+        helloService4 = (HelloService) ARouter.getInstance().build("/yourservicegroupname/hello").navigation();
         helloService3.sayHello("Vergil");
         helloService4.sayHello("Vergil");
     }
