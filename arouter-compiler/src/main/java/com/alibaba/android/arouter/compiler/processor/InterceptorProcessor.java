@@ -42,6 +42,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.IINTERCEPTOR_GRO
 import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_INTERCEPTOR;
+import static com.alibaba.android.arouter.compiler.utils.Consts.NO_MODULE_NAME_TIPS;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
@@ -95,12 +96,7 @@ public class InterceptorProcessor extends AbstractProcessor {
             moduleName = moduleName.replaceAll("[^0-9a-zA-Z_]+", "");
             logger.info("The user has configuration the module name, it was [" + moduleName + "]");
         } else {
-            logger.error("These no module name, at 'build.gradle', like :\n" +
-                    "apt {\n" +
-                    "    arguments {\n" +
-                    "        moduleName project.getName();\n" +
-                    "    }\n" +
-                    "}\n");
+            logger.error(NO_MODULE_NAME_TIPS);
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
         }
 

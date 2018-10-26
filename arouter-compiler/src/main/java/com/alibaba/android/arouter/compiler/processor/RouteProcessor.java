@@ -64,6 +64,7 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
+import static com.alibaba.android.arouter.compiler.utils.Consts.NO_MODULE_NAME_TIPS;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_DOCS;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
@@ -130,17 +131,7 @@ public class RouteProcessor extends AbstractProcessor {
 
             logger.info("The user has configuration the module name, it was [" + moduleName + "]");
         } else {
-            logger.error("These no module name, at 'build.gradle', like :\n" +
-                    "android {\n" +
-                    "    defaultConfig {\n" +
-                    "        ...\n" +
-                    "        javaCompileOptions {\n" +
-                    "            annotationProcessorOptions {\n" +
-                    "                arguments = [AROUTER_MODULE_NAME: project.getName()]\n" +
-                    "            }\n" +
-                    "        }\n" +
-                    "    }\n" +
-                    "}\n");
+            logger.error(NO_MODULE_NAME_TIPS);
             throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
         }
 
