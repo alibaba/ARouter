@@ -100,6 +100,7 @@ public final class ARouter {
         _ARouter.enableAutoInject();
     }
 
+    @Deprecated
     public static boolean canAutoInject() {
         return _ARouter.canAutoInject();
     }
