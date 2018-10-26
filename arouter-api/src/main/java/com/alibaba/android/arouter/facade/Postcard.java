@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -19,8 +18,6 @@ import com.alibaba.android.arouter.facade.template.IProvider;
 import com.alibaba.android.arouter.launcher.ARouter;
 
 import java.io.Serializable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -190,31 +187,6 @@ public final class Postcard extends RouteMeta {
         return this;
     }
 
-    @IntDef({
-            Intent.FLAG_ACTIVITY_SINGLE_TOP,
-            Intent.FLAG_ACTIVITY_NEW_TASK,
-            Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-            Intent.FLAG_DEBUG_LOG_RESOLUTION,
-            Intent.FLAG_FROM_BACKGROUND,
-            Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT,
-            Intent.FLAG_ACTIVITY_CLEAR_TASK,
-            Intent.FLAG_ACTIVITY_CLEAR_TOP,
-            Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS,
-            Intent.FLAG_ACTIVITY_FORWARD_RESULT,
-            Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY,
-            Intent.FLAG_ACTIVITY_MULTIPLE_TASK,
-            Intent.FLAG_ACTIVITY_NO_ANIMATION,
-            Intent.FLAG_ACTIVITY_NO_USER_ACTION,
-            Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP,
-            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED,
-            Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
-            Intent.FLAG_ACTIVITY_TASK_ON_HOME,
-            Intent.FLAG_RECEIVER_REGISTERED_ONLY
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface FlagInt {
-    }
-
     /**
      * Set special flags controlling how this intent is handled.  Most values
      * here depend on the type of component being executed by the Intent,
@@ -223,8 +195,22 @@ public final class Postcard extends RouteMeta {
      * FLAG_RECEIVER_* flags are all for use with
      * {@link Context#sendBroadcast(Intent) Context.sendBroadcast()}.
      */
-    public Postcard withFlags(@FlagInt int flag) {
+    public Postcard withFlags(int flag) {
         this.flags = flag;
+        return this;
+    }
+
+    /**
+     * Add additional flags to the intent (or with existing flags
+     * value).
+     *
+     * @param flags The new flags to set.
+     * @return Returns the same Intent object, for chaining multiple calls
+     * into a single statement.
+     * @see #withFlags
+     */
+    public Postcard addFlags(int flags) {
+        this.flags |= flags;
         return this;
     }
 
@@ -605,13 +591,16 @@ public final class Postcard extends RouteMeta {
                 "}\n" +
                 super.toString();
     }
+
     //增加设置intent的action
     private String action;
-    public String getAction(){
+
+    public String getAction() {
         return action;
     }
-    public Postcard withAction(String action){
-        this.action=action;
+
+    public Postcard withAction(String action) {
+        this.action = action;
         return this;
     }
 }
