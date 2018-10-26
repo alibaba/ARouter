@@ -416,16 +416,15 @@ final class _ARouter {
 
     /**
      * Start activity
-     *
-     * @param requestCode
-     * @param currentContext
-     * @param intent
-     * @param postcard
-     * @param callback
+     * @see ActivityCompat
      */
     private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
         if (requestCode >= 0) {  // Need start for result
-            ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+            if (currentContext instanceof Activity) {
+                ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+            } else {
+                logger.warning(Consts.TAG, "Must use [navigation(activity, ...)] to support [startActivityForResult]");
+            }
         } else {
             ActivityCompat.startActivity(currentContext, intent, postcard.getOptionsBundle());
         }
