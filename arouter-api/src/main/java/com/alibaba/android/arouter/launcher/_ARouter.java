@@ -465,7 +465,7 @@ final class _ARouter {
      * @param postcard
      * @param callback
      */
-    private void startActivity(int requestCode, Object jumper, Intent intent, Postcard postcard, NavigationCallback callback) {
+     private void startActivity(int requestCode, Object jumper, Intent intent, Postcard postcard, NavigationCallback callback) {
         if (jumper instanceof Context) {
             if (requestCode >= 0) {  // Need start for result
                 ActivityCompat.startActivityForResult(getActivityByContext((Context) jumper)
@@ -503,7 +503,7 @@ final class _ARouter {
             callback.onArrival(postcard);
         }
     }
-
+  
     private Activity getActivity(Object obj) {
         if (obj instanceof Activity) {
             return (Activity) obj;

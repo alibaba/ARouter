@@ -58,6 +58,17 @@ public class Consts {
 
     // Log
     static final String PREFIX_OF_LOGGER = PROJECT + "::Compiler ";
+    public static final String NO_MODULE_NAME_TIPS = "These no module name, at 'build.gradle', like :\n" +
+            "android {\n" +
+            "    defaultConfig {\n" +
+            "        ...\n" +
+            "        javaCompileOptions {\n" +
+            "            annotationProcessorOptions {\n" +
+            "                arguments = [AROUTER_MODULE_NAME: project.getName()]\n" +
+            "            }\n" +
+            "        }\n" +
+            "    }\n" +
+            "}\n";
 
     // Options of processor
     public static final String KEY_MODULE_NAME = "AROUTER_MODULE_NAME";

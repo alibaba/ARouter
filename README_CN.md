@@ -189,7 +189,7 @@ public class Test1Activity extends Activity {
 
 
 // 如果需要传递自定义对象，新建一个类（并非自定义对象类），然后实现 SerializationService,并使用@Route注解标注(方便用户自行选择序列化方式)，例如：
-@Route(path = "/service/json")
+@Route(path = "/yourservicegroupname/json")
 public class JsonServiceImpl implements SerializationService {
     @Override
     public void init(Context context) {
@@ -279,7 +279,7 @@ public interface HelloService extends IProvider {
 }
 
 // 实现接口
-@Route(path = "/service/hello", name = "测试服务")
+@Route(path = "/yourservicegroupname/hello", name = "测试服务")
 public class HelloServiceImpl implements HelloService {
 
     @Override
@@ -300,7 +300,7 @@ public class Test {
     @Autowired
     HelloService helloService;
 
-    @Autowired(name = "/service/hello")
+    @Autowired(name = "/yourservicegroupname/hello")
     HelloService helloService2;
 
     HelloService helloService3;
@@ -319,7 +319,7 @@ public class Test {
 
 	// 2. 使用依赖查找的方式发现服务，主动去发现服务并使用，下面两种方式分别是byName和byType
 	helloService3 = ARouter.getInstance().navigation(HelloService.class);
-	helloService4 = (HelloService) ARouter.getInstance().build("/service/hello").navigation();
+	helloService4 = (HelloService) ARouter.getInstance().build("/yourservicegroupname/hello").navigation();
 	helloService3.sayHello("Vergil");
 	helloService4.sayHello("Vergil");
     }
