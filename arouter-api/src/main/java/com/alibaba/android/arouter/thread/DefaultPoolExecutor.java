@@ -28,7 +28,7 @@ public class DefaultPoolExecutor extends ThreadPoolExecutor {
     private static final int MAX_THREAD_COUNT = INIT_THREAD_COUNT;
     private static final long SURPLUS_THREAD_LIFE = 30L;
 
-    private static DefaultPoolExecutor instance;
+    private static volatile DefaultPoolExecutor instance;
 
     public static DefaultPoolExecutor getInstance() {
         if (null == instance) {
