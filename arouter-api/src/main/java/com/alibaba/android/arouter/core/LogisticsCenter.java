@@ -181,14 +181,16 @@ public class LogisticsCenter {
                 logger.info(TAG, "Find router map finished, map size = " + routerMap.size() + ", cost " + (System.currentTimeMillis() - startInit) + " ms.");
                 startInit = System.currentTimeMillis();
 
+                //modifed by hanshengjian 2018/11/8
+                //join strings in advance
                 for (String className : routerMap) {
-                    if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_ROOT)) {
+                    if (className.startsWith(Consts.PRE_ROUTE_ROOT)) {
                         // This one of root elements, load root.
                         ((IRouteRoot) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.groupsIndex);
-                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_INTERCEPTORS)) {
+                    } else if (className.startsWith(Consts.PRE_INTERCEPTOR_GROUP)) {
                         // Load interceptorMeta
                         ((IInterceptorGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.interceptorsIndex);
-                    } else if (className.startsWith(ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR + SUFFIX_PROVIDERS)) {
+                    } else if (className.startsWith(Consts.PRE_PROVIDER_GROUP)) {
                         // Load providerIndex
                         ((IProviderGroup) (Class.forName(className).getConstructor().newInstance())).loadInto(Warehouse.providersIndex);
                     }

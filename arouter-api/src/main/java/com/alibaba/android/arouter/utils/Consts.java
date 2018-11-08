@@ -23,4 +23,10 @@ public final class Consts {
 
     public static final String LAST_VERSION_NAME = "LAST_VERSION_NAME";
     public static final String LAST_VERSION_CODE = "LAST_VERSION_CODE";
+
+    //modified by hanshengjian 2018/11/8
+    public static final String PRE_BASE = ROUTE_ROOT_PAKCAGE + DOT + SDK_NAME + SEPARATOR;
+    public static final String PRE_ROUTE_ROOT = PRE_BASE + SUFFIX_ROOT;
+    public static final String PRE_INTERCEPTOR_GROUP = PRE_BASE + SUFFIX_INTERCEPTORS;
+    public static final String PRE_PROVIDER_GROUP = PRE_BASE + SUFFIX_PROVIDERS;
 }
