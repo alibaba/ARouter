@@ -29,7 +29,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 8. Supports users to specify global demotion and local demotion strategies
 9. Activity, interceptor and service can be automatically registered to the framework
 10. Support multiple ways to configure transition animation
-11. Support for fragement
+11. Support for fragment
 12. Full kotlin support (Look at Other#2)
 13. **Generate route doc support**
 
