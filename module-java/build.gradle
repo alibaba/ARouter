@@ -1,9 +1,10 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile project(':arouter-api')
+    implementation project(':arouter-annotation')
+    implementation project(':arouter-api')
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
     annotationProcessor project(':arouter-compiler')
-    compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)

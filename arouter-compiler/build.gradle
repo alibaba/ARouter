@@ -14,15 +14,15 @@ compileJava {
 }
 
 dependencies {
-    compile 'com.alibaba:arouter-annotation:1.0.6'
+    implementation 'com.alibaba:arouter-annotation:1.0.6'
 
-    compile 'com.google.auto.service:auto-service:1.0-rc2'
-    compile 'com.squareup:javapoet:1.7.0'
+    implementation 'com.google.auto.service:auto-service:1.0-rc3'
+    implementation 'com.squareup:javapoet:1.8.0'
 
-    compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'org.apache.commons:commons-collections4:4.1'
+    implementation 'org.apache.commons:commons-lang3:3.5'
+    implementation 'org.apache.commons:commons-collections4:4.1'
 
-    compile 'com.alibaba:fastjson:1.2.48'
+    implementation 'com.alibaba:fastjson:1.2.48'
 }
 
 apply from: '../install.gradle'
