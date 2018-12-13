@@ -1,21 +1,18 @@
 <idea-plugin>
-    <id>com.alibaba.android.arouter</id>
+    <id>arouter-roadsign</id>
     <name>Alibaba ARouter Idea Plugin</name>
-    <description>ARouter idea plugin support.</description>
-    <vendor>alibaba</vendor>
-    <version>1.0.0</version>
+    <vendor email="zhilong.liu@aliyun.com" url="https://www.alibaba.com">Alibaba</vendor>
 
-    <change-notes>
-        <![CDATA[
-            <ul>
-                1.0.0
-                <li>Support navigation to target class.</li>
-            </ul>
-        ]]>
-    </change-notes>
-    <idea-version since-build="141.0"/>
-    <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.lang</depends>
-    <depends>com.intellij.modules.vcs</depends>
-    <depends>com.intellij.modules.xml</depends>
+    <description><![CDATA[
+    Support to track navigation target.
+    ]]></description>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <codeInsight.lineMarkerProvider language="JAVA"
+                                        implementationClass="com.alibaba.android.arouter.idea.extensions.NavigationLineMarker"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
 </idea-plugin>
