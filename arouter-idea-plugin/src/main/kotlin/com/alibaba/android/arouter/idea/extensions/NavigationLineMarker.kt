@@ -1,11 +1,5 @@
 package com.alibaba.android.arouter.idea.extensions
 
-import com.alibaba.android.arouter.idea.extensions.Const.NOTIFY_NO_TARGET_TIPS
-import com.alibaba.android.arouter.idea.extensions.Const.NOTIFY_SERVICE_NAME
-import com.alibaba.android.arouter.idea.extensions.Const.NOTIFY_TITLE
-import com.alibaba.android.arouter.idea.extensions.Const.ROUTE_ANNOTATION_NAME
-import com.alibaba.android.arouter.idea.extensions.Const.SDK_NAME
-import com.alibaba.android.arouter.idea.extensions.Const.navigationOnIcon
 import com.intellij.codeHighlighting.Pass
 import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
@@ -15,6 +9,7 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationType
 import com.intellij.notification.Notifications
 import com.intellij.openapi.editor.markup.GutterIconRenderer
+import com.intellij.openapi.util.IconLoader
 import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.java.PsiMethodCallExpressionImpl
 import com.intellij.psi.search.GlobalSearchScope
@@ -46,25 +41,31 @@ class NavigationLineMarker : LineMarkerProviderDescriptor(), GutterIconNavigatio
     override fun navigate(e: MouseEvent?, psiElement: PsiElement?) {
         if (psiElement is PsiMethodCallExpression) {
             val psiExpressionList = (psiElement as PsiMethodCallExpressionImpl).argumentList
-            if (psiExpressionList.expressionCount == 1) {
+            if (psiExpressionList.expressions.size == 1) {
                 // Support `build(path)` only now.
 
-                val targetPath = psiExpressionList.children[1].text.replace("\"", "")
+                val targetPath = psiExpressionList.expressions[0].text.replace("\"", "")
                 val fullScope = GlobalSearchScope.allScope(psiElement.project)
                 val routeAnnotationWrapper = AnnotatedMembersSearch.search(getAnnotationWrapper(psiElement, fullScope)
                         ?: return, fullScope).findAll()
                 val target = routeAnnotationWrapper.find {
-                    it.annotations.map { it.findAttributeValue("path")?.text?.replace("\"", "") }.contains(targetPath)
+                    it.modifierList?.annotations?.map { it.findAttributeValue("path")?.text?.replace("\"", "") }?.contains(targetPath)
+                            ?: false
                 }
 
-                if (null == target) {
-                    Notifications.Bus.notify(Notification(NOTIFY_SERVICE_NAME, NOTIFY_TITLE, NOTIFY_NO_TARGET_TIPS, NotificationType.WARNING))
-                } else {
+                if (null != target) {
                     // Redirect to target.
                     NavigationItem::class.java.cast(target).navigate(true)
+                    return
                 }
             }
         }
+
+        notifyNotFound()
+    }
+
+    private fun notifyNotFound() {
+        Notifications.Bus.notify(Notification(NOTIFY_SERVICE_NAME, NOTIFY_TITLE, NOTIFY_NO_TARGET_TIPS, NotificationType.WARNING))
     }
 
     private fun getAnnotationWrapper(psiElement: PsiElement?, scope: GlobalSearchScope): PsiClass? {
@@ -107,6 +108,18 @@ class NavigationLineMarker : LineMarkerProviderDescriptor(), GutterIconNavigatio
         psiClass.supers.find { it.name == SDK_NAME } ?: return false
 
         return true
+    }
+
+    companion object {
+        const val ROUTE_ANNOTATION_NAME = "com.alibaba.android.arouter.facade.annotation.Route"
+        const val SDK_NAME = "ARouter"
+
+        // Notify
+        const val NOTIFY_SERVICE_NAME = "ARouter Plugin Tips"
+        const val NOTIFY_TITLE = "Road Sign"
+        const val NOTIFY_NO_TARGET_TIPS = "No destination found or unsupported type."
+
+        val navigationOnIcon = IconLoader.getIcon("/icon/outline_my_location_black_18dp.png")
     }
 
     // I'm 100% sure this point can not made memory leak.
