@@ -50,16 +50,14 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
     annotationProcessor project(':arouter-compiler')
-    compile project(':arouter-api')
-    compile project(':module-java')
-    compile project(':module-kotlin')
-    compile project(':arouter-annotation')
+    implementation project(':arouter-api')
+    implementation project(':module-java')
+    implementation project(':module-kotlin')
+    implementation project(':arouter-annotation')
 
-    compile 'com.alibaba:fastjson:1.2.9'
+    implementation 'com.alibaba:fastjson:1.2.48'
 
-    compile "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
-    compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
 }
