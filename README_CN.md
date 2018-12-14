@@ -134,7 +134,7 @@
 
     在 Android Studio 插件市场中搜索 `ARouter Helper`, 或者直接下载文档上方 `最新版本` 中列出的 `arouter-idea-plugin` zip 安装包手动安装，安装后
     插件无任何设置，可以在跳转代码的行首找到一个图标 (![navigation](https://raw.githubusercontent.com/alibaba/ARouter/develop/arouter-idea-plugin/src/main/resources/icon/outline_my_location_black_18dp.png))
-    点击改图标，即可跳转到标识了代码中路径的目标类
+    点击该图标，即可跳转到标识了代码中路径的目标类
 
 #### 四、进阶用法
 1. 通过URL跳转
