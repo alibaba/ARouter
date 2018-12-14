@@ -10,9 +10,9 @@
 
 #### Lastest version
 
-module|arouter-api|arouter-compiler|arouter-register
+module|arouter-api|arouter-compiler|arouter-register|arouter-idea-plugin
 ---|---|---|---
-version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)
+version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
 
 #### Demo
 
@@ -29,9 +29,10 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 8. Supports users to specify global demotion and local demotion strategies
 9. Activity, interceptor and service can be automatically registered to the framework
 10. Support multiple ways to configure transition animation
-11. Support for fragement
+11. Support for fragment
 12. Full kotlin support (Look at Other#2)
 13. **Generate route doc support**
+14. **Provide IDE plugin for quick navigation to target class**
 
 #### II. Classic Case
 1. Forward from external URLs to internal pages, and parsing parameters
