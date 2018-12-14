@@ -3,9 +3,10 @@ plugins {
     id "org.jetbrains.intellij" version '0.3.12'
 }
 
-//intellij {
-//    version '2018.2.6'
-//}
+intellij {
+    version support_idea_version
+    plugins 'coverage'
+}
 
 patchPluginXml {
     changeNotes """
@@ -21,8 +22,7 @@ publishPlugin {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 }
 
 compileKotlin {

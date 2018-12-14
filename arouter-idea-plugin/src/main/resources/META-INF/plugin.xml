@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>arouter-roadsign</id>
-    <name>Alibaba ARouter Idea Plugin</name>
+    <name>ARouter Helper</name>
     <vendor email="zhilong.liu@aliyun.com" url="https://www.alibaba.com">Alibaba</vendor>
 
     <description><![CDATA[
