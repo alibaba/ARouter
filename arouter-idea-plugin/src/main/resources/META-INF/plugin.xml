@@ -1,6 +1,7 @@
 <idea-plugin>
     <id>arouter-roadsign</id>
     <name>ARouter Helper</name>
+    <version>1.0.0</version>
     <vendor email="zhilong.liu@aliyun.com" url="https://www.alibaba.com">Alibaba</vendor>
     <idea-version since-build="162.0"/>
 
@@ -12,8 +13,4 @@
         <codeInsight.lineMarkerProvider language="JAVA"
                                         implementationClass="com.alibaba.android.arouter.idea.extensions.NavigationLineMarker"/>
     </extensions>
-
-    <actions>
-        <!-- Add your actions here -->
-    </actions>
 </idea-plugin>
