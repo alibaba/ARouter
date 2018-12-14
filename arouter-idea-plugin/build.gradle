@@ -5,6 +5,7 @@ plugins {
 
 intellij {
     version support_idea_version
+    updateSinceUntilBuild false
     plugins 'coverage'
 }
 
