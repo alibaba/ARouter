@@ -16,6 +16,7 @@ import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.service.SerializationService;
 import com.alibaba.android.arouter.facade.template.IProvider;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.alibaba.android.arouter.launcher.OnResultCallback;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -143,27 +144,27 @@ public final class Postcard extends RouteMeta {
      * @param context Activity and so on.
      */
     public Object navigation(Context context, NavigationCallback callback) {
-        return ARouter.getInstance().navigation(context, this, -1, callback);
+        return ARouter.getInstance().navigation(context, this, null, callback);
     }
 
     /**
      * Navigation to the route with path in postcard.
      *
-     * @param mContext    Activity and so on.
-     * @param requestCode startActivityForResult's param
+     * @param mContext       Activity and so on.
+     * @param resultCallback startActivityForResult's param
      */
-    public void navigation(Activity mContext, int requestCode) {
-        navigation(mContext, requestCode, null);
+    public void navigation(Activity mContext, OnResultCallback resultCallback) {
+        navigation(mContext, resultCallback, null);
     }
 
     /**
      * Navigation to the route with path in postcard.
      *
-     * @param mContext    Activity and so on.
-     * @param requestCode startActivityForResult's param
+     * @param mContext       Activity and so on.
+     * @param resultCallback startActivityForResult's param
      */
-    public void navigation(Activity mContext, int requestCode, NavigationCallback callback) {
-        ARouter.getInstance().navigation(mContext, this, requestCode, callback);
+    public void navigation(Activity mContext, OnResultCallback resultCallback, NavigationCallback callback) {
+        ARouter.getInstance().navigation(mContext, this, resultCallback, callback);
     }
 
     /**

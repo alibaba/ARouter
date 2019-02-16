@@ -20,6 +20,7 @@ import com.alibaba.android.arouter.demo.testservice.SingleService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
+import com.alibaba.android.arouter.launcher.OnResultCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -203,7 +204,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.normalNavigation2:
                 ARouter.getInstance()
                         .build("/test/activity2")
-                        .navigation(this, 666);
+                        .navigation(this, new OnResultCallback() {
+                            @Override
+                            public void onResult(int resultCode, Intent data) {
+                                Log.e("activityResult", String.valueOf(resultCode));
+                            }
+                        });
                 break;
             case R.id.getFragment:
                 Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
@@ -214,16 +220,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case 666:
-                Log.e("activityResult", String.valueOf(resultCode));
-                break;
-            default:
-                break;
-        }
-    }
 }

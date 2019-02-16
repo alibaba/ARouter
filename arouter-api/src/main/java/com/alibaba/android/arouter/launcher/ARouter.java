@@ -177,10 +177,10 @@ public final class ARouter {
      *
      * @param mContext    .
      * @param postcard    .
-     * @param requestCode Set for startActivityForResult
+     * @param resultCallback Set for startActivityForResult
      * @param callback    cb
      */
-    public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
-        return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
+    public Object navigation(Context mContext, Postcard postcard, OnResultCallback resultCallback, NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(mContext, postcard, resultCallback, callback);
     }
 }

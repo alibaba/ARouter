@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -270,12 +271,12 @@ final class _ARouter {
     /**
      * Use router navigation.
      *
-     * @param context     Activity or null.
-     * @param postcard    Route metas
-     * @param requestCode RequestCode
-     * @param callback    cb
+     * @param context        Activity or null.
+     * @param postcard       Route metas
+     * @param resultCallback Result callback
+     * @param callback       cb
      */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    protected Object navigation(final Context context, final Postcard postcard, final OnResultCallback resultCallback, final NavigationCallback callback) {
         try {
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
@@ -318,7 +319,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode, callback);
+                    _navigation(context, postcard, resultCallback, callback);
                 }
 
                 /**
@@ -336,13 +337,13 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode, callback);
+            return _navigation(context, postcard, resultCallback, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    private Object _navigation(final Context context, final Postcard postcard, final OnResultCallback resultCallback, final NavigationCallback callback) {
         final Context currentContext = null == context ? mContext : context;
 
         switch (postcard.getType()) {
@@ -369,7 +370,7 @@ final class _ARouter {
                 runInMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        startActivity(requestCode, currentContext, intent, postcard, callback);
+                        startActivity(resultCallback, currentContext, intent, postcard, callback);
                     }
                 });
 
@@ -416,12 +417,16 @@ final class _ARouter {
 
     /**
      * Start activity
+     *
      * @see ActivityCompat
      */
-    private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
-        if (requestCode >= 0) {  // Need start for result
-            if (currentContext instanceof Activity) {
-                ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
+    private void startActivity(OnResultCallback resultCallback, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
+        if (resultCallback != null) {  // Need start for result
+            if (currentContext instanceof FragmentActivity) {
+                $ResultFragmentV4.launch((FragmentActivity) currentContext, intent, postcard.getOptionsBundle(), resultCallback);
+            } else if (currentContext instanceof Activity) {
+                //noinspection deprecation
+                $ResultFragment.launch((Activity) currentContext, intent, postcard.getOptionsBundle(), resultCallback);
             } else {
                 logger.warning(Consts.TAG, "Must use [navigation(activity, ...)] to support [startActivityForResult]");
             }
