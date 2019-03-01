@@ -5,12 +5,12 @@ ext {
     artifact = bintrayName
     libraryName = 'ARouter compiler'
     libraryDescription = 'A compiler for ARouter to find route'
-    libraryVersion = arouter_compiler_version
+    libraryVersion = arouter_main_version
 }
 
 compileJava {
-    sourceCompatibility = '1.7'
-    targetCompatibility = '1.7'
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
 }
 
 dependencies {

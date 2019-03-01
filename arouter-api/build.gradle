@@ -5,7 +5,7 @@ ext {
     artifact = bintrayName
     libraryName = 'ARouter sdk'
     libraryDescription = 'A router for android'
-    libraryVersion = arouter_api_version
+    libraryVersion = arouter_main_version
 }
 
 android {
