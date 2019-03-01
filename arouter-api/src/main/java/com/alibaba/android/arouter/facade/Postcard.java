@@ -226,17 +226,8 @@ public final class Postcard extends RouteMeta {
      * @return current
      */
     public Postcard withObject(@Nullable String key, @Nullable Object value) {
-        // fix : if it implements 'Serializable' interface, should be use 'withSerializable' instead of 'withObject'
-        if (value instanceof Serializable) {
-            mBundle.putSerializable(key, (Serializable) value);
-        } else {
-            if (null == serializationService) {
-                serializationService = ARouter.getInstance().navigation(SerializationService.class);
-            }
-
-            mBundle.putString(key, serializationService.object2Json(value));
-        }
-
+        serializationService = ARouter.getInstance().navigation(SerializationService.class);
+        mBundle.putString(key, serializationService.object2Json(value));
         return this;
     }
 
