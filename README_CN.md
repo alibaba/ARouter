@@ -169,7 +169,7 @@
     </activity>
     ```
 
-2. 解析URL中的参数
+2. 解析参数
     ``` java
     // 为每一个参数声明一个字段，并使用 @Autowired 标注
     // URL中不能传递Parcelable类型数据，通过ARouter api可以传递Parcelable对象
@@ -179,11 +179,25 @@
         public String name;
         @Autowired
         int age;
-        @Autowired(name = "girl") // 通过name来映射URL中的不同参数
+        
+        // 通过name来映射URL中的不同参数
+        @Autowired(name = "girl") 
         boolean boy;
+        
+        // 支持解析自定义对象，URL中使用json传递
         @Autowired
-        TestObj obj;    // 支持解析自定义对象，URL中使用json传递
-
+        TestObj obj;      
+        
+        // 使用 withObject 传递 List 和 Map 的实现了
+        // Serializable 接口的实现类(ArrayList/HashMap)
+        // 的时候，接收该对象的地方不能标注具体的实现类类型
+        // 应仅标注为 List 或 Map，否则会影响序列化中类型
+        // 的判断, 其他类似情况需要同样处理        
+        @Autowired
+        List<TestObj> list;
+        @Autowired
+        Map<String, List<TestObj>> map;
+        
         @Override
         protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

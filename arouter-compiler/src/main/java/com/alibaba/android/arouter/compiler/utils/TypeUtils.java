@@ -29,16 +29,14 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.CHAR;
 public class TypeUtils {
 
     private Types types;
-    private Elements elements;
     private TypeMirror parcelableType;
     private TypeMirror serializableType;
 
     public TypeUtils(Types types, Elements elements) {
         this.types = types;
-        this.elements = elements;
 
-        parcelableType = this.elements.getTypeElement(PARCELABLE).asType();
-        serializableType = this.elements.getTypeElement(SERIALIZABLE).asType();
+        parcelableType = elements.getTypeElement(PARCELABLE).asType();
+        serializableType = elements.getTypeElement(SERIALIZABLE).asType();
     }
 
     /**
@@ -74,12 +72,15 @@ public class TypeUtils {
                 return TypeKind.CHAR.ordinal();
             case STRING:
                 return TypeKind.STRING.ordinal();
-            default:    // Other side, maybe the PARCELABLE or SERIALIZABLE or OBJECT.
-                if (types.isSubtype(typeMirror, parcelableType)) {  // PARCELABLE
+            default:
+                // Other side, maybe the PARCELABLE or SERIALIZABLE or OBJECT.
+                if (types.isSubtype(typeMirror, parcelableType)) {
+                    // PARCELABLE
                     return TypeKind.PARCELABLE.ordinal();
-                } else if (types.isSubtype(typeMirror, serializableType)) {  // PARCELABLE
+                } else if (types.isSubtype(typeMirror, serializableType)) {
+                    // SERIALIZABLE
                     return TypeKind.SERIALIZABLE.ordinal();
-                } else {    // For others
+                } else {
                     return TypeKind.OBJECT.ordinal();
                 }
         }
