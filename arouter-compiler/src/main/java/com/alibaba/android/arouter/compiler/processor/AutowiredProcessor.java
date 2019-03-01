@@ -1,8 +1,6 @@
 package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.utils.Consts;
-import com.alibaba.android.arouter.compiler.utils.Logger;
-import com.alibaba.android.arouter.compiler.utils.TypeUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.google.auto.service.AutoService;
@@ -26,8 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -39,16 +35,8 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 
-import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
-import static com.alibaba.android.arouter.compiler.utils.Consts.ISYRINGE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.JSON_SERVICE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
-import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_INJECT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_AUTOWIRED;
-import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
+import static com.alibaba.android.arouter.compiler.utils.Consts.*;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 /**
@@ -59,15 +47,8 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @since 2017/2/20 下午5:56
  */
 @AutoService(Processor.class)
-@SupportedOptions(KEY_MODULE_NAME)
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_AUTOWIRED})
-public class AutowiredProcessor extends AbstractProcessor {
-    private Filer mFiler;       // File util, write class file into disk.
-    private Logger logger;
-    private Types types;
-    private TypeUtils typeUtils;
-    private Elements elements;
+public class AutowiredProcessor extends BaseProcessor {
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
     private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
     private static final ClassName AndroidLog = ClassName.get("android.util", "Log");
@@ -75,14 +56,6 @@ public class AutowiredProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
-
-        mFiler = processingEnv.getFiler();                  // Generate class.
-        types = processingEnv.getTypeUtils();            // Get type utils.
-        elements = processingEnv.getElementUtils();      // Get class meta.
-
-        typeUtils = new TypeUtils(types, elements);
-
-        logger = new Logger(processingEnv.getMessager());   // Package the log utils.
 
         logger.info(">>> AutowiredProcessor init. <<<");
     }
@@ -105,12 +78,12 @@ public class AutowiredProcessor extends AbstractProcessor {
     }
 
     private void generateHelper() throws IOException, IllegalAccessException {
-        TypeElement type_ISyringe = elements.getTypeElement(ISYRINGE);
-        TypeElement type_JsonService = elements.getTypeElement(JSON_SERVICE);
-        TypeMirror iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
-        TypeMirror activityTm = elements.getTypeElement(Consts.ACTIVITY).asType();
-        TypeMirror fragmentTm = elements.getTypeElement(Consts.FRAGMENT).asType();
-        TypeMirror fragmentTmV4 = elements.getTypeElement(Consts.FRAGMENT_V4).asType();
+        TypeElement type_ISyringe = elementUtils.getTypeElement(ISYRINGE);
+        TypeElement type_JsonService = elementUtils.getTypeElement(JSON_SERVICE);
+        TypeMirror iProvider = elementUtils.getTypeElement(Consts.IPROVIDER).asType();
+        TypeMirror activityTm = elementUtils.getTypeElement(Consts.ACTIVITY).asType();
+        TypeMirror fragmentTm = elementUtils.getTypeElement(Consts.FRAGMENT).asType();
+        TypeMirror fragmentTmV4 = elementUtils.getTypeElement(Consts.FRAGMENT_V4).asType();
 
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
@@ -232,30 +205,43 @@ public class AutowiredProcessor extends AbstractProcessor {
     }
 
     private String buildStatement(String originalValue, String statement, int type, boolean isActivity) {
-        if (type == TypeKind.BOOLEAN.ordinal()) {
-            statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
-        } else if (type == TypeKind.BYTE.ordinal()) {
-            statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
-        } else if (type == TypeKind.SHORT.ordinal()) {
-            statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
-        } else if (type == TypeKind.INT.ordinal()) {
-            statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
-        } else if (type == TypeKind.LONG.ordinal()) {
-            statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
-        }else if(type == TypeKind.CHAR.ordinal()){
-            statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
-        } else if (type == TypeKind.FLOAT.ordinal()) {
-            statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
-        } else if (type == TypeKind.DOUBLE.ordinal()) {
-            statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
-        } else if (type == TypeKind.STRING.ordinal()) {
-            statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
-        } else if (type == TypeKind.SERIALIZABLE.ordinal()) {
-            statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
-        } else if (type == TypeKind.PARCELABLE.ordinal()) {
-            statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
-        } else if (type == TypeKind.OBJECT.ordinal()) {
-            statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new com.alibaba.android.arouter.facade.model.TypeWrapper<$T>(){}.getType())";
+        switch (TypeKind.values()[type]) {
+            case BOOLEAN:
+                statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
+                break;
+            case BYTE:
+                statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
+                break;
+            case SHORT:
+                statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
+                break;
+            case INT:
+                statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
+                break;
+            case LONG:
+                statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
+                break;
+            case CHAR:
+                statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
+                break;
+            case FLOAT:
+                statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
+                break;
+            case DOUBLE:
+                statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
+                break;
+            case STRING:
+                statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+                break;
+            case SERIALIZABLE:
+                statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
+                break;
+            case PARCELABLE:
+                statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
+                break;
+            case OBJECT:
+                statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new " + TYPE_WRAPPER + "<$T>(){}.getType())";
+                break;
         }
 
         return statement;

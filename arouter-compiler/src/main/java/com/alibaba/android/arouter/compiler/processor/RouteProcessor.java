@@ -2,8 +2,6 @@ package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.entity.RouteDoc;
 import com.alibaba.android.arouter.compiler.utils.Consts;
-import com.alibaba.android.arouter.compiler.utils.Logger;
-import com.alibaba.android.arouter.compiler.utils.TypeUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
@@ -35,8 +33,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -47,8 +43,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.lang.model.util.Types;
 import javax.tools.StandardLocation;
 
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
@@ -64,12 +58,10 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_ROOT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.NO_MODULE_NAME_TIPS;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_DOCS;
 import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
 import static com.alibaba.android.arouter.compiler.utils.Consts.SERVICE;
-import static com.alibaba.android.arouter.compiler.utils.Consts.VALUE_ENABLE;
 import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -81,48 +73,17 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @since 16/8/15 下午10:08
  */
 @AutoService(Processor.class)
-@SupportedOptions({KEY_MODULE_NAME, KEY_GENERATE_DOC_NAME})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
 public class RouteProcessor extends BaseProcessor {
     private Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
     private Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
 
-    private String moduleName = null;   // Module name, maybe its 'app' or others
     private TypeMirror iProvider = null;
-    private boolean generateDoc;    // If need generate router doc
     private Writer docWriter;       // Writer used for write doc
 
-    /**
-     * Initializes the processor with the processing environment by
-     * setting the {@code processingEnv} field to the value of the
-     * {@code processingEnv} argument.  An {@code
-     * IllegalStateException} will be thrown if this method is called
-     * more than once on the same object.
-     *
-     * @param processingEnv environment to access facilities the tool framework
-     *                      provides to the processor
-     * @throws IllegalStateException if this method is called more than once.
-     */
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-
-        // Attempt to get user configuration [moduleName]
-        Map<String, String> options = processingEnv.getOptions();
-        if (MapUtils.isNotEmpty(options)) {
-            moduleName = options.get(KEY_MODULE_NAME);
-            generateDoc = VALUE_ENABLE.equals(options.get(KEY_GENERATE_DOC_NAME));
-        }
-
-        if (StringUtils.isNotEmpty(moduleName)) {
-            moduleName = moduleName.replaceAll("[^0-9a-zA-Z_]+", "");
-
-            logger.info("The user has configuration the module name, it was [" + moduleName + "]");
-        } else {
-            logger.error(NO_MODULE_NAME_TIPS);
-            throw new RuntimeException("ARouter::Compiler >>> No module name, for more information, look at gradle log.");
-        }
 
         if (generateDoc) {
             try {
@@ -136,7 +97,7 @@ public class RouteProcessor extends BaseProcessor {
             }
         }
 
-        iProvider = elements.getTypeElement(Consts.IPROVIDER).asType();
+        iProvider = elementUtils.getTypeElement(Consts.IPROVIDER).asType();
 
         logger.info(">>> RouteProcessor init. <<<");
     }
@@ -172,14 +133,14 @@ public class RouteProcessor extends BaseProcessor {
 
             rootMap.clear();
 
-            TypeMirror type_Activity = elements.getTypeElement(ACTIVITY).asType();
-            TypeMirror type_Service = elements.getTypeElement(SERVICE).asType();
-            TypeMirror fragmentTm = elements.getTypeElement(FRAGMENT).asType();
-            TypeMirror fragmentTmV4 = elements.getTypeElement(Consts.FRAGMENT_V4).asType();
+            TypeMirror type_Activity = elementUtils.getTypeElement(ACTIVITY).asType();
+            TypeMirror type_Service = elementUtils.getTypeElement(SERVICE).asType();
+            TypeMirror fragmentTm = elementUtils.getTypeElement(FRAGMENT).asType();
+            TypeMirror fragmentTmV4 = elementUtils.getTypeElement(Consts.FRAGMENT_V4).asType();
 
             // Interface of ARouter
-            TypeElement type_IRouteGroup = elements.getTypeElement(IROUTE_GROUP);
-            TypeElement type_IProviderGroup = elements.getTypeElement(IPROVIDER_GROUP);
+            TypeElement type_IRouteGroup = elementUtils.getTypeElement(IROUTE_GROUP);
+            TypeElement type_IProviderGroup = elementUtils.getTypeElement(IPROVIDER_GROUP);
             ClassName routeMetaCn = ClassName.get(RouteMeta.class);
             ClassName routeTypeCn = ClassName.get(RouteType.class);
 
@@ -404,7 +365,7 @@ public class RouteProcessor extends BaseProcessor {
             JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                     TypeSpec.classBuilder(rootFileName)
                             .addJavadoc(WARNING_TIPS)
-                            .addSuperinterface(ClassName.get(elements.getTypeElement(ITROUTE_ROOT)))
+                            .addSuperinterface(ClassName.get(elementUtils.getTypeElement(ITROUTE_ROOT)))
                             .addModifiers(PUBLIC)
                             .addMethod(loadIntoMethodOfRootBuilder.build())
                             .build()
