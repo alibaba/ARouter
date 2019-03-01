@@ -47,6 +47,7 @@ public class Consts {
     private static final String FACADE_PACKAGE = "com.alibaba.android.arouter.facade";
     private static final String TEMPLATE_PACKAGE = ".template";
     private static final String SERVICE_PACKAGE = ".service";
+    private static final String MODEL_PACKAGE = ".model";
     public static final String IPROVIDER = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IProvider";
     public static final String IPROVIDER_GROUP = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IProviderGroup";
     public static final String IINTERCEPTOR = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IInterceptor";
@@ -55,6 +56,7 @@ public class Consts {
     public static final String IROUTE_GROUP = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".IRouteGroup";
     public static final String ISYRINGE = FACADE_PACKAGE + TEMPLATE_PACKAGE + ".ISyringe";
     public static final String JSON_SERVICE = FACADE_PACKAGE + SERVICE_PACKAGE + ".SerializationService";
+    public static final String TYPE_WRAPPER = FACADE_PACKAGE + MODEL_PACKAGE + ".TypeWrapper";
 
     // Log
     static final String PREFIX_OF_LOGGER = PROJECT + "::Compiler ";

@@ -84,14 +84,10 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 @SupportedOptions({KEY_MODULE_NAME, KEY_GENERATE_DOC_NAME})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
-public class RouteProcessor extends AbstractProcessor {
+public class RouteProcessor extends BaseProcessor {
     private Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
     private Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
-    private Filer mFiler;       // File util, write class file into disk.
-    private Logger logger;
-    private Types types;
-    private Elements elements;
-    private TypeUtils typeUtils;
+
     private String moduleName = null;   // Module name, maybe its 'app' or others
     private TypeMirror iProvider = null;
     private boolean generateDoc;    // If need generate router doc
@@ -111,13 +107,6 @@ public class RouteProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-
-        mFiler = processingEnv.getFiler();                  // Generate class.
-        types = processingEnv.getTypeUtils();            // Get type utils.
-        elements = processingEnv.getElementUtils();      // Get class meta.
-
-        typeUtils = new TypeUtils(types, elements);
-        logger = new Logger(processingEnv.getMessager());   // Package the log utils.
 
         // Attempt to get user configuration [moduleName]
         Map<String, String> options = processingEnv.getOptions();
