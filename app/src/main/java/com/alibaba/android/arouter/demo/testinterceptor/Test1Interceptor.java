@@ -14,7 +14,7 @@ import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.template.IInterceptor;
 
 /**
- * TODO feature
+ * 一个拦截器的例子
  *
  * @author Alex <a href="mailto:zhilong.lzl@alibaba-inc.com">Contact me.</a>
  * @version 1.0
@@ -33,6 +33,8 @@ public class Test1Interceptor implements IInterceptor {
     @Override
     public void process(final Postcard postcard, final InterceptorCallback callback) {
         if ("/test/activity4".equals(postcard.getPath())) {
+
+            // 这里的弹窗仅做举例，代码写法不具有可参考价值
             final AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.getThis());
             ab.setCancelable(false);
             ab.setTitle("温馨提醒");

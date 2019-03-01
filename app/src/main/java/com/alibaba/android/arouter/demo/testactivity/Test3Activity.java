@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.alibaba.android.arouter.demo.R;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
+import com.alibaba.android.arouter.launcher.ARouter;
 
 /**
  * 自动注入的测试用例
@@ -30,6 +31,8 @@ public class Test3Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test1);
+
+        ARouter.getInstance().inject(this);
 
         String params = String.format("name=%s, age=%s, girl=%s, high=%s", name, age, girl, high);
 
