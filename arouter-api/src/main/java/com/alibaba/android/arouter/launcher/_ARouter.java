@@ -25,6 +25,7 @@ import com.alibaba.android.arouter.facade.service.DegradeService;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.service.PathReplaceService;
 import com.alibaba.android.arouter.facade.template.ILogger;
+import com.alibaba.android.arouter.facade.template.IProvider;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
@@ -244,9 +245,9 @@ final class _ARouter {
         interceptorService = (InterceptorService) ARouter.getInstance().build("/arouter/service/interceptor").navigation();
     }
 
-    protected <T> T navigation(Class<? extends T> service) {
+    protected <T extends IProvider> T navigation(Class<? extends T> service) {
         try {
-            Postcard postcard = LogisticsCenter.buildProvider(service.getName());
+            Postcard<T> postcard = LogisticsCenter.buildProvider(service.getName());
 
             // Compatible 1.0.5 compiler sdk.
             // Earlier versions did not use the fully qualified name to get the service
@@ -260,7 +261,7 @@ final class _ARouter {
             }
 
             LogisticsCenter.completion(postcard);
-            return (T) postcard.getProvider();
+            return postcard.getProvider();
         } catch (NoRouteFoundException ex) {
             logger.warning(Consts.TAG, ex.getMessage());
             return null;
