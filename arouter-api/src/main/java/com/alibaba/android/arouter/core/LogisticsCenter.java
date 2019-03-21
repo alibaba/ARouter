@@ -215,13 +215,13 @@ public class LogisticsCenter {
      * @param serviceName interfaceName
      * @return postcard
      */
-    public static Postcard buildProvider(String serviceName) {
+    public static <T extends IProvider> Postcard<T> buildProvider(String serviceName) {
         RouteMeta meta = Warehouse.providersIndex.get(serviceName);
 
         if (null == meta) {
             return null;
         } else {
-            return new Postcard(meta.getPath(), meta.getGroup());
+            return new Postcard<>(meta.getPath(), meta.getGroup());
         }
     }
 
@@ -230,7 +230,7 @@ public class LogisticsCenter {
      *
      * @param postcard Incomplete postcard, should complete by this method.
      */
-    public synchronized static void completion(Postcard postcard) {
+    public synchronized static <T extends IProvider> void completion(Postcard<T> postcard) {
         if (null == postcard) {
             throw new NoRouteFoundException(TAG + "No postcard!");
         }
@@ -291,14 +291,14 @@ public class LogisticsCenter {
             switch (routeMeta.getType()) {
                 case PROVIDER:  // if the route is provider, should find its instance
                     // Its provider, so it must implement IProvider
-                    Class<? extends IProvider> providerMeta = (Class<? extends IProvider>) routeMeta.getDestination();
-                    IProvider instance = Warehouse.providers.get(providerMeta);
+                    Class<T> providerMeta = (Class<T>) routeMeta.getDestination();
+                    T instance = Warehouse.getProvider(providerMeta);
                     if (null == instance) { // There's no instance of this provider
-                        IProvider provider;
+                        T provider;
                         try {
                             provider = providerMeta.getConstructor().newInstance();
                             provider.init(mContext);
-                            Warehouse.providers.put(providerMeta, provider);
+                            Warehouse.putProvider(providerMeta, provider);
                             instance = provider;
                         } catch (Exception e) {
                             throw new HandlerException("Init provider failed! " + e.getMessage());

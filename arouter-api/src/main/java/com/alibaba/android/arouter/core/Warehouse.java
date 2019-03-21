@@ -24,7 +24,7 @@ class Warehouse {
     static Map<String, RouteMeta> routes = new HashMap<>();
 
     // Cache provider
-    static Map<Class, IProvider> providers = new HashMap<>();
+    private static Map<Class, IProvider> providers = new HashMap<>();
     static Map<String, RouteMeta> providersIndex = new HashMap<>();
 
     // Cache interceptor
@@ -38,5 +38,13 @@ class Warehouse {
         providersIndex.clear();
         interceptors.clear();
         interceptorsIndex.clear();
+    }
+
+    static <T extends IProvider> void putProvider(Class<T> clazz, T provider) {
+        providers.put(clazz, provider);
+    }
+
+    static <T extends IProvider> T getProvider(Class<T> clazz) {
+        return ((T) providers.get(clazz));
     }
 }

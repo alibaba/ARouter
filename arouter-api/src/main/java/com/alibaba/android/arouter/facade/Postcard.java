@@ -27,14 +27,14 @@ import java.util.ArrayList;
  * @version 1.1.0
  * @since 16/8/22 19:16
  */
-public final class Postcard extends RouteMeta {
+public final class Postcard<T extends IProvider> extends RouteMeta {
     // Base
     private Uri uri;
     private Object tag;             // A tag prepare for some thing wrong.
     private Bundle mBundle;         // Data to transform
     private int flags = -1;         // Flags of route
     private int timeout = 300;      // Navigation timeout, TimeUnit.Second
-    private IProvider provider;     // It will be set value, if this postcard was provider.
+    private T provider;     // It will be set value, if this postcard was provider.
     private boolean greenChannel;
     private SerializationService serializationService;
 
@@ -55,11 +55,11 @@ public final class Postcard extends RouteMeta {
         return exitAnim;
     }
 
-    public IProvider getProvider() {
+    public T getProvider() {
         return provider;
     }
 
-    public Postcard setProvider(IProvider provider) {
+    public Postcard setProvider(T provider) {
         this.provider = provider;
         return this;
     }

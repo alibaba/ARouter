@@ -8,6 +8,7 @@ import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.facade.template.ILogger;
+import com.alibaba.android.arouter.facade.template.IProvider;
 import com.alibaba.android.arouter.utils.Consts;
 
 import java.util.concurrent.ThreadPoolExecutor;
@@ -168,7 +169,7 @@ public final class ARouter {
      * @param <T>     return type
      * @return instance of service
      */
-    public <T> T navigation(Class<? extends T> service) {
+    public <T extends IProvider> T navigation(Class<? extends T> service) {
         return _ARouter.getInstance().navigation(service);
     }
 
