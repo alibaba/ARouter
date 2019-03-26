@@ -158,6 +158,14 @@
                 android:layout_height="wrap_content"
                 android:onClick="onClick"
                 android:text="依赖注入(参照代码)" />
+
+
+            <Button
+                android:id="@+id/loadExternalDexRoute"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClick"
+                android:text="load External dex route" />
         </LinearLayout>
 
         <LinearLayout

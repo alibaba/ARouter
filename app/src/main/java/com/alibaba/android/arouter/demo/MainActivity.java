@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alibaba.android.arouter.core.LogisticsCenter;
+import com.alibaba.android.arouter.demo.extrasdex.ExternalDexProvider;
 import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testinject.TestSerializable;
@@ -21,7 +23,9 @@ import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // 发阶段，线上开启调试模式有安全风险，可以使用BuildConfig.DEBUG
                 // 来区分环境
                 ARouter.openDebug();
+                // Add external dex( push your patch dex here)
+                LogisticsCenter.setExtraDexList(collectExtraDexPath("/data/local/tmp/arouter/external"));
                 ARouter.init(getApplication());
                 break;
             case R.id.normalNavigation:
@@ -152,6 +158,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .withObject("map", map)
                         .navigation();
                 break;
+
+            case R.id.loadExternalDexRoute:
+                // Before using outer route , you must make sure load your outer dex impl ...
+
+                ARouter.getInstance()
+                        .navigation(ExternalDexProvider.class)
+                        .doSomethings();
+                break;
+
             case R.id.navByName:
                 ((HelloService) ARouter.getInstance().build("/yourservicegroupname/hello").navigation()).sayHello("mike");
                 break;
@@ -212,6 +227,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 break;
         }
+    }
+
+    private static List<String> collectExtraDexPath(String... extraDexDir) {
+        List<String> extraDexPaths = Collections.emptyList();
+        if (extraDexDir != null) {
+            extraDexPaths = new ArrayList<>();
+
+            for (String dir : extraDexDir) {
+                File dexDir = new File(dir);
+                if (dexDir.exists() && dexDir.isDirectory()) {
+                    File[] listFiles = dexDir.listFiles();
+                    for (File dexFile : listFiles) {
+                        extraDexPaths.add(dexFile.getAbsolutePath());
+                    }
+                }
+            }
+        }
+        return extraDexPaths;
     }
 
     @Override

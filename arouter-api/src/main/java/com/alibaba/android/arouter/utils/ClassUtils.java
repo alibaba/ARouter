@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -57,10 +58,14 @@ public class ClassUtils {
      * @param packageName 包名
      * @return 所有class的集合
      */
-    public static Set<String> getFileNameByPackageName(Context context, final String packageName) throws PackageManager.NameNotFoundException, IOException, InterruptedException {
+    public static Set<String> getFileNameByPackageName(Context context, final String packageName, List<String> extraDex) throws PackageManager.NameNotFoundException, IOException, InterruptedException {
         final Set<String> classNames = new HashSet<>();
 
         List<String> paths = getSourcePaths(context);
+        if (extraDex != null) {
+            paths.addAll(extraDex);
+        }
+
         final CountDownLatch parserCtl = new CountDownLatch(paths.size());
 
         for (final String path : paths) {
