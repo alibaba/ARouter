@@ -220,14 +220,20 @@ public final class Postcard extends RouteMeta {
 
     /**
      * Set object value, the value will be convert to string by 'Fastjson'
-     *
+     * And the object must not implements Parcelable or Serializable
      * @param key   a String, or null
      * @param value a Object, or null
      * @return current
      */
     public Postcard withObject(@Nullable String key, @Nullable Object value) {
-        serializationService = ARouter.getInstance().navigation(SerializationService.class);
-        mBundle.putString(key, serializationService.object2Json(value));
+        if (value instanceof Parcelable) {//compat the compiler
+            mBundle.putParcelable(key, (Parcelable) value);
+        } else if (value instanceof Serializable) {
+            mBundle.putSerializable(key, (Serializable) value);
+        } else {
+            serializationService = ARouter.getInstance().navigation(SerializationService.class);
+            mBundle.putString(key, serializationService.object2Json(value));
+        }
         return this;
     }
 
