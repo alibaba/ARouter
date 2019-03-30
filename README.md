@@ -56,7 +56,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 
     dependencies {
         // Replace with the latest version
-        compile 'com.alibaba:arouter-api:?'
+        implementation 'com.alibaba:arouter-api:?'
         annotationProcessor 'com.alibaba:arouter-compiler:?'
         ...
     }
@@ -467,7 +467,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
     }
 
     dependencies {
-        compile 'com.alibaba:arouter-api:x.x.x'
+        implementation 'com.alibaba:arouter-api:x.x.x'
         apt 'com.alibaba:arouter-compiler:x.x.x'
         ...
     }
@@ -485,7 +485,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
     }
 
     dependencies {
-        compile 'com.alibaba:arouter-api:x.x.x'
+        implementation 'com.alibaba:arouter-api:x.x.x'
         kapt 'com.alibaba:arouter-compiler:x.x.x'
         ...
     }
