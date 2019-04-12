@@ -1,5 +1,6 @@
 package com.alibaba.android.arouter.facade.template;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,5 +16,5 @@ public interface IRouteRoot {
      * Load routes to input
      * @param routes input
      */
-    void loadInto(Map<String, Class<? extends IRouteGroup>> routes);
+    void loadInto(Map<String, List<Class<? extends IRouteGroup>>> routes);
 }

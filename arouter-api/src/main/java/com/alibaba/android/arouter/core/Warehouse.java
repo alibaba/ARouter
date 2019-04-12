@@ -20,7 +20,7 @@ import java.util.Map;
  */
 class Warehouse {
     // Cache route and metas
-    static Map<String, Class<? extends IRouteGroup>> groupsIndex = new HashMap<>();
+    static Map<String, List<Class<? extends IRouteGroup>>> groupsIndex = new HashMap<>();
     static Map<String, RouteMeta> routes = new HashMap<>();
 
     // Cache provider

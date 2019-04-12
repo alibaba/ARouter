@@ -21,6 +21,7 @@ import com.alibaba.android.arouter.utils.PackageUtils;
 import com.alibaba.android.arouter.utils.TextUtils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -237,8 +238,8 @@ public class LogisticsCenter {
 
         RouteMeta routeMeta = Warehouse.routes.get(postcard.getPath());
         if (null == routeMeta) {    // Maybe its does't exist, or didn't load.
-            Class<? extends IRouteGroup> groupMeta = Warehouse.groupsIndex.get(postcard.getGroup());  // Load route meta.
-            if (null == groupMeta) {
+            List<Class<? extends IRouteGroup>> groupMetas = Warehouse.groupsIndex.get(postcard.getGroup());  // Load route meta.
+            if (null == groupMetas || groupMetas.isEmpty()) {
                 throw new NoRouteFoundException(TAG + "There is no route match the path [" + postcard.getPath() + "], in group [" + postcard.getGroup() + "]");
             } else {
                 // Load route and cache it into memory, then delete from metas.
@@ -247,9 +248,11 @@ public class LogisticsCenter {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] starts loading, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
                     }
 
-                    IRouteGroup iGroupInstance = groupMeta.getConstructor().newInstance();
-                    iGroupInstance.loadInto(Warehouse.routes);
-                    Warehouse.groupsIndex.remove(postcard.getGroup());
+                    for (Class<? extends IRouteGroup> groupMeta : groupMetas) {
+                        IRouteGroup iGroupInstance = groupMeta.getConstructor().newInstance();
+                        iGroupInstance.loadInto(Warehouse.routes);
+                        Warehouse.groupsIndex.remove(postcard.getGroup());
+                    }
 
                     if (ARouter.debuggable()) {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] has already been loaded, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
