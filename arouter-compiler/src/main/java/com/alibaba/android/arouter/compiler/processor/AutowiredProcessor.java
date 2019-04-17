@@ -231,7 +231,7 @@ public class AutowiredProcessor extends BaseProcessor {
                 statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
                 break;
             case STRING:
-                statement += (isActivity ? ("getStringExtra($S)") : ("getString($S)"));
+                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S, " + originalValue + ")") : ("getString($S)"));
                 break;
             case SERIALIZABLE:
                 statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
