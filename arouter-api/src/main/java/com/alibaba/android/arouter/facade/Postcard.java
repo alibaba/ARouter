@@ -1,9 +1,11 @@
 package com.alibaba.android.arouter.facade;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -165,6 +167,27 @@ public final class Postcard extends RouteMeta {
     public void navigation(Activity mContext, int requestCode, NavigationCallback callback) {
         ARouter.getInstance().navigation(mContext, this, requestCode, callback);
     }
+
+
+    public void navigation(android.support.v4.app.Fragment fragment, int requestCode) {
+        navigation(fragment, requestCode, null);
+    }
+
+    public void navigation(android.support.v4.app.Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(fragment, this, requestCode, callback);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void navigation(Fragment fragment, int requestCode) {
+        navigation(fragment, requestCode, null);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void navigation(Fragment fragment, int requestCode, NavigationCallback callback) {
+        ARouter.getInstance().navigation(fragment, this, requestCode, callback);
+    }
+
+
 
     /**
      * Green channel, it will skip all of interceptors.
