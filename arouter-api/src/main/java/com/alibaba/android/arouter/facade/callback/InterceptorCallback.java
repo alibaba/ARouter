@@ -19,7 +19,7 @@ public interface InterceptorCallback {
     void onContinue(Postcard postcard);
 
     /**
-     * Interrupt process, pipeline will be destory when this method called.
+     * Interrupt process, pipeline will be destroy when this method called.
      *
      * @param exception Reson of interrupt.
      */

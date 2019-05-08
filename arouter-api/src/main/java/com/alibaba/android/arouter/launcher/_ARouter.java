@@ -20,10 +20,7 @@ import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
-import com.alibaba.android.arouter.facade.service.AutowiredService;
-import com.alibaba.android.arouter.facade.service.DegradeService;
-import com.alibaba.android.arouter.facade.service.InterceptorService;
-import com.alibaba.android.arouter.facade.service.PathReplaceService;
+import com.alibaba.android.arouter.facade.service.*;
 import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
@@ -276,6 +273,12 @@ final class _ARouter {
      * @param callback    cb
      */
     protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        PretreatmentService pretreatmentService = ARouter.getInstance().navigation(PretreatmentService.class);
+        if (null != pretreatmentService && !pretreatmentService.onPretreatment(context, postcard)) {
+            // Pretreatment failed, navigation canceled.
+            return null;
+        }
+
         try {
             LogisticsCenter.completion(postcard);
         } catch (NoRouteFoundException ex) {
@@ -295,7 +298,8 @@ final class _ARouter {
 
             if (null != callback) {
                 callback.onLost(postcard);
-            } else {    // No callback for this invoke, then we use the global degrade service.
+            } else {
+                // No callback for this invoke, then we use the global degrade service.
                 DegradeService degradeService = ARouter.getInstance().navigation(DegradeService.class);
                 if (null != degradeService) {
                     degradeService.onLost(context, postcard);
@@ -416,6 +420,7 @@ final class _ARouter {
 
     /**
      * Start activity
+     *
      * @see ActivityCompat
      */
     private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
