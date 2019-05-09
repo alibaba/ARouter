@@ -280,7 +280,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 
         @Override
         public String sayHello(String name) {
-        return "hello, " + name;
+            return "hello, " + name;
         }
 
         @Override
@@ -304,7 +304,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
         HelloService helloService4;
 
         public Test() {
-        ARouter.getInstance().inject(this);
+            ARouter.getInstance().inject(this);
         }
 
         public void testService() {
@@ -317,6 +317,22 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
             helloService4 = (HelloService) ARouter.getInstance().build("/yourservicegroupname/hello").navigation();
             helloService3.sayHello("Vergil");
             helloService4.sayHello("Vergil");
+        }
+    }
+    ```
+  
+8. Pretreatment Service
+    ``` java
+    @Route(path = "/xxx/xxx")
+    public class PretreatmentServiceImpl implements PretreatmentService {
+        @Override
+        public boolean onPretreatment(Context context, Postcard postcard) {
+            // Do something before the navigation, if you need to handle the navigation yourself, the method returns false
+        }
+
+        @Override
+        public void init(Context context) {
+    
         }
     }
     ```

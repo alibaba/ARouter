@@ -347,6 +347,23 @@
     }
     ```
 
+9. 预处理服务
+    ``` java
+    // 实现 PretreatmentService 接口，并加上一个Path内容任意的注解即可
+    @Route(path = "/xxx/xxx")
+    public class PretreatmentServiceImpl implements PretreatmentService {
+        @Override
+        public boolean onPretreatment(Context context, Postcard postcard) {
+            // 跳转前预处理，如果需要自行处理跳转，该方法返回 false 即可
+        }
+
+        @Override
+        public void init(Context context) {
+    
+        }
+    }
+    ```
+ 
 #### 五、更多功能
 
 1. 初始化中的其他设置
