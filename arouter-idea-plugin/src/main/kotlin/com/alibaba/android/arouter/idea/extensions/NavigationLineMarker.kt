@@ -15,6 +15,9 @@ import com.intellij.psi.impl.source.tree.java.PsiMethodCallExpressionImpl
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedMembersSearch
 import java.awt.event.MouseEvent
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiMethod
+import org.jetbrains.kotlin.idea.references.KtSimpleNameReference
 
 /**
  * Mark navigation target.
@@ -39,26 +42,40 @@ class NavigationLineMarker : LineMarkerProviderDescriptor(), GutterIconNavigatio
     }
 
     override fun navigate(e: MouseEvent?, psiElement: PsiElement?) {
-        if (psiElement is PsiMethodCallExpression) {
-            val psiExpressionList = (psiElement as PsiMethodCallExpressionImpl).argumentList
-            if (psiExpressionList.expressions.size == 1) {
-                // Support `build(path)` only now.
+        psiElement?: let {
+            notifyNotFound()
+            return
+        }
+        var targetPath = ""
 
-                val targetPath = psiExpressionList.expressions[0].text.replace("\"", "")
-                val fullScope = GlobalSearchScope.allScope(psiElement.project)
-                val routeAnnotationWrapper = AnnotatedMembersSearch.search(getAnnotationWrapper(psiElement, fullScope)
-                        ?: return, fullScope).findAll()
-                val target = routeAnnotationWrapper.find {
-                    it.modifierList?.annotations?.map { it.findAttributeValue("path")?.text?.replace("\"", "") }?.contains(targetPath)
-                            ?: false
-                }
+        when (psiElement.language.id) {
+            "JAVA" -> {
+                if (psiElement is PsiMethodCallExpression) {
+                    val psiExpressionList = (psiElement as PsiMethodCallExpressionImpl).argumentList
+                    if (psiExpressionList.expressions.size == 1) {
+                        // Support `build(path)` only now.
 
-                if (null != target) {
-                    // Redirect to target.
-                    NavigationItem::class.java.cast(target).navigate(true)
-                    return
+                        targetPath = psiExpressionList.expressions[0].text.replace("\"", "")
+                    }
                 }
             }
+            "kotlin" -> {
+                // TODO : Get target path from kotlin expression.
+            }
+        }
+
+        val fullScope = GlobalSearchScope.allScope(psiElement.project)
+        val routeAnnotationWrapper = AnnotatedMembersSearch.search(getAnnotationWrapper(psiElement, fullScope)
+                ?: return, fullScope).findAll()
+        val target = routeAnnotationWrapper.find {
+            it.modifierList?.annotations?.map { psiAnnotation -> psiAnnotation.findAttributeValue("path")?.text?.replace("\"", "") }?.contains(targetPath)
+                    ?: false
+        }
+
+        if (null != target) {
+            // Redirect to target.
+            NavigationItem::class.java.cast(target).navigate(true)
+            return
         }
 
         notifyNotFound()
@@ -82,16 +99,26 @@ class NavigationLineMarker : LineMarkerProviderDescriptor(), GutterIconNavigatio
      * Judge whether the code used for navigation.
      */
     private fun isNavigationCall(psiElement: PsiElement): Boolean {
-        if (psiElement is PsiCallExpression) {
-            val method = psiElement.resolveMethod() ?: return false
-            val parent = method.parent
+        when (psiElement.language.id) {
+            "JAVA" -> {
+                if (psiElement is PsiCallExpression) {
+                    val method = psiElement.resolveMethod() ?: return false
+                    val parent = method.parent
 
-            if (method.name == "build" && parent is PsiClass) {
-                if (isClassOfARouter(parent)) {
-                    return true
+                    if (method.name == "build" && parent is PsiClass) {
+                        if (isClassOfARouter(parent)) {
+                            return true
+                        }
+                    }
+                }
+            }
+            "kotlin" -> {
+                if (psiElement.text == "build") {
+                    // TODO : return true when it was ARouter navigation call.
                 }
             }
         }
+
         return false
     }
 
@@ -122,6 +149,5 @@ class NavigationLineMarker : LineMarkerProviderDescriptor(), GutterIconNavigatio
         val navigationOnIcon = IconLoader.getIcon("/icon/outline_my_location_black_18dp.png")
     }
 
-    // I'm 100% sure this point can not made memory leak.
     private var routeAnnotationWrapper: PsiClass? = null
 }

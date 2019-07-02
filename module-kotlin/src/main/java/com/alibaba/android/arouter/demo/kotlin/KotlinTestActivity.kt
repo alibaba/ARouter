@@ -23,4 +23,8 @@ class KotlinTestActivity : Activity() {
 
         content.text = "name = $name, age = $age"
     }
+
+    private fun testNavigationPlugin() {
+        ARouter.getInstance().build("/test/activity2").navigation()
+    }
 }
