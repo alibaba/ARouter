@@ -30,6 +30,8 @@ proguard/
 *.iml
 /*.ipr
 /*.iws
+.project
+.classpath
 
 # Eclipse Files
 /target
