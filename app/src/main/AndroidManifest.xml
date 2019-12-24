@@ -9,7 +9,7 @@
         android:theme="@style/Base.Theme.AppCompat">
         <activity android:name=".SchemeFilterActivity">
 
-            <!-- Schame -->
+            <!-- Scheme -->
             <intent-filter>
                 <data
                     android:host="m.aliyun.com"
