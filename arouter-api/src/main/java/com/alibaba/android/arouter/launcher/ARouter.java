@@ -149,7 +149,7 @@ public final class ARouter {
      */
     @Deprecated
     public Postcard build(String path, String group) {
-        return _ARouter.getInstance().build(path, group);
+        return _ARouter.getInstance().build(path, group, false);
     }
 
     /**
