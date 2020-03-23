@@ -45,7 +45,7 @@ public class InterceptorServiceImpl implements InterceptorService {
                 public void run() {
                     CancelableCountDownLatch interceptorCounter = new CancelableCountDownLatch(Warehouse.interceptors.size());
                     try {
-                        _excute(0, interceptorCounter, postcard);
+                        _execute(0, interceptorCounter, postcard);
                         interceptorCounter.await(postcard.getTimeout(), TimeUnit.SECONDS);
                         if (interceptorCounter.getCount() > 0) {    // Cancel the navigation this time, if it hasn't return anythings.
                             callback.onInterrupt(new HandlerException("The interceptor processing timed out."));
@@ -71,7 +71,7 @@ public class InterceptorServiceImpl implements InterceptorService {
      * @param counter  interceptor counter
      * @param postcard routeMeta
      */
-    private static void _excute(final int index, final CancelableCountDownLatch counter, final Postcard postcard) {
+    private static void _execute(final int index, final CancelableCountDownLatch counter, final Postcard postcard) {
         if (index < Warehouse.interceptors.size()) {
             IInterceptor iInterceptor = Warehouse.interceptors.get(index);
             iInterceptor.process(postcard, new InterceptorCallback() {
@@ -79,7 +79,7 @@ public class InterceptorServiceImpl implements InterceptorService {
                 public void onContinue(Postcard postcard) {
                     // Last interceptor excute over with no exception.
                     counter.countDown();
-                    _excute(index + 1, counter, postcard);  // When counter is down, it will be execute continue ,but index bigger than interceptors size, then U know.
+                    _execute(index + 1, counter, postcard);  // When counter is down, it will be execute continue ,but index bigger than interceptors size, then U know.
                 }
 
                 @Override
