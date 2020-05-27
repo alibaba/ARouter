@@ -189,9 +189,8 @@ public class RouteProcessor extends BaseProcessor {
                 Route route = element.getAnnotation(Route.class);
                 RouteMeta routeMeta;
 
-                if (types.isSubtype(tm, type_Activity)) {                 // Activity
-                    logger.info(">>> Found activity route: " + tm.toString() + " <<<");
-
+                // Activity or Fragment
+                if (types.isSubtype(tm, type_Activity) || types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
                     // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
                     Map<String, Autowired> injectConfig = new HashMap<>();
@@ -204,7 +203,17 @@ public class RouteProcessor extends BaseProcessor {
                             injectConfig.put(injectName, paramConfig);
                         }
                     }
-                    routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
+
+                    if (types.isSubtype(tm, type_Activity)) {
+                        // Activity
+                        logger.info(">>> Found activity route: " + tm.toString() + " <<<");
+                        routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
+                    } else {
+                        // Fragment
+                        logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
+                        routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), paramsType);
+                    }
+
                     routeMeta.setInjectConfig(injectConfig);
                 } else if (types.isSubtype(tm, iProvider)) {         // IProvider
                     logger.info(">>> Found provider route: " + tm.toString() + " <<<");
@@ -212,9 +221,6 @@ public class RouteProcessor extends BaseProcessor {
                 } else if (types.isSubtype(tm, type_Service)) {           // Service
                     logger.info(">>> Found service route: " + tm.toString() + " <<<");
                     routeMeta = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
-                } else if (types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
-                    logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
-                    routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), null);
                 } else {
                     throw new RuntimeException("The @Route is marked on unsupported class, look at [" + tm.toString() + "].");
                 }
