@@ -216,7 +216,7 @@ public class RouteProcessor extends BaseProcessor {
                     logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
                     routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), null);
                 } else {
-                    throw new RuntimeException("ARouter::Compiler >>> Found unsupported class type, type = [" + types.toString() + "].");
+                    throw new RuntimeException("The @Route is marked on unsupported class, look at [" + tm.toString() + "].");
                 }
 
                 categories(routeMeta);
