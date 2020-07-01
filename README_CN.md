@@ -139,8 +139,8 @@
 #### 四、进阶用法
 1. 通过URL跳转
     ``` java
-    // 新建一个Activity用于监听Schame事件,之后直接把url传递给ARouter即可
-    public class SchameFilterActivity extends Activity {
+    // 新建一个Activity用于监听Scheme事件,之后直接把url传递给ARouter即可
+    public class SchemeFilterActivity extends Activity {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,8 +154,8 @@
 
     AndroidManifest.xml
     ``` xml
-    <activity android:name=".activity.SchameFilterActivity">
-        <!-- Schame -->
+    <activity android:name=".activity.SchemeFilterActivity">
+        <!-- Scheme -->
         <intent-filter>
             <data
             android:host="m.aliyun.com"

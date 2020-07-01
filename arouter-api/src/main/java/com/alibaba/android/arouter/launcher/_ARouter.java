@@ -181,7 +181,7 @@ final class _ARouter {
             if (null != pService) {
                 path = pService.forString(path);
             }
-            return build(path, extractGroup(path));
+            return build(path, extractGroup(path), true);
         }
     }
 
@@ -203,13 +203,15 @@ final class _ARouter {
     /**
      * Build postcard by path and group
      */
-    protected Postcard build(String path, String group) {
+    protected Postcard build(String path, String group, Boolean afterReplace) {
         if (TextUtils.isEmpty(path) || TextUtils.isEmpty(group)) {
             throw new HandlerException(Consts.TAG + "Parameter is invalid!");
         } else {
-            PathReplaceService pService = ARouter.getInstance().navigation(PathReplaceService.class);
-            if (null != pService) {
-                path = pService.forString(path);
+            if (!afterReplace) {
+                PathReplaceService pService = ARouter.getInstance().navigation(PathReplaceService.class);
+                if (null != pService) {
+                    path = pService.forString(path);
+                }
             }
             return new Postcard(path, group);
         }
