@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.navByUrl:
                 ARouter.getInstance()
                         .build("/test/webview")
-                        .withString("url", "file:///android_asset/schame-test.html")
+                        .withString("url", "file:///android_asset/scheme-test.html")
                         .navigation();
                 break;
             case R.id.autoInject:

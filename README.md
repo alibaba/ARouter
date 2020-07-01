@@ -136,8 +136,8 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 #### IV. Advanced usage
 1. Jump via URL
     ``` java
-    // Create a new Activity for monitoring Schame events, and then directly pass url to ARouter
-    public class SchameFilterActivity extends Activity {
+    // Create a new Activity for monitoring Scheme events, and then directly pass url to ARouter
+    public class SchemeFilterActivity extends Activity {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -151,8 +151,8 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 
     AndroidManifest.xml
     ``` xml
-    <activity android:name=".activity.SchameFilterActivity">
-        <!-- Schame -->
+    <activity android:name=".activity.SchemeFilterActivity">
+        <!-- Scheme -->
         <intent-filter>
             <data
                 android:host="m.aliyun.com"
