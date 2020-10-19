@@ -20,11 +20,7 @@ import java.util.Map;
  * https://m.aliyun.com/test/activity1?name=老王&age=23&boy=true&high=180
  */
 @Route(path = "/test/activity1", name = "测试用 Activity")
-public class Test1Activity extends AppCompatActivity {
-
-    @Autowired(desc = "姓名")
-    String name = "jack";
-
+public class Test1Activity extends BaseActivity {
     @Autowired
     int age = 10;
 

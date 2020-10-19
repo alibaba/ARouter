@@ -37,11 +37,9 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.StandardLocation;
 
@@ -52,8 +50,6 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.FRAGMENT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ITROUTE_ROOT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_GENERATE_DOC_NAME;
-import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
@@ -194,15 +190,7 @@ public class RouteProcessor extends BaseProcessor {
                     // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
                     Map<String, Autowired> injectConfig = new HashMap<>();
-                    for (Element field : element.getEnclosedElements()) {
-                        if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !types.isSubtype(field.asType(), iProvider)) {
-                            // It must be field, then it has annotation, but it not be provider.
-                            Autowired paramConfig = field.getAnnotation(Autowired.class);
-                            String injectName = StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name();
-                            paramsType.put(injectName, typeUtils.typeExchange(field));
-                            injectConfig.put(injectName, paramConfig);
-                        }
-                    }
+                    injectParamCollector(element, paramsType, injectConfig);
 
                     if (types.isSubtype(tm, type_Activity)) {
                         // Activity
@@ -378,6 +366,32 @@ public class RouteProcessor extends BaseProcessor {
             ).build().writeTo(mFiler);
 
             logger.info(">>> Generated root, name is " + rootFileName + " <<<");
+        }
+    }
+
+    /**
+     * Recursive inject config collector.
+     *
+     * @param element current element.
+     */
+    private void injectParamCollector(Element element, Map<String, Integer> paramsType, Map<String, Autowired> injectConfig) {
+        for (Element field : element.getEnclosedElements()) {
+            if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !types.isSubtype(field.asType(), iProvider)) {
+                // It must be field, then it has annotation, but it not be provider.
+                Autowired paramConfig = field.getAnnotation(Autowired.class);
+                String injectName = StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name();
+                paramsType.put(injectName, typeUtils.typeExchange(field));
+                injectConfig.put(injectName, paramConfig);
+            }
+        }
+
+        // if has parent?
+        TypeMirror parent = ((TypeElement) element).getSuperclass();
+        if (parent instanceof DeclaredType) {
+            Element parentElement = ((DeclaredType) parent).asElement();
+            if (parentElement instanceof TypeElement && !((TypeElement) parentElement).getQualifiedName().toString().startsWith("android")) {
+                injectParamCollector(parentElement, paramsType, injectConfig);
+            }
         }
     }
 

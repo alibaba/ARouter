@@ -13,7 +13,7 @@ import java.util.List;
 import static com.alibaba.android.arouter.utils.Consts.SUFFIX_AUTOWIRED;
 
 /**
- * Autowired service impl.
+ * param inject service impl.
  *
  * @author zhilong <a href="mailto:zhilong.lzl@alibaba-inc.com">Contact me.</a>
  * @version 1.0
@@ -26,24 +26,52 @@ public class AutowiredServiceImpl implements AutowiredService {
 
     @Override
     public void init(Context context) {
-        classCache = new LruCache<>(66);
+        classCache = new LruCache<>(50);
         blackList = new ArrayList<>();
     }
 
     @Override
     public void autowire(Object instance) {
-        String className = instance.getClass().getName();
+        doInject(instance, null);
+    }
+
+    /**
+     * Recursive injection
+     *
+     * @param instance who call me.
+     * @param parent   parent of me.
+     */
+    private void doInject(Object instance, Class<?> parent) {
+        Class<?> clazz = null == parent ? instance.getClass() : parent;
+
+        ISyringe syringe = getSyringe(clazz);
+        if (null != syringe) {
+            syringe.inject(instance);
+        }
+
+        Class<?> superClazz = clazz.getSuperclass();
+        // has parent and its not the class of framework.
+        if (null != superClazz && !superClazz.getName().startsWith("android")) {
+            doInject(instance, superClazz);
+        }
+    }
+
+    private ISyringe getSyringe(Class<?> clazz) {
+        String className = clazz.getName();
+
         try {
             if (!blackList.contains(className)) {
-                ISyringe autowiredHelper = classCache.get(className);
-                if (null == autowiredHelper) {  // No cache.
-                    autowiredHelper = (ISyringe) Class.forName(instance.getClass().getName() + SUFFIX_AUTOWIRED).getConstructor().newInstance();
+                ISyringe syringeHelper = classCache.get(className);
+                if (null == syringeHelper) {  // No cache.
+                    syringeHelper = (ISyringe) Class.forName(clazz.getName() + SUFFIX_AUTOWIRED).getConstructor().newInstance();
                 }
-                autowiredHelper.inject(instance);
-                classCache.put(className, autowiredHelper);
+                classCache.put(className, syringeHelper);
+                return syringeHelper;
             }
-        } catch (Exception ex) {
+        } catch (Exception e) {
             blackList.add(className);    // This instance need not autowired.
         }
+
+        return null;
     }
 }

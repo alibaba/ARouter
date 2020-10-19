@@ -333,17 +333,17 @@ public class LogisticsCenter {
                 if (typeDef == TypeKind.BOOLEAN.ordinal()) {
                     postcard.withBoolean(key, Boolean.parseBoolean(value));
                 } else if (typeDef == TypeKind.BYTE.ordinal()) {
-                    postcard.withByte(key, Byte.valueOf(value));
+                    postcard.withByte(key, Byte.parseByte(value));
                 } else if (typeDef == TypeKind.SHORT.ordinal()) {
-                    postcard.withShort(key, Short.valueOf(value));
+                    postcard.withShort(key, Short.parseShort(value));
                 } else if (typeDef == TypeKind.INT.ordinal()) {
-                    postcard.withInt(key, Integer.valueOf(value));
+                    postcard.withInt(key, Integer.parseInt(value));
                 } else if (typeDef == TypeKind.LONG.ordinal()) {
-                    postcard.withLong(key, Long.valueOf(value));
+                    postcard.withLong(key, Long.parseLong(value));
                 } else if (typeDef == TypeKind.FLOAT.ordinal()) {
-                    postcard.withFloat(key, Float.valueOf(value));
+                    postcard.withFloat(key, Float.parseFloat(value));
                 } else if (typeDef == TypeKind.DOUBLE.ordinal()) {
-                    postcard.withDouble(key, Double.valueOf(value));
+                    postcard.withDouble(key, Double.parseDouble(value));
                 } else if (typeDef == TypeKind.STRING.ordinal()) {
                     postcard.withString(key, value);
                 } else if (typeDef == TypeKind.PARCELABLE.ordinal()) {
