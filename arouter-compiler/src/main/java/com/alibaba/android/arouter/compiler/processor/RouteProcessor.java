@@ -37,11 +37,9 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.StandardLocation;
 
@@ -52,8 +50,6 @@ import static com.alibaba.android.arouter.compiler.utils.Consts.FRAGMENT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ITROUTE_ROOT;
-import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_GENERATE_DOC_NAME;
-import static com.alibaba.android.arouter.compiler.utils.Consts.KEY_MODULE_NAME;
 import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_PROVIDER;
@@ -189,22 +185,23 @@ public class RouteProcessor extends BaseProcessor {
                 Route route = element.getAnnotation(Route.class);
                 RouteMeta routeMeta;
 
-                if (types.isSubtype(tm, type_Activity)) {                 // Activity
-                    logger.info(">>> Found activity route: " + tm.toString() + " <<<");
-
+                // Activity or Fragment
+                if (types.isSubtype(tm, type_Activity) || types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
                     // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
                     Map<String, Autowired> injectConfig = new HashMap<>();
-                    for (Element field : element.getEnclosedElements()) {
-                        if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !types.isSubtype(field.asType(), iProvider)) {
-                            // It must be field, then it has annotation, but it not be provider.
-                            Autowired paramConfig = field.getAnnotation(Autowired.class);
-                            String injectName = StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name();
-                            paramsType.put(injectName, typeUtils.typeExchange(field));
-                            injectConfig.put(injectName, paramConfig);
-                        }
+                    injectParamCollector(element, paramsType, injectConfig);
+
+                    if (types.isSubtype(tm, type_Activity)) {
+                        // Activity
+                        logger.info(">>> Found activity route: " + tm.toString() + " <<<");
+                        routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
+                    } else {
+                        // Fragment
+                        logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
+                        routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), paramsType);
                     }
-                    routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
+
                     routeMeta.setInjectConfig(injectConfig);
                 } else if (types.isSubtype(tm, iProvider)) {         // IProvider
                     logger.info(">>> Found provider route: " + tm.toString() + " <<<");
@@ -212,11 +209,8 @@ public class RouteProcessor extends BaseProcessor {
                 } else if (types.isSubtype(tm, type_Service)) {           // Service
                     logger.info(">>> Found service route: " + tm.toString() + " <<<");
                     routeMeta = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
-                } else if (types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
-                    logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
-                    routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), null);
                 } else {
-                    throw new RuntimeException("ARouter::Compiler >>> Found unsupported class type, type = [" + types.toString() + "].");
+                    throw new RuntimeException("The @Route is marked on unsupported class, look at [" + tm.toString() + "].");
                 }
 
                 categories(routeMeta);
@@ -372,6 +366,32 @@ public class RouteProcessor extends BaseProcessor {
             ).build().writeTo(mFiler);
 
             logger.info(">>> Generated root, name is " + rootFileName + " <<<");
+        }
+    }
+
+    /**
+     * Recursive inject config collector.
+     *
+     * @param element current element.
+     */
+    private void injectParamCollector(Element element, Map<String, Integer> paramsType, Map<String, Autowired> injectConfig) {
+        for (Element field : element.getEnclosedElements()) {
+            if (field.getKind().isField() && field.getAnnotation(Autowired.class) != null && !types.isSubtype(field.asType(), iProvider)) {
+                // It must be field, then it has annotation, but it not be provider.
+                Autowired paramConfig = field.getAnnotation(Autowired.class);
+                String injectName = StringUtils.isEmpty(paramConfig.name()) ? field.getSimpleName().toString() : paramConfig.name();
+                paramsType.put(injectName, typeUtils.typeExchange(field));
+                injectConfig.put(injectName, paramConfig);
+            }
+        }
+
+        // if has parent?
+        TypeMirror parent = ((TypeElement) element).getSuperclass();
+        if (parent instanceof DeclaredType) {
+            Element parentElement = ((DeclaredType) parent).asElement();
+            if (parentElement instanceof TypeElement && !((TypeElement) parentElement).getQualifiedName().toString().startsWith("android")) {
+                injectParamCollector(parentElement, paramsType, injectConfig);
+            }
         }
     }
 
