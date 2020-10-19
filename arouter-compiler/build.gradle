@@ -16,7 +16,9 @@ compileJava {
 dependencies {
     implementation 'com.alibaba:arouter-annotation:1.0.6'
 
-    implementation 'com.google.auto.service:auto-service:1.0-rc3'
+    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc7'
+    compileOnly 'com.google.auto.service:auto-service-annotations:1.0-rc7'
+
     implementation 'com.squareup:javapoet:1.8.0'
 
     implementation 'org.apache.commons:commons-lang3:3.5'
