@@ -33,6 +33,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 12. Full kotlin support (Look at Other#2)
 13. **Generate route doc support**
 14. **Provide IDE plugin for quick navigation to target class**
+15. Support Incremental annotation processing
 
 #### II. Classic Case
 1. Forward from external URLs to internal pages, and parsing parameters
