@@ -31,7 +31,7 @@ public class InterceptorServiceImpl implements InterceptorService {
 
     @Override
     public void doInterceptions(final Postcard postcard, final InterceptorCallback callback) {
-        if (null != Warehouse.interceptors && Warehouse.interceptors.size() > 0) {
+        if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
 
             checkInterceptorsInitStatus();
 
