@@ -49,6 +49,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onClick(View v) {
+        // Build test data.
+        TestSerializable testSerializable = new TestSerializable("Titanic", 555);
+        TestParcelable testParcelable = new TestParcelable("jack", 666);
+        TestObj testObj = new TestObj("Rose", 777);
+        List<TestObj> objList = new ArrayList<>();
+        objList.add(testObj);
+        Map<String, List<TestObj>> map = new HashMap<>();
+        map.put("testMap", objList);
+
         switch (v.getId()) {
             case R.id.openLog:
                 ARouter.openLog();
@@ -130,15 +139,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation();
                 break;
             case R.id.autoInject:
-                TestSerializable testSerializable = new TestSerializable("Titanic", 555);
-                TestParcelable testParcelable = new TestParcelable("jack", 666);
-                TestObj testObj = new TestObj("Rose", 777);
-                List<TestObj> objList = new ArrayList<>();
-                objList.add(testObj);
-
-                Map<String, List<TestObj>> map = new HashMap<>();
-                map.put("testMap", objList);
-
                 ARouter.getInstance().build("/test/activity1")
                         .withString("name", "老王")
                         .withInt("age", 18)
@@ -206,7 +206,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation(this, 666);
                 break;
             case R.id.getFragment:
-                Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
+                Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment")
+                        .withString("name", "老王")
+                        .withInt("age", 18)
+                        .withBoolean("boy", true)
+                        .withLong("high", 180)
+                        .withString("url", "https://a.b.c")
+                        .withSerializable("ser", testSerializable)
+                        .withParcelable("pac", testParcelable)
+                        .withObject("obj", testObj)
+                        .withObject("objList", objList)
+                        .withObject("map", map).navigation();
                 Toast.makeText(this, "找到Fragment:" + fragment.toString(), Toast.LENGTH_SHORT).show();
                 break;
             default:
