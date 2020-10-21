@@ -16,7 +16,7 @@
 
 #### Demo展示
 
-##### [Demo apk下载](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
+##### [Demo apk下载](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo-1.5.2.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### 一、功能介绍
 1. **支持直接解析标准URL进行跳转，并自动注入参数到目标页面中**
@@ -35,6 +35,7 @@
 14. **支持生成路由文档**
 15. **提供 IDE 插件便捷的关联路径和目标类**
 16. 支持增量编译(开启文档生成后无法增量编译)
+17. 支持动态注册路由信息
 
 #### 二、典型应用
 1. 从外部URL映射到内部页面，以及参数传递与解析
@@ -363,6 +364,27 @@
     
         }
     }
+    ```
+
+10. 动态注册路由信息
+适用于部分插件化架构的App以及需要动态注册路由信息的场景，可以通过 ARouter 提供的接口实现动态注册
+路由信息，目标页面和服务可以不标注 @Route 注解，**注意：同一批次仅允许相同 group 的路由信息注册**
+    ``` java
+        ARouter.getInstance().addRouteGroup(new IRouteGroup() {
+            @Override
+            public void loadInto(Map<String, RouteMeta> atlas) {
+                atlas.put("/dynamic/activity",      // path
+                    RouteMeta.build(
+                        RouteType.ACTIVITY,         // 路由信息
+                        TestDynamicActivity.class,  // 目标的 Class
+                        "/dynamic/activity",        // Path
+                        "dynamic",                  // Group, 尽量保持和 path 的第一段相同
+                        0,                          // 优先级，暂未使用
+                        0                           // Extra，用于给页面打标
+                    )
+                );
+            }
+        });
     ```
  
 #### 五、更多功能

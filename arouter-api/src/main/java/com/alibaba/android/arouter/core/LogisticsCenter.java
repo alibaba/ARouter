@@ -20,6 +20,7 @@ import com.alibaba.android.arouter.utils.MapUtils;
 import com.alibaba.android.arouter.utils.PackageUtils;
 import com.alibaba.android.arouter.utils.TextUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -366,5 +367,16 @@ public class LogisticsCenter {
      */
     public static void suspend() {
         Warehouse.clear();
+    }
+
+    public synchronized static void addRouteGroupDynamic(String groupName, IRouteGroup group) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        if (Warehouse.groupsIndex.containsKey(groupName)){
+            // If this group is included, but it has not been loaded
+            // load this group first, because dynamic route has high priority.
+            Warehouse.groupsIndex.get(groupName).getConstructor().newInstance().loadInto(Warehouse.routes);
+        }
+
+        // cover old group.
+        group.loadInto(Warehouse.routes);
     }
 }

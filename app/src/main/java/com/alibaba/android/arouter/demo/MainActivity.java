@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.alibaba.android.arouter.demo.testactivity.TestDynamicActivity;
 import com.alibaba.android.arouter.demo.testinject.TestObj;
 import com.alibaba.android.arouter.demo.testinject.TestParcelable;
 import com.alibaba.android.arouter.demo.testinject.TestSerializable;
@@ -19,6 +20,9 @@ import com.alibaba.android.arouter.demo.testservice.HelloService;
 import com.alibaba.android.arouter.demo.testservice.SingleService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
+import com.alibaba.android.arouter.facade.enums.RouteType;
+import com.alibaba.android.arouter.facade.model.RouteMeta;
+import com.alibaba.android.arouter.facade.template.IRouteGroup;
 import com.alibaba.android.arouter.launcher.ARouter;
 
 import java.util.ArrayList;
@@ -209,6 +213,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .withObject("objList", objList)
                         .withObject("map", map).navigation();
                 Toast.makeText(this, "找到Fragment:" + fragment.toString(), Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.addGroup:
+                ARouter.getInstance().addRouteGroup(new IRouteGroup() {
+                    @Override
+                    public void loadInto(Map<String, RouteMeta> atlas) {
+                        atlas.put("/dynamic/activity", RouteMeta.build(
+                                RouteType.ACTIVITY,
+                                TestDynamicActivity.class,
+                                "/dynamic/activity",
+                                "dynamic", 0, 0));
+                    }
+                });
+                break;
+            case R.id.dynamicNavigation:
+                // 该页面未配置 Route 注解，动态注册到 ARouter
+                ARouter.getInstance().build("/dynamic/activity")
+                        .withString("name", "老王")
+                        .withInt("age", 18)
+                        .withBoolean("boy", true)
+                        .withLong("high", 180)
+                        .withString("url", "https://a.b.c")
+                        .withSerializable("ser", testSerializable)
+                        .withParcelable("pac", testParcelable)
+                        .withObject("obj", testObj)
+                        .withObject("objList", objList)
+                        .withObject("map", map).navigation(this);
                 break;
             default:
                 break;

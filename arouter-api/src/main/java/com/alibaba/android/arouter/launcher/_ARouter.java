@@ -20,8 +20,10 @@ import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.service.*;
 import com.alibaba.android.arouter.facade.template.ILogger;
+import com.alibaba.android.arouter.facade.template.IRouteGroup;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
@@ -29,6 +31,8 @@ import com.alibaba.android.arouter.utils.TextUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -452,5 +456,45 @@ final class _ARouter {
         if (null != callback) { // Navigation over.
             callback.onArrival(postcard);
         }
+    }
+
+    boolean addRouteGroup(IRouteGroup group) {
+        if (null == group) {
+            return false;
+        }
+
+        String groupName = null;
+
+        try {
+            // Extract route meta.
+            Map<String, RouteMeta> dynamicRoute = new HashMap<>();
+            group.loadInto(dynamicRoute);
+
+            // Check route meta.
+            for (Map.Entry<String, RouteMeta> route : dynamicRoute.entrySet()) {
+                String path = route.getKey();
+                String groupByExtract = extractGroup(path);
+                RouteMeta meta = route.getValue();
+
+                if (null == groupName) {
+                    groupName = groupByExtract;
+                }
+
+                if (null == groupName || !groupName.equals(groupByExtract) || !groupName.equals(meta.getGroup())) {
+                    // Group name not consistent
+                    return false;
+                }
+            }
+
+            LogisticsCenter.addRouteGroupDynamic(groupName, group);
+
+            logger.info(Consts.TAG, "Add route group [" + groupName + "] finish, " + dynamicRoute.size() + " new route meta.");
+
+            return true;
+        } catch (Exception exception) {
+            logger.error(Consts.TAG, "Add route group dynamic exception! " + exception.getMessage());
+        }
+
+        return false;
     }
 }

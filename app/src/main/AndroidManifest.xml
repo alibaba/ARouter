@@ -53,6 +53,8 @@
         </activity>
         <activity android:name=".testactivity.Test4Activity">
         </activity>
+        <activity android:name=".testactivity.TestDynamicActivity">
+        </activity>
     </application>
 
 </manifest>
