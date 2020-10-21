@@ -22,8 +22,6 @@ import com.alibaba.android.arouter.facade.template.IInterceptor;
  */
 @Interceptor(priority = 7)
 public class Test1Interceptor implements IInterceptor {
-    Context mContext;
-
     /**
      * The operation of this interceptor.
      *
@@ -35,7 +33,7 @@ public class Test1Interceptor implements IInterceptor {
         if ("/test/activity4".equals(postcard.getPath())) {
 
             // 这里的弹窗仅做举例，代码写法不具有可参考价值
-            final AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.getThis());
+            final AlertDialog.Builder ab = new AlertDialog.Builder(postcard.getContext());
             ab.setCancelable(false);
             ab.setTitle("温馨提醒");
             ab.setMessage("想要跳转到Test4Activity么？(触发了\"/inter/test1\"拦截器，拦截了本次跳转)");
@@ -77,7 +75,6 @@ public class Test1Interceptor implements IInterceptor {
      */
     @Override
     public void init(Context context) {
-        mContext = context;
         Log.e("testService", Test1Interceptor.class.getName() + " has init.");
     }
 }

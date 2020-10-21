@@ -258,6 +258,9 @@ final class _ARouter {
                 return null;
             }
 
+            // Set application to postcard.
+            postcard.setContext(mContext);
+
             LogisticsCenter.completion(postcard);
             return (T) postcard.getProvider();
         } catch (NoRouteFoundException ex) {
@@ -280,6 +283,9 @@ final class _ARouter {
             // Pretreatment failed, navigation canceled.
             return null;
         }
+
+        // Set context to postcard.
+        postcard.setContext(null == context ? mContext : context);
 
         try {
             LogisticsCenter.completion(postcard);

@@ -140,7 +140,7 @@ public class AutowiredProcessor extends BaseProcessor {
                             );
                         }
 
-                        // Validater
+                        // Validator
                         if (fieldConfig.required()) {
                             injectMethodBuilder.beginControlFlow("if (substitute." + fieldName + " == null)");
                             injectMethodBuilder.addStatement(
