@@ -365,7 +365,7 @@ final class _ARouter {
 
                 // Set flags.
                 int flags = postcard.getFlags();
-                if (-1 != flags) {
+                if (0 != flags) {
                     intent.setFlags(flags);
                 } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

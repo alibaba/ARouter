@@ -32,7 +32,7 @@ public final class Postcard extends RouteMeta {
     private Uri uri;
     private Object tag;             // A tag prepare for some thing wrong. inner params, DO NOT USE!
     private Bundle mBundle;         // Data to transform
-    private int flags = -1;         // Flags of route
+    private int flags = 0;         // Flags of route
     private int timeout = 300;      // Navigation timeout, TimeUnit.Second
     private IProvider provider;     // It will be set value, if this postcard was provider.
     private boolean greenChannel;
