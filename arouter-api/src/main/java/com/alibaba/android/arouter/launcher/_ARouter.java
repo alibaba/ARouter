@@ -330,7 +330,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode, callback);
+                    _navigation(postcard, requestCode, callback);
                 }
 
                 /**
@@ -348,14 +348,14 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode, callback);
+            return _navigation(postcard, requestCode, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
-        final Context currentContext = null == context ? mContext : context;
+    private Object _navigation(final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        final Context currentContext = postcard.getContext();
 
         switch (postcard.getType()) {
             case ACTIVITY:
@@ -367,8 +367,11 @@ final class _ARouter {
                 int flags = postcard.getFlags();
                 if (-1 != flags) {
                     intent.setFlags(flags);
-                } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+
+                // Non activity, need FLAG_ACTIVITY_NEW_TASK
+                if (!(currentContext instanceof Activity)) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
                 // Set Actions
@@ -391,7 +394,7 @@ final class _ARouter {
             case BOARDCAST:
             case CONTENT_PROVIDER:
             case FRAGMENT:
-                Class fragmentMeta = postcard.getDestination();
+                Class<?> fragmentMeta = postcard.getDestination();
                 try {
                     Object instance = fragmentMeta.getConstructor().newInstance();
                     if (instance instanceof Fragment) {
