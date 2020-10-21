@@ -362,7 +362,7 @@ public class LogisticsCenter {
     }
 
     /**
-     * Suspend bussiness, clear cache.
+     * Suspend business, clear cache.
      */
     public static void suspend() {
         Warehouse.clear();
