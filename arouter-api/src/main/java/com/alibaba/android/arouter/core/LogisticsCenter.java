@@ -58,12 +58,10 @@ public class LogisticsCenter {
     /**
      * arouter-auto-register plugin will generate code inside this method
      * call this method to register all Routers, Interceptors and Providers
-     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
-     * @since 2017-12-06
      */
     private static void loadRouterMap() {
         registerByPlugin = false;
-        //auto generate register code by gradle plugin: arouter-auto-register
+        // auto generate register code by gradle plugin: arouter-auto-register
         // looks like below:
         // registerRouteRoot(new ARouter..Root..modulejava());
         // registerRouteRoot(new ARouter..Root..modulekotlin());
@@ -73,8 +71,6 @@ public class LogisticsCenter {
      * register by class name
      * Sacrificing a bit of efficiency to solve
      * the problem that the main dex file size is too large
-     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
-     * @param className class name
      */
     private static void register(String className) {
         if (!TextUtils.isEmpty(className)) {
@@ -100,8 +96,6 @@ public class LogisticsCenter {
     /**
      * method for arouter-auto-register plugin to register Routers
      * @param routeRoot IRouteRoot implementation class in the package: com.alibaba.android.arouter.core.routers
-     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
-     * @since 2017-12-06
      */
     private static void registerRouteRoot(IRouteRoot routeRoot) {
         markRegisteredByPlugin();
@@ -113,8 +107,6 @@ public class LogisticsCenter {
     /**
      * method for arouter-auto-register plugin to register Interceptors
      * @param interceptorGroup IInterceptorGroup implementation class in the package: com.alibaba.android.arouter.core.routers
-     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
-     * @since 2017-12-06
      */
     private static void registerInterceptor(IInterceptorGroup interceptorGroup) {
         markRegisteredByPlugin();
@@ -126,8 +118,6 @@ public class LogisticsCenter {
     /**
      * method for arouter-auto-register plugin to register Providers
      * @param providerGroup IProviderGroup implementation class in the package: com.alibaba.android.arouter.core.routers
-     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
-     * @since 2017-12-06
      */
     private static void registerProvider(IProviderGroup providerGroup) {
         markRegisteredByPlugin();
@@ -138,8 +128,6 @@ public class LogisticsCenter {
 
     /**
      * mark already registered by arouter-auto-register plugin
-     * @author billy.qi <a href="mailto:qiyilike@163.com">Contact me.</a>
-     * @since 2017-12-06
      */
     private static void markRegisteredByPlugin() {
         if (!registerByPlugin) {
@@ -156,7 +144,6 @@ public class LogisticsCenter {
 
         try {
             long startInit = System.currentTimeMillis();
-            //billy.qi modified at 2017-12-06
             //load by plugin first
             loadRouterMap();
             if (registerByPlugin) {
@@ -237,9 +224,9 @@ public class LogisticsCenter {
         }
 
         RouteMeta routeMeta = Warehouse.routes.get(postcard.getPath());
-        if (null == routeMeta) {    // Maybe its does't exist, or didn't load.
-            Class<? extends IRouteGroup> groupMeta = Warehouse.groupsIndex.get(postcard.getGroup());  // Load route meta.
-            if (null == groupMeta) {
+        if (null == routeMeta) {
+            // Maybe its does't exist, or didn't load.
+            if (!Warehouse.groupsIndex.containsKey(postcard.getGroup())) {
                 throw new NoRouteFoundException(TAG + "There is no route match the path [" + postcard.getPath() + "], in group [" + postcard.getGroup() + "]");
             } else {
                 // Load route and cache it into memory, then delete from metas.
@@ -248,9 +235,7 @@ public class LogisticsCenter {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] starts loading, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
                     }
 
-                    IRouteGroup iGroupInstance = groupMeta.getConstructor().newInstance();
-                    iGroupInstance.loadInto(Warehouse.routes);
-                    Warehouse.groupsIndex.remove(postcard.getGroup());
+                    addRouteGroupDynamic(postcard.getGroup(), null);
 
                     if (ARouter.debuggable()) {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] has already been loaded, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
@@ -374,9 +359,12 @@ public class LogisticsCenter {
             // If this group is included, but it has not been loaded
             // load this group first, because dynamic route has high priority.
             Warehouse.groupsIndex.get(groupName).getConstructor().newInstance().loadInto(Warehouse.routes);
+            Warehouse.groupsIndex.remove(groupName);
         }
 
         // cover old group.
-        group.loadInto(Warehouse.routes);
+        if (null != group) {
+            group.loadInto(Warehouse.routes);
+        }
     }
 }
