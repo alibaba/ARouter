@@ -1,4 +1,4 @@
-package com.alibaba.android.arouter.demo;
+package com.alibaba.android.arouter.demo.module1;
 
 import android.app.Activity;
 import android.os.Bundle;

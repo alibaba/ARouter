@@ -1,13 +1,11 @@
-package com.alibaba.android.arouter.demo.testinterceptor;
+package com.alibaba.android.arouter.demo.module1.testinterceptor;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
 
-import com.alibaba.android.arouter.demo.MainActivity;
-import com.alibaba.android.arouter.demo.MainLooper;
-import com.alibaba.android.arouter.demo.testservice.HelloService;
+import com.alibaba.android.arouter.demo.module1.MainLooper;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.annotation.Interceptor;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;

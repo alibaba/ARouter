@@ -1,4 +1,4 @@
-package com.alibaba.android.arouter.demo.testservice;
+package com.alibaba.android.arouter.demo.module1.testservice;
 
 import android.content.Context;
 import android.widget.Toast;

@@ -1,4 +1,4 @@
-package com.alibaba.android.arouter.demo.testinject;
+package com.alibaba.android.arouter.demo.service.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

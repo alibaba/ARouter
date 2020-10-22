@@ -1,14 +1,13 @@
-package com.alibaba.android.arouter.demo.testactivity;
+package com.alibaba.android.arouter.demo.module1.testactivity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
-import com.alibaba.android.arouter.demo.R;
-import com.alibaba.android.arouter.demo.testinject.TestObj;
-import com.alibaba.android.arouter.demo.testinject.TestParcelable;
-import com.alibaba.android.arouter.demo.testinject.TestSerializable;
-import com.alibaba.android.arouter.demo.testservice.HelloService;
+import com.alibaba.android.arouter.demo.module1.R;
+import com.alibaba.android.arouter.demo.service.HelloService;
+import com.alibaba.android.arouter.demo.service.model.TestObj;
+import com.alibaba.android.arouter.demo.service.model.TestParcelable;
+import com.alibaba.android.arouter.demo.service.model.TestSerializable;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.launcher.ARouter;

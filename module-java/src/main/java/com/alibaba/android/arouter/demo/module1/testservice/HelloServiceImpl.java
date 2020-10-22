@@ -1,9 +1,10 @@
-package com.alibaba.android.arouter.demo.testservice;
+package com.alibaba.android.arouter.demo.module1.testservice;
 
 import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.alibaba.android.arouter.demo.service.HelloService;
 import com.alibaba.android.arouter.facade.annotation.Route;
 
 /**

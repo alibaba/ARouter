@@ -1,6 +1,5 @@
 package com.alibaba.android.arouter.demo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -12,12 +11,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.alibaba.android.arouter.demo.testactivity.TestDynamicActivity;
-import com.alibaba.android.arouter.demo.testinject.TestObj;
-import com.alibaba.android.arouter.demo.testinject.TestParcelable;
-import com.alibaba.android.arouter.demo.testinject.TestSerializable;
-import com.alibaba.android.arouter.demo.testservice.HelloService;
-import com.alibaba.android.arouter.demo.testservice.SingleService;
+import com.alibaba.android.arouter.demo.module1.testactivity.TestDynamicActivity;
+import com.alibaba.android.arouter.demo.service.model.TestObj;
+import com.alibaba.android.arouter.demo.service.model.TestParcelable;
+import com.alibaba.android.arouter.demo.service.model.TestSerializable;
+import com.alibaba.android.arouter.demo.service.HelloService;
+import com.alibaba.android.arouter.demo.module1.testservice.SingleService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
 import com.alibaba.android.arouter.facade.enums.RouteType;
@@ -73,6 +72,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance()
                         .build("/test/activity2")
                         .navigation();
+
+                // 也可以通过依赖对方提供的二方包来约束入参
+                // 非必须，可以通过这种方式调用
+                // Entrance.redirect2Test1Activity("张飞", 48, this);
                 break;
             case R.id.kotlinNavigation:
                 ARouter.getInstance()

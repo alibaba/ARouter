@@ -1,11 +1,11 @@
-package com.alibaba.android.arouter.demo.testactivity;
+package com.alibaba.android.arouter.demo.module1.testactivity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.alibaba.android.arouter.demo.R;
+import com.alibaba.android.arouter.demo.module1.R;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 
