@@ -27,6 +27,8 @@ public interface ILogger {
 
     void error(String tag, String message);
 
+    void error(String tag, String message, Throwable e);
+
     void monitor(String message);
 
     boolean isMonitorMode();

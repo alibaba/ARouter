@@ -88,7 +88,7 @@ public class LogisticsCenter {
                             + " should implements one of IRouteRoot/IProviderGroup/IInterceptorGroup.");
                 }
             } catch (Exception e) {
-                logger.error(TAG,"register class error:" + className);
+                logger.error(TAG,"register class error:" + className, e);
             }
         }
     }
@@ -287,7 +287,8 @@ public class LogisticsCenter {
                             Warehouse.providers.put(providerMeta, provider);
                             instance = provider;
                         } catch (Exception e) {
-                            throw new HandlerException("Init provider failed! " + e.getMessage());
+                            logger.error(TAG, "Init provider failed!", e);
+                            throw new HandlerException("Init provider failed!");
                         }
                     }
                     postcard.setProvider(instance);
