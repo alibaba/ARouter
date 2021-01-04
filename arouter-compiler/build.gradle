@@ -24,7 +24,7 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.5'
     implementation 'org.apache.commons:commons-collections4:4.1'
 
-    implementation 'com.alibaba:fastjson:1.2.48'
+    implementation 'com.alibaba:fastjson:1.2.69'
 }
 
 apply from: '../install.gradle'
