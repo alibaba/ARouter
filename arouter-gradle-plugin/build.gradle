@@ -9,12 +9,12 @@ ext {
 }
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
+    implementation gradleApi()
+    implementation localGroovy()
 }
 
 dependencies {
-    compile 'com.android.tools.build:gradle:2.1.3'
+    implementation "com.android.tools.build:gradle:$androidGradlePluginVersion"
 }
 
 apply from: '../install.gradle'

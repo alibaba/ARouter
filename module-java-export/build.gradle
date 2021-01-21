@@ -6,7 +6,7 @@ dependencies {
     implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
     annotationProcessor project(':arouter-compiler')
 
-    implementation 'com.alibaba:fastjson:1.2.48'
+    implementation "com.alibaba:fastjson:$fastjsonVersion"
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
@@ -30,7 +30,6 @@ android {
 
     buildTypes {
         release {
-            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

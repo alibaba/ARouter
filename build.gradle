@@ -1,23 +1,20 @@
 buildscript {
-    ext.kotlin_version = '1.4.10'
-    ext.arouter_register_version = '1.0.2'
+    ext {
+        kotlin_version = '1.4.21'
+        arouter_register_version = '1.0.2'
+        fastjsonVersion = '1.1.72.android'
+        androidGradlePluginVersion = '4.1.2'
+    }
 
     repositories {
-        maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        maven {
-            url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
-        }
-        mavenCentral()
-        jcenter()
         google()
+        jcenter()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        classpath "com.android.tools.build:gradle:$androidGradlePluginVersion"
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.5'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.alibaba:arouter-register:$arouter_register_version"
