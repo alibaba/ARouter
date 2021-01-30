@@ -2,7 +2,7 @@ buildscript {
     ext {
         kotlin_version = '1.4.21'
         arouter_register_version = '1.0.2'
-        fastjsonVersion = '1.1.72.android'
+        fastjsonVersion = '1.2.75'
         androidGradlePluginVersion = '4.1.2'
     }
 
