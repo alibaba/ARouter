@@ -12,11 +12,11 @@
 
 module|arouter-api|arouter-compiler|arouter-register|arouter-idea-plugin
 ---|---|---|---|---
-version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
+version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-api)|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-compiler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-compiler)|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-register/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-register)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
 
 #### Demo
 
-##### [Demo apk](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
+##### [Demo apk](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo-1.5.2.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### I. Feature
 1. **Supports direct parsing of standard URLs for jumps and automatic injection of parameters into target pages**
@@ -34,6 +34,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 13. **Generate route doc support**
 14. **Provide IDE plugin for quick navigation to target class**
 15. Support Incremental annotation processing
+16. Support register route meta dynamic.
 
 #### II. Classic Case
 1. Forward from external URLs to internal pages, and parsing parameters
@@ -116,7 +117,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 
     buildscript {
         repositories {
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {
@@ -338,6 +339,29 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
     }
     ```
 
+9. Dynamic register route meta
+Applicable to apps with plug-in architectures or some scenarios where routing information
+needs to be dynamically registered，Dynamic registration can be achieved through the
+interface provided by ARouter, The target page and service need not be marked with @Route
+annotation，**Only the routing information of the same group can be registered in the same batch**
+    ``` java
+        ARouter.getInstance().addRouteGroup(new IRouteGroup() {
+            @Override
+            public void loadInto(Map<String, RouteMeta> atlas) {
+                atlas.put("/dynamic/activity",      // path
+                    RouteMeta.build(
+                        RouteType.ACTIVITY,         // Route type
+                        TestDynamicActivity.class,  // Target class
+                        "/dynamic/activity",        // Path
+                        "dynamic",                  // Group
+                        0,                          // not need
+                        0                           // Extra tag, Used to mark page feature
+                    )
+                );
+            }
+        });
+    ```
+
 #### V. More features
 
 1. Other settings in initialization
@@ -469,7 +493,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 
     buildscript {
         repositories {
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {

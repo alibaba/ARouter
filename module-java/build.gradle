@@ -3,8 +3,12 @@ apply plugin: 'com.android.library'
 dependencies {
     implementation project(':arouter-annotation')
     implementation project(':arouter-api')
-    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
     annotationProcessor project(':arouter-compiler')
+
+    implementation project(':module-java-export')
+
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    implementation 'com.alibaba:fastjson:1.2.48'
 }
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
@@ -16,7 +20,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments = [ AROUTER_MODULE_NAME : project.getName() ]
+                arguments = [AROUTER_MODULE_NAME: project.getName(), AROUTER_GENERATE_DOC: "enable"]
             }
         }
     }

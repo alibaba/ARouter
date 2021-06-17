@@ -9,12 +9,6 @@ android {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
         versionName "0.0.1"
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments = [AROUTER_MODULE_NAME: project.getName(), AROUTER_GENERATE_DOC: "enable"]
-            }
-        }
     }
 
     compileOptions {
@@ -50,13 +44,13 @@ android {
 }
 
 dependencies {
-    annotationProcessor project(':arouter-compiler')
     implementation project(':arouter-api')
-    implementation project(':module-java')
-    implementation project(':module-kotlin')
-    implementation project(':arouter-annotation')
 
-    implementation 'com.alibaba:fastjson:1.2.48'
+    // 开发中依赖对方的 service 包
+    implementation project(':module-java-export')
+    implementation project(':module-java')
+
+    implementation project(':module-kotlin')
 
     implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
     implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"

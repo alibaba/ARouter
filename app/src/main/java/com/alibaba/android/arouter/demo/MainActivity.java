@@ -1,6 +1,5 @@
 package com.alibaba.android.arouter.demo;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -12,13 +11,17 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.alibaba.android.arouter.demo.testinject.TestObj;
-import com.alibaba.android.arouter.demo.testinject.TestParcelable;
-import com.alibaba.android.arouter.demo.testinject.TestSerializable;
-import com.alibaba.android.arouter.demo.testservice.HelloService;
-import com.alibaba.android.arouter.demo.testservice.SingleService;
+import com.alibaba.android.arouter.demo.module1.testactivity.TestDynamicActivity;
+import com.alibaba.android.arouter.demo.service.model.TestObj;
+import com.alibaba.android.arouter.demo.service.model.TestParcelable;
+import com.alibaba.android.arouter.demo.service.model.TestSerializable;
+import com.alibaba.android.arouter.demo.service.HelloService;
+import com.alibaba.android.arouter.demo.module1.testservice.SingleService;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavCallback;
+import com.alibaba.android.arouter.facade.enums.RouteType;
+import com.alibaba.android.arouter.facade.model.RouteMeta;
+import com.alibaba.android.arouter.facade.template.IRouteGroup;
 import com.alibaba.android.arouter.launcher.ARouter;
 
 import java.util.ArrayList;
@@ -27,19 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private static Activity activity;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        activity = this;
-    }
-
-    public static Activity getThis() {
-        return activity;
     }
 
     /**
@@ -49,6 +43,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onClick(View v) {
+        // Build test data.
+        TestSerializable testSerializable = new TestSerializable("Titanic", 555);
+        TestParcelable testParcelable = new TestParcelable("jack", 666);
+        TestObj testObj = new TestObj("Rose", 777);
+        List<TestObj> objList = new ArrayList<>();
+        objList.add(testObj);
+        Map<String, List<TestObj>> map = new HashMap<>();
+        map.put("testMap", objList);
+
         switch (v.getId()) {
             case R.id.openLog:
                 ARouter.openLog();
@@ -69,6 +72,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ARouter.getInstance()
                         .build("/test/activity2")
                         .navigation();
+
+                // 也可以通过依赖对方提供的二方包来约束入参
+                // 非必须，可以通过这种方式调用
+                // Entrance.redirect2Test1Activity("张飞", 48, this);
                 break;
             case R.id.kotlinNavigation:
                 ARouter.getInstance()
@@ -130,15 +137,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation();
                 break;
             case R.id.autoInject:
-                TestSerializable testSerializable = new TestSerializable("Titanic", 555);
-                TestParcelable testParcelable = new TestParcelable("jack", 666);
-                TestObj testObj = new TestObj("Rose", 777);
-                List<TestObj> objList = new ArrayList<>();
-                objList.add(testObj);
-
-                Map<String, List<TestObj>> map = new HashMap<>();
-                map.put("testMap", objList);
-
                 ARouter.getInstance().build("/test/activity1")
                         .withString("name", "老王")
                         .withInt("age", 18)
@@ -206,8 +204,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .navigation(this, 666);
                 break;
             case R.id.getFragment:
-                Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();
+                Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment")
+                        .withString("name", "老王")
+                        .withInt("age", 18)
+                        .withBoolean("boy", true)
+                        .withLong("high", 180)
+                        .withString("url", "https://a.b.c")
+                        .withSerializable("ser", testSerializable)
+                        .withParcelable("pac", testParcelable)
+                        .withObject("obj", testObj)
+                        .withObject("objList", objList)
+                        .withObject("map", map).navigation();
                 Toast.makeText(this, "找到Fragment:" + fragment.toString(), Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.addGroup:
+                ARouter.getInstance().addRouteGroup(new IRouteGroup() {
+                    @Override
+                    public void loadInto(Map<String, RouteMeta> atlas) {
+                        atlas.put("/dynamic/activity", RouteMeta.build(
+                                RouteType.ACTIVITY,
+                                TestDynamicActivity.class,
+                                "/dynamic/activity",
+                                "dynamic", 0, 0));
+                    }
+                });
+                break;
+            case R.id.dynamicNavigation:
+                // 该页面未配置 Route 注解，动态注册到 ARouter
+                ARouter.getInstance().build("/dynamic/activity")
+                        .withString("name", "老王")
+                        .withInt("age", 18)
+                        .withBoolean("boy", true)
+                        .withLong("high", 180)
+                        .withString("url", "https://a.b.c")
+                        .withSerializable("ser", testSerializable)
+                        .withParcelable("pac", testParcelable)
+                        .withObject("obj", testObj)
+                        .withObject("objList", objList)
+                        .withObject("map", map).navigation(this);
                 break;
             default:
                 break;

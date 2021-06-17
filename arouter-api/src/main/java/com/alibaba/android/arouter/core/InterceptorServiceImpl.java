@@ -31,7 +31,7 @@ public class InterceptorServiceImpl implements InterceptorService {
 
     @Override
     public void doInterceptions(final Postcard postcard, final InterceptorCallback callback) {
-        if (null != Warehouse.interceptors && Warehouse.interceptors.size() > 0) {
+        if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
 
             checkInterceptorsInitStatus();
 
@@ -50,7 +50,7 @@ public class InterceptorServiceImpl implements InterceptorService {
                         if (interceptorCounter.getCount() > 0) {    // Cancel the navigation this time, if it hasn't return anythings.
                             callback.onInterrupt(new HandlerException("The interceptor processing timed out."));
                         } else if (null != postcard.getTag()) {    // Maybe some exception in the tag.
-                            callback.onInterrupt(new HandlerException(postcard.getTag().toString()));
+                            callback.onInterrupt((Throwable) postcard.getTag());
                         } else {
                             callback.onContinue(postcard);
                         }
@@ -84,9 +84,9 @@ public class InterceptorServiceImpl implements InterceptorService {
 
                 @Override
                 public void onInterrupt(Throwable exception) {
-                    // Last interceptor excute over with fatal exception.
+                    // Last interceptor execute over with fatal exception.
 
-                    postcard.setTag(null == exception ? new HandlerException("No message.") : exception.getMessage());    // save the exception message for backup.
+                    postcard.setTag(null == exception ? new HandlerException("No message.") : exception);    // save the exception message for backup.
                     counter.cancel();
                     // Be attention, maybe the thread in callback has been changed,
                     // then the catch block(L207) will be invalid.

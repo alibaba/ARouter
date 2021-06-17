@@ -30,13 +30,15 @@ import java.util.ArrayList;
 public final class Postcard extends RouteMeta {
     // Base
     private Uri uri;
-    private Object tag;             // A tag prepare for some thing wrong.
+    private Object tag;             // A tag prepare for some thing wrong. inner params, DO NOT USE!
     private Bundle mBundle;         // Data to transform
-    private int flags = -1;         // Flags of route
+    private int flags = 0;         // Flags of route
     private int timeout = 300;      // Navigation timeout, TimeUnit.Second
     private IProvider provider;     // It will be set value, if this postcard was provider.
     private boolean greenChannel;
     private SerializationService serializationService;
+    private Context context;        // May application or activity, check instance type before use it.
+    private String action;
 
     // Animation
     private Bundle optionsCompat;    // The transition animation of activity
@@ -592,9 +594,6 @@ public final class Postcard extends RouteMeta {
                 super.toString();
     }
 
-    //增加设置intent的action
-    private String action;
-
     public String getAction() {
         return action;
     }
@@ -602,5 +601,13 @@ public final class Postcard extends RouteMeta {
     public Postcard withAction(String action) {
         this.action = action;
         return this;
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 }

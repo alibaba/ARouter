@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    implementation project(':arouter-annotation')
+    implementation project(':arouter-api')
+    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    annotationProcessor project(':arouter-compiler')
+
+    implementation 'com.alibaba:fastjson:1.2.48'
+}
+android {
+    compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
+    buildToolsVersion BUILDTOOLS_VERSION
+
+    defaultConfig {
+        minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
+        targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [ AROUTER_MODULE_NAME : project.getName() ]
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        lintOptions { abortOnError false }
+    }
+}

@@ -31,6 +31,7 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -139,7 +140,7 @@ public class AutowiredProcessor extends BaseProcessor {
                             );
                         }
 
-                        // Validater
+                        // Validator
                         if (fieldConfig.required()) {
                             injectMethodBuilder.beginControlFlow("if (substitute." + fieldName + " == null)");
                             injectMethodBuilder.addStatement(
@@ -159,7 +160,7 @@ public class AutowiredProcessor extends BaseProcessor {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
-                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity);
+                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity, isKtClass(parent));
                         if (statement.startsWith("serializationService.")) {   // Not mortals
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
@@ -197,6 +198,16 @@ public class AutowiredProcessor extends BaseProcessor {
         }
     }
 
+    private boolean isKtClass(Element element) {
+        for (AnnotationMirror annotationMirror : elementUtils.getAllAnnotationMirrors(element)) {
+            if (annotationMirror.getAnnotationType().toString().contains("kotlin")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private String buildCastCode(Element element) {
         if (typeUtils.typeExchange(element) == TypeKind.SERIALIZABLE.ordinal()) {
             return CodeBlock.builder().add("($T) ", ClassName.get(element.asType())).build().toString();
@@ -204,34 +215,37 @@ public class AutowiredProcessor extends BaseProcessor {
         return "";
     }
 
-    private String buildStatement(String originalValue, String statement, int type, boolean isActivity) {
+    /**
+     * Build param inject statement
+     */
+    private String buildStatement(String originalValue, String statement, int type, boolean isActivity, boolean isKt) {
         switch (TypeKind.values()[type]) {
             case BOOLEAN:
-                statement += (isActivity ? ("getBooleanExtra($S, " + originalValue + ")") : ("getBoolean($S)"));
+                statement += "getBoolean" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case BYTE:
-                statement += (isActivity ? ("getByteExtra($S, " + originalValue + ")") : ("getByte($S)"));
+                statement += "getByte" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case SHORT:
-                statement += (isActivity ? ("getShortExtra($S, " + originalValue + ")") : ("getShort($S)"));
+                statement += "getShort" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case INT:
-                statement += (isActivity ? ("getIntExtra($S, " + originalValue + ")") : ("getInt($S)"));
+                statement += "getInt" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case LONG:
-                statement += (isActivity ? ("getLongExtra($S, " + originalValue + ")") : ("getLong($S)"));
+                statement += "getLong" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case CHAR:
-                statement += (isActivity ? ("getCharExtra($S, " + originalValue + ")") : ("getChar($S)"));
+                statement += "getChar" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case FLOAT:
-                statement += (isActivity ? ("getFloatExtra($S, " + originalValue + ")") : ("getFloat($S)"));
+                statement += "getFloat" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case DOUBLE:
-                statement += (isActivity ? ("getDoubleExtra($S, " + originalValue + ")") : ("getDouble($S)"));
+                statement += "getDouble" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case STRING:
-                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S, " + originalValue + ")") : ("getString($S)"));
+                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S") : ("getString($S")) + ", " + originalValue + ")";
                 break;
             case SERIALIZABLE:
                 statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));

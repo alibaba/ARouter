@@ -72,6 +72,14 @@ public class DefaultLogger implements ILogger {
     }
 
     @Override
+    public void error(String tag, String message, Throwable e) {
+        if (isShowLog) {
+            Log.e(TextUtils.isEmpty(tag) ? getDefaultTag() : tag, message, e);
+        }
+    }
+
+
+    @Override
     public void monitor(String message) {
         if (isShowLog && isMonitorMode()) {
             StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];

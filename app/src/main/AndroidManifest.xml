@@ -43,16 +43,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".TestWebview">
-        </activity>
-        <activity android:name=".testactivity.Test1Activity">
-        </activity>
-        <activity android:name=".testactivity.Test2Activity">
-        </activity>
-        <activity android:name=".testactivity.Test3Activity">
-        </activity>
-        <activity android:name=".testactivity.Test4Activity">
-        </activity>
     </application>
 
 </manifest>

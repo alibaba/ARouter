@@ -20,8 +20,10 @@ import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.service.*;
 import com.alibaba.android.arouter.facade.template.ILogger;
+import com.alibaba.android.arouter.facade.template.IRouteGroup;
 import com.alibaba.android.arouter.thread.DefaultPoolExecutor;
 import com.alibaba.android.arouter.utils.Consts;
 import com.alibaba.android.arouter.utils.DefaultLogger;
@@ -29,6 +31,8 @@ import com.alibaba.android.arouter.utils.TextUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -258,6 +262,9 @@ final class _ARouter {
                 return null;
             }
 
+            // Set application to postcard.
+            postcard.setContext(mContext);
+
             LogisticsCenter.completion(postcard);
             return (T) postcard.getProvider();
         } catch (NoRouteFoundException ex) {
@@ -280,6 +287,9 @@ final class _ARouter {
             // Pretreatment failed, navigation canceled.
             return null;
         }
+
+        // Set context to postcard.
+        postcard.setContext(null == context ? mContext : context);
 
         try {
             LogisticsCenter.completion(postcard);
@@ -324,7 +334,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(context, postcard, requestCode, callback);
+                    _navigation(postcard, requestCode, callback);
                 }
 
                 /**
@@ -342,14 +352,14 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(context, postcard, requestCode, callback);
+            return _navigation(postcard, requestCode, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
-        final Context currentContext = null == context ? mContext : context;
+    private Object _navigation(final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        final Context currentContext = postcard.getContext();
 
         switch (postcard.getType()) {
             case ACTIVITY:
@@ -359,10 +369,13 @@ final class _ARouter {
 
                 // Set flags.
                 int flags = postcard.getFlags();
-                if (-1 != flags) {
+                if (0 != flags) {
                     intent.setFlags(flags);
-                } else if (!(currentContext instanceof Activity)) {    // Non activity, need less one flag.
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+
+                // Non activity, need FLAG_ACTIVITY_NEW_TASK
+                if (!(currentContext instanceof Activity)) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
                 // Set Actions
@@ -385,7 +398,7 @@ final class _ARouter {
             case BOARDCAST:
             case CONTENT_PROVIDER:
             case FRAGMENT:
-                Class fragmentMeta = postcard.getDestination();
+                Class<?> fragmentMeta = postcard.getDestination();
                 try {
                     Object instance = fragmentMeta.getConstructor().newInstance();
                     if (instance instanceof Fragment) {
@@ -443,5 +456,45 @@ final class _ARouter {
         if (null != callback) { // Navigation over.
             callback.onArrival(postcard);
         }
+    }
+
+    boolean addRouteGroup(IRouteGroup group) {
+        if (null == group) {
+            return false;
+        }
+
+        String groupName = null;
+
+        try {
+            // Extract route meta.
+            Map<String, RouteMeta> dynamicRoute = new HashMap<>();
+            group.loadInto(dynamicRoute);
+
+            // Check route meta.
+            for (Map.Entry<String, RouteMeta> route : dynamicRoute.entrySet()) {
+                String path = route.getKey();
+                String groupByExtract = extractGroup(path);
+                RouteMeta meta = route.getValue();
+
+                if (null == groupName) {
+                    groupName = groupByExtract;
+                }
+
+                if (null == groupName || !groupName.equals(groupByExtract) || !groupName.equals(meta.getGroup())) {
+                    // Group name not consistent
+                    return false;
+                }
+            }
+
+            LogisticsCenter.addRouteGroupDynamic(groupName, group);
+
+            logger.info(Consts.TAG, "Add route group [" + groupName + "] finish, " + dynamicRoute.size() + " new route meta.");
+
+            return true;
+        } catch (Exception exception) {
+            logger.error(Consts.TAG, "Add route group dynamic exception!", exception);
+        }
+
+        return false;
     }
 }
