@@ -12,7 +12,7 @@
 
 module|arouter-api|arouter-compiler|arouter-register|arouter-idea-plugin
 ---|---|---|---|---
-version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
+version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-api)|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-compiler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-compiler)|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-register/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-register)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
 
 #### Demo
 
@@ -117,7 +117,7 @@ version|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/
 
     buildscript {
         repositories {
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {
@@ -493,7 +493,7 @@ annotation，**Only the routing information of the same group can be registered 
 
     buildscript {
         repositories {
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {

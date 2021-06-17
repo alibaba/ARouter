@@ -12,7 +12,7 @@
 
 模块|arouter-api|arouter-compiler|arouter-register|arouter-idea-plugin
 ---|---|---|---|---
-最新版本|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-api/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-api/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-compiler/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-compiler/_latestVersion)|[![Download](https://api.bintray.com/packages/zhi1ong/maven/arouter-register/images/download.svg)](https://bintray.com/zhi1ong/maven/arouter-register/_latestVersion)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
+最新版本|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-api/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-api)|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-compiler/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-compiler)|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-register/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.alibaba/arouter-register)|[![as plugin](https://img.shields.io/jetbrains/plugin/d/11428-arouter-helper.svg)](https://plugins.jetbrains.com/plugin/11428-arouter-helper)
 
 #### Demo展示
 
@@ -119,7 +119,7 @@
 
     buildscript {
         repositories {
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {
@@ -534,17 +534,17 @@
 
     buildscript {
         repositories {
-        jcenter()
+            mavenCentral()
         }
 
         dependencies {
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+            classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
         }
     }
 
     apt {
         arguments {
-        AROUTER_MODULE_NAME project.getName();
+            AROUTER_MODULE_NAME project.getName();
         }
     }
 

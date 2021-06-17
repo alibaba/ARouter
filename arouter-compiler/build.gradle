@@ -1,13 +1,5 @@
 apply plugin: 'java'
 
-ext {
-    bintrayName = 'arouter-compiler'
-    artifact = bintrayName
-    libraryName = 'ARouter compiler'
-    libraryDescription = 'A compiler for ARouter to find route'
-    libraryVersion = arouter_main_version
-}
-
 compileJava {
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
@@ -27,5 +19,4 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.69'
 }
 
-apply from: '../install.gradle'
-apply from: '../bintray.gradle'
+apply from: rootProject.file('gradle/publish.gradle')

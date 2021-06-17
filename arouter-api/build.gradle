@@ -1,13 +1,5 @@
 apply plugin: 'com.android.library'
 
-ext {
-    bintrayName = 'arouter-api'
-    artifact = bintrayName
-    libraryName = 'ARouter sdk'
-    libraryDescription = 'A router for android'
-    libraryVersion = arouter_main_version
-}
-
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
     buildToolsVersion BUILDTOOLS_VERSION
@@ -39,10 +31,9 @@ android {
 }
 
 dependencies {
-    annotationProcessor 'com.alibaba:arouter-compiler:1.5.1'
+    annotationProcessor 'com.alibaba:arouter-compiler:1.5.2'
     api 'com.alibaba:arouter-annotation:1.0.6'
     implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
 }
 
-apply from: '../install.gradle'
-apply from: '../bintray.gradle'
+apply from: rootProject.file('gradle/publish.gradle')

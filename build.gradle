@@ -4,20 +4,15 @@ buildscript {
 
     repositories {
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
-        maven {
             url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
         }
         mavenCentral()
-        jcenter()
         google()
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.1'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.alibaba:arouter-register:$arouter_register_version"
@@ -26,7 +21,11 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url "https://s01.oss.sonatype.org/content/repositories/releases/"
+        }
         google()
     }
 }
