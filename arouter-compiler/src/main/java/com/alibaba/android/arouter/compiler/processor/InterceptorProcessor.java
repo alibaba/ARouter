@@ -77,9 +77,9 @@ public class InterceptorProcessor extends BaseProcessor {
     }
 
     /**
-     * Parse tollgate.
+     * Parse interceptor.
      *
-     * @param elements elements of tollgate.
+     * @param elements elements of interceptor.
      */
     private void parseInterceptors(Set<? extends Element> elements) throws IOException {
         if (CollectionUtils.isNotEmpty(elements)) {
@@ -108,20 +108,20 @@ public class InterceptorProcessor extends BaseProcessor {
             }
 
             // Interface of ARouter.
-            TypeElement type_ITollgate = elementUtils.getTypeElement(IINTERCEPTOR);
-            TypeElement type_ITollgateGroup = elementUtils.getTypeElement(IINTERCEPTOR_GROUP);
+            TypeElement type_IInterceptor = elementUtils.getTypeElement(IINTERCEPTOR);
+            TypeElement type_IInterceptorGroup = elementUtils.getTypeElement(IINTERCEPTOR_GROUP);
 
             /**
              *  Build input type, format as :
              *
-             *  ```Map<Integer, Class<? extends ITollgate>>```
+             *  ```Map<Integer, Class<? extends IInterceptor>>```
              */
             ParameterizedTypeName inputMapTypeOfTollgate = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
                     ClassName.get(Integer.class),
                     ParameterizedTypeName.get(
                             ClassName.get(Class.class),
-                            WildcardTypeName.subtypeOf(ClassName.get(type_ITollgate))
+                            WildcardTypeName.subtypeOf(ClassName.get(type_IInterceptor))
                     )
             );
 
@@ -148,7 +148,7 @@ public class InterceptorProcessor extends BaseProcessor {
                             .addModifiers(PUBLIC)
                             .addJavadoc(WARNING_TIPS)
                             .addMethod(loadIntoMethodOfTollgateBuilder.build())
-                            .addSuperinterface(ClassName.get(type_ITollgateGroup))
+                            .addSuperinterface(ClassName.get(type_IInterceptorGroup))
                             .build()
             ).build().writeTo(mFiler);
 
