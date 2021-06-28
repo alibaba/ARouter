@@ -83,7 +83,7 @@ class RegisterTransform extends Transform {
                 File dest = outputProvider.getContentLocation(destName + "_" + hexName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
 
                 //scan jar file to find classes
-                if (ScanUtil.shouldProcessPreDexJar(src.absolutePath)) {
+                if (ScanUtil.shouldProcessPreDexJar(jarInput)) {
                     ScanUtil.scanJar(src, dest)
                 }
                 FileUtils.copyFile(src, dest)

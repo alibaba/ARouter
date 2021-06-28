@@ -1,6 +1,7 @@
 package com.alibaba.android.arouter.register.utils
 
 import com.alibaba.android.arouter.register.core.RegisterTransform
+import com.android.build.api.transform.JarInput
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -16,6 +17,8 @@ import java.util.jar.JarFile
  * @since 17/3/20 11:48
  */
 class ScanUtil {
+
+    static final Set<String> shouldExcludeDexJarSet = ["com.android.support", "android.arch", "androidx.", "org.jetbrains."]
 
     /**
      * scan jar file
@@ -43,9 +46,20 @@ class ScanUtil {
         }
     }
 
-    static boolean shouldProcessPreDexJar(String path) {
-        return !path.contains("com.android.support") && !path.contains("/android/m2repository")
+
+    static boolean shouldProcessPreDexJar(JarInput jarInput) {
+        if (jarInput == null || jarInput.file == null || !jarInput.file.exists()) {
+            return false
+        }
+        boolean isShouldExclude = false
+        shouldExcludeDexJarSet.each {
+            if (jarInput.name.contains(it)) {
+                isShouldExclude = true
+            }
+        }
+        return !isShouldExclude
     }
+
 
     static boolean shouldProcessClass(String entryName) {
         return entryName != null && entryName.startsWith(ScanSetting.ROUTER_CLASS_PACKAGE_NAME)
