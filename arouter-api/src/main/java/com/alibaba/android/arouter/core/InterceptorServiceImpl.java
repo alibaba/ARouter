@@ -74,12 +74,12 @@ public class InterceptorServiceImpl implements InterceptorService {
     private static void _execute(final int index, final CancelableCountDownLatch counter, final Postcard postcard) {
         if (index < Warehouse.interceptors.size()) {
             IInterceptor iInterceptor = Warehouse.interceptors.get(index);
+            long curCount = counter.getCount();
             iInterceptor.process(postcard, new InterceptorCallback() {
                 @Override
                 public void onContinue(Postcard postcard) {
                     // Last interceptor excute over with no exception.
-                    counter.countDown();
-                    _execute(index + 1, counter, postcard);  // When counter is down, it will be execute continue ,but index bigger than interceptors size, then U know.
+                    countDownAndContinue(index, counter, postcard);
                 }
 
                 @Override
@@ -96,7 +96,22 @@ public class InterceptorServiceImpl implements InterceptorService {
 //                    }
                 }
             });
+            if (curCount == counter.getCount()) {
+                countDownAndContinue(index, counter, postcard);
+            }
         }
+    }
+
+    /**
+     * continue execute interceptor
+     *
+     * @param index    current interceptor index
+     * @param counter  interceptor counter
+     * @param postcard routeMeta
+     */
+    private static void countDownAndContinue(int index, CancelableCountDownLatch counter, Postcard postcard) {
+        counter.countDown();
+        _execute(index + 1, counter, postcard);  // When counter is down, it will be execute continue ,but index bigger than interceptors size, then U know.
     }
 
     @Override
