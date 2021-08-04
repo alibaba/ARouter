@@ -232,7 +232,6 @@ class KtNavigationLineMarker : LineMarkerProvider {
             // 不包含前后的两个字符
             return matcher.group(1)
         } else {
-            println(" 没有匹配到内容....")
             return "";
         }
     }
