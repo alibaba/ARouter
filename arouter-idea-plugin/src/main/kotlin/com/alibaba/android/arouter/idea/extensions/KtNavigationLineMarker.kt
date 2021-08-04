@@ -21,7 +21,6 @@ import javax.swing.Icon
 
 /**
  * 支持 kotlin 的Arouter行解读器
- *
  * @author lckj686
  * @version 1.0
  * @since 2021-08-01
@@ -156,7 +155,6 @@ class KtNavigationLineMarker : LineMarkerProvider {
             if (virtualFile.canonicalPath == filePath) {
                 continue
             }
-
             val psiFile: PsiFile? = PsiManager.getInstance(project).findFile(virtualFile)
             psiFile ?: return listOf()
 
