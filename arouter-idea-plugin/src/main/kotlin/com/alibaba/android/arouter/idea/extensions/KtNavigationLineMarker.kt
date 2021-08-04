@@ -22,7 +22,7 @@ import javax.swing.Icon
 /**
  * 支持 kotlin 的Arouter行解读器
  *
- * @author lckj686 <a href="luchaokj686@126.com">Contact me.</a>
+ * @author lckj686
  * @version 1.0
  * @since 2021-08-01
  */
@@ -227,12 +227,10 @@ class KtNavigationLineMarker : LineMarkerProvider {
 
         // 内容 与 匹配规则 的测试
         val matcher = pattern.matcher(srcStr)
-
         if (matcher.find()) {
             // 不包含前后的两个字符
             return matcher.group(1)
         } else {
-            println(" 没有匹配到内容....")
             return "";
         }
     }
