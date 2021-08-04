@@ -22,7 +22,7 @@ import javax.swing.Icon
 /**
  * 支持 kotlin 的Arouter行解读器
  *
- * @author liwei <a href="luchaokj686@126.com">Contact me.</a>
+ * @author lckj686 <a href="luchaokj686@126.com">Contact me.</a>
  * @version 1.0
  * @since 2021-08-01
  */
@@ -42,7 +42,7 @@ class KtNavigationLineMarker : LineMarkerProvider {
         projectPath = project.basePath
         filePath = elements[0].containingFile.viewProvider.virtualFile.canonicalPath
         elements.forEachIndexed { index, psiElement ->
-            println("tag1**${psiElement.javaClass.name}  ${psiElement.text}")
+
             var target: TargetContent? = null
 
             //目标注解
@@ -51,11 +51,9 @@ class KtNavigationLineMarker : LineMarkerProvider {
             if (target == null) {
                 target = getAnnotationContent2(psiElement)
             }
-
             target?.let {
                 val reva = findProperties(project, target, PsiElement::class.java, listOf("Route"))
                 if (reva.isNotEmpty()) {
-                    println("111*************$target")
                     val builder = NavigationGutterIconBuilder.create(getIcon(target))
                     builder.setAlignment(GutterIconRenderer.Alignment.CENTER)
                     builder.setTargets(reva)
@@ -97,14 +95,12 @@ class KtNavigationLineMarker : LineMarkerProvider {
                 val pre = (element as LeafPsiElement).treeParent.prev()
                 if (pre is CompositeElement) {
                     val text = recursionCompositeElementText(pre)
-                    // println("----text = $text")
                     //确实是注解
                     if (targetAno.contains(text)) {
                         //接着去找注解的内容
                         val next = element.treeNext
                         if (next is CompositeElement) {
                             val ano = recursionCompositeElement(next)
-                            //  println("----ano = $ano")
                             return TargetContent().apply {
                                 this.content = ano
                                 this.type = 1
@@ -172,7 +168,6 @@ class KtNavigationLineMarker : LineMarkerProvider {
                 list.forEach {
                     if (it.javaClass.simpleName == "KtAnnotationEntry" && it.text.contains(target.content
                                     ?: "") && it.text.contains("Route")) {
-                        println("++property=${it.javaClass.simpleName} ${it.text} ")
                         result.add(it)
                     }
                 }
@@ -182,15 +177,12 @@ class KtNavigationLineMarker : LineMarkerProvider {
                     //KtDotQualifiedExpression
                     if (target.content?.startsWith("\"") == true && property.javaClass.simpleName == "KtStringTemplateExpression") {
                         if (property.text == target.content) {
-                            println("--property=${property.javaClass.simpleName} ${property.text} ")
                             result.add(property)
-                            //return@forEachIndexed
                         }
                     }
                 }
             } else {
                 list.forEachIndexed { index, property ->
-                    println("2级查找=${property.javaClass.simpleName}  ${property.text}")
                     if (property.javaClass.simpleName == "KtDotQualifiedExpression") {
                         if (property.text == target.content) {
                             println("--property=${property.javaClass.simpleName} ${property.text} ")
