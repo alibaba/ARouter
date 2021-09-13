@@ -497,6 +497,19 @@ public final class Postcard extends RouteMeta {
         mBundle.putShortArray(key, value);
         return this;
     }
+    
+    /**
+     * Inserts a boolean array value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key   a String, or null
+     * @param value a boolean array object, or null
+     * @return current
+     */
+    public Postcard withBooleanArray(@Nullable String key, @Nullable boolean[] value) {
+        mBundle.putBooleanArray(key, value);
+        return this;
+    }
 
     /**
      * Inserts a char array value into the mapping of this Bundle, replacing
