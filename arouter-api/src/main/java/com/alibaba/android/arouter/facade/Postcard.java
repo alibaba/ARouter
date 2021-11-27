@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -547,6 +548,18 @@ public final class Postcard extends RouteMeta {
      */
     public Postcard withBundle(@Nullable String key, @Nullable Bundle value) {
         mBundle.putBundle(key, value);
+        return this;
+    }
+
+    /**
+     * Inserts a Bundle value into the mapping of this Bundle
+     * the sub-item of the @param values will be added to mBundle
+     *
+     * @param  values a Bundle object, not null
+     * @return current
+     */
+    public Postcard withBundle(@NonNull Bundle values){
+        mBundle.putAll(values);
         return this;
     }
 
