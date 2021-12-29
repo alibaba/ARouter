@@ -4,8 +4,12 @@ buildscript {
 
     repositories {
         maven {
-            url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
+            url "http://maven.aliyun.com/nexus/content/groups/public/"
         }
+//        maven {
+//            url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
+//        }
+
         mavenCentral()
         google()
     }
@@ -24,8 +28,15 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven {
+            url "http://maven.aliyun.com/nexus/content/groups/public/"
+        }
+        maven {
             url "https://s01.oss.sonatype.org/content/repositories/releases/"
         }
+//        maven {
+//            url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
+//        }
+
         google()
     }
 }
