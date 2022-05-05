@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import java.util.zip.ZipFile
+
 apply plugin: 'maven'
 apply plugin: 'signing'
 
@@ -75,6 +80,22 @@ def configurePom(pom) {
         }
     }
 }
+private def extractEntry(archive, entryPath, outputPath) {
+
+
+    def zip = new ZipFile(archive)
+    try {
+        zip.entries().each {
+            if (it.name == entryPath) {
+                def path = Paths.get(outputPath)
+                Files.createDirectories(path.getParent())
+                Files.copy(zip.getInputStream(it), path, StandardCopyOption.REPLACE_EXISTING)
+            }
+        }
+    } finally {
+        zip.close()
+    }
+}
 
 afterEvaluate { project ->
     uploadArchives {
@@ -124,6 +145,22 @@ afterEvaluate { project ->
         task androidJavadocs(type: Javadoc) {
             source = android.sourceSets.main.java.source
             classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+            classpath += project.configurations.releaseCompileClasspath
+            classpath += project.configurations.debugCompileClasspath
+            classpath += project.configurations.archives
+
+            options.encoding 'UTF-8'
+
+            afterEvaluate {
+                def aars = classpath.filter { it.name.endsWith('.aar') }
+                classpath -= aars
+                aars.forEach({ aar ->
+                    def outputPath = "$buildDir/tmp/aarJar/${aar.name.replace('.aar', '.jar')}"
+                    Paths.get(outputPath).parent.toFile().mkdirs()
+                    extractEntry(aar, 'classes.jar', outputPath)
+                    classpath += files(outputPath)
+                })
+            }
         }
 
         task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
