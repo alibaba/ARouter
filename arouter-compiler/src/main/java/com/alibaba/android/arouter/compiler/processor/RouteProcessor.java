@@ -4,6 +4,7 @@ import com.alibaba.android.arouter.compiler.entity.RouteDoc;
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
+import com.alibaba.android.arouter.facade.annotation.Routes;
 import com.alibaba.android.arouter.facade.enums.RouteType;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
@@ -27,6 +28,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +48,7 @@ import javax.tools.StandardLocation;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ACTIVITY;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_AUTOWIRED;
 import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTES;
 import static com.alibaba.android.arouter.compiler.utils.Consts.FRAGMENT;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IPROVIDER_GROUP;
 import static com.alibaba.android.arouter.compiler.utils.Consts.IROUTE_GROUP;
@@ -69,7 +72,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @since 16/8/15 下午10:08
  */
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
+@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE,ANNOTATION_TYPE_ROUTES, ANNOTATION_TYPE_AUTOWIRED})
 public class RouteProcessor extends BaseProcessor {
     private Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
     private Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
@@ -108,9 +111,14 @@ public class RouteProcessor extends BaseProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         if (CollectionUtils.isNotEmpty(annotations)) {
             Set<? extends Element> routeElements = roundEnv.getElementsAnnotatedWith(Route.class);
+            Set<? extends Element> routesElements = roundEnv.getElementsAnnotatedWith(Routes.class);
+
+            Set<Element> set = new HashSet<>();
+            set.addAll(routeElements);
+            set.addAll(routesElements);
             try {
                 logger.info(">>> Found routes, start... <<<");
-                this.parseRoutes(routeElements);
+                this.parseRoutes(set);
 
             } catch (Exception e) {
                 logger.error(e);
@@ -182,38 +190,17 @@ public class RouteProcessor extends BaseProcessor {
             //  Follow a sequence, find out metas of group first, generate java file, then statistics them as root.
             for (Element element : routeElements) {
                 TypeMirror tm = element.asType();
+
                 Route route = element.getAnnotation(Route.class);
-                RouteMeta routeMeta;
-
-                // Activity or Fragment
-                if (types.isSubtype(tm, type_Activity) || types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
-                    // Get all fields annotation by @Autowired
-                    Map<String, Integer> paramsType = new HashMap<>();
-                    Map<String, Autowired> injectConfig = new HashMap<>();
-                    injectParamCollector(element, paramsType, injectConfig);
-
-                    if (types.isSubtype(tm, type_Activity)) {
-                        // Activity
-                        logger.info(">>> Found activity route: " + tm.toString() + " <<<");
-                        routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
-                    } else {
-                        // Fragment
-                        logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
-                        routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), paramsType);
+                Routes routes = element.getAnnotation(Routes.class);
+                if (route == null) {
+                    Route[] routeArr = routes.value();
+                    for (Route r : routeArr) {
+                        initRouteMeta(type_Activity, type_Service, fragmentTm, fragmentTmV4, element, tm, r);
                     }
-
-                    routeMeta.setInjectConfig(injectConfig);
-                } else if (types.isSubtype(tm, iProvider)) {         // IProvider
-                    logger.info(">>> Found provider route: " + tm.toString() + " <<<");
-                    routeMeta = new RouteMeta(route, element, RouteType.PROVIDER, null);
-                } else if (types.isSubtype(tm, type_Service)) {           // Service
-                    logger.info(">>> Found service route: " + tm.toString() + " <<<");
-                    routeMeta = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
-                } else {
-                    throw new RuntimeException("The @Route is marked on unsupported class, look at [" + tm.toString() + "].");
+                }else {
+                    initRouteMeta(type_Activity, type_Service, fragmentTm, fragmentTmV4, element, tm, route);
                 }
-
-                categories(routeMeta);
             }
 
             MethodSpec.Builder loadIntoMethodOfProviderBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
@@ -367,6 +354,39 @@ public class RouteProcessor extends BaseProcessor {
 
             logger.info(">>> Generated root, name is " + rootFileName + " <<<");
         }
+    }
+
+    private void initRouteMeta(TypeMirror type_Activity, TypeMirror type_Service, TypeMirror fragmentTm, TypeMirror fragmentTmV4, Element element, TypeMirror tm, Route route) {
+        RouteMeta routeMeta;
+        // Activity or Fragment
+        if (types.isSubtype(tm, type_Activity) || types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
+            // Get all fields annotation by @Autowired
+            Map<String, Integer> paramsType = new HashMap<>();
+            Map<String, Autowired> injectConfig = new HashMap<>();
+            injectParamCollector(element, paramsType, injectConfig);
+
+            if (types.isSubtype(tm, type_Activity)) {
+                // Activity
+                logger.info(">>> Found activity route: " + tm.toString() + " <<<");
+                routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
+            } else {
+                // Fragment
+                logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
+                routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), paramsType);
+            }
+
+            routeMeta.setInjectConfig(injectConfig);
+        } else if (types.isSubtype(tm, iProvider)) {         // IProvider
+            logger.info(">>> Found provider route: " + tm.toString() + " <<<");
+            routeMeta = new RouteMeta(route, element, RouteType.PROVIDER, null);
+        } else if (types.isSubtype(tm, type_Service)) {           // Service
+            logger.info(">>> Found service route: " + tm.toString() + " <<<");
+            routeMeta = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
+        } else {
+            throw new RuntimeException("The @Route is marked on unsupported class, look at [" + tm.toString() + "].");
+        }
+
+        categories(routeMeta);
     }
 
     /**

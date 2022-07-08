@@ -6,7 +6,7 @@ compileJava {
 }
 
 dependencies {
-    implementation 'com.alibaba:arouter-annotation:1.0.6'
+    implementation project(':arouter-annotation')
 
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc7'
     compileOnly 'com.google.auto.service:auto-service-annotations:1.0-rc7'
