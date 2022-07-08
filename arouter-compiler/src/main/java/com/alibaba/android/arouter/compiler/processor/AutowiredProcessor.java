@@ -117,6 +117,12 @@ public class AutowiredProcessor extends BaseProcessor {
                 injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class)", ARouterClass, ClassName.get(type_JsonService));
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
+                if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
+                    injectMethodBuilder.addStatement("android.os.Bundle bundle = substitute.getIntent().getExtras()");
+                } else if (types.isSubtype(parent.asType(), fragmentTm) || types.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
+                    injectMethodBuilder.addStatement("android.os.Bundle bundle = substitute.getArguments()");
+                }
+
                 // Generate method body, start inject.
                 for (Element element : childs) {
                     Autowired fieldConfig = element.getAnnotation(Autowired.class);
@@ -149,25 +155,27 @@ public class AutowiredProcessor extends BaseProcessor {
                         }
                     } else {    // It's normal intent value
                         String originalValue = "substitute." + fieldName;
-                        String statement = "substitute." + fieldName + " = " + buildCastCode(element) + "substitute.";
-                        boolean isActivity = false;
-                        if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
-                            isActivity = true;
-                            statement += "getIntent().";
-                        } else if (types.isSubtype(parent.asType(), fragmentTm) || types.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
-                            statement += "getArguments().";
-                        } else {
+                        String statement = "substitute." + fieldName + " = " + "bundle == null ? " + originalValue + " : ";
+                        if (!types.isSubtype(parent.asType(), activityTm)
+                            && !types.isSubtype(parent.asType(), fragmentTm)
+                            && !types.isSubtype(parent.asType(), fragmentTmV4)) {
                             throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
                         }
 
-                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity, isKtClass(parent));
+                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), buildCastCode(element), isKtClass(parent));
                         if (statement.startsWith("serializationService.")) {   // Not mortals
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = " + statement,
+                                    "$T default_" + fieldName + " = " + statement,
+                                    ClassName.get(element.asType()),
                                     (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
                                     ClassName.get(element.asType())
                             );
+
+                            injectMethodBuilder.beginControlFlow("if (null != default_" + fieldName + ")");
+                            injectMethodBuilder.addStatement("substitute.$N = default_$N", fieldName, fieldName);
+                            injectMethodBuilder.endControlFlow();
+
                             injectMethodBuilder.nextControlFlow("else");
                             injectMethodBuilder.addStatement(
                                     "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
@@ -209,7 +217,8 @@ public class AutowiredProcessor extends BaseProcessor {
     }
 
     private String buildCastCode(Element element) {
-        if (typeUtils.typeExchange(element) == TypeKind.SERIALIZABLE.ordinal()) {
+        if (typeUtils.typeExchange(element) == TypeKind.SERIALIZABLE.ordinal()
+            || typeUtils.typeExchange(element) == TypeKind.PARCELABLE.ordinal()) {
             return CodeBlock.builder().add("($T) ", ClassName.get(element.asType())).build().toString();
         }
         return "";
@@ -218,43 +227,43 @@ public class AutowiredProcessor extends BaseProcessor {
     /**
      * Build param inject statement
      */
-    private String buildStatement(String originalValue, String statement, int type, boolean isActivity, boolean isKt) {
+    private String buildStatement(String originalValue, String statement, int type, String castCode, boolean isKt) {
         switch (TypeKind.values()[type]) {
             case BOOLEAN:
-                statement += "getBoolean" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getBoolean" + "($S, " + originalValue + ")";
                 break;
             case BYTE:
-                statement += "getByte" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getByte" + "($S, " + originalValue + ")";
                 break;
             case SHORT:
-                statement += "getShort" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getShort" + "($S, " + originalValue + ")";
                 break;
             case INT:
-                statement += "getInt" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getInt" + "($S, " + originalValue + ")";
                 break;
             case LONG:
-                statement += "getLong" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getLong" + "($S, " + originalValue + ")";
                 break;
             case CHAR:
-                statement += "getChar" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getChar" + "($S, " + originalValue + ")";
                 break;
             case FLOAT:
-                statement += "getFloat" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getFloat" + "($S, " + originalValue + ")";
                 break;
             case DOUBLE:
-                statement += "getDouble" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
+                statement += "bundle.getDouble" + "($S, " + originalValue + ")";
                 break;
             case STRING:
-                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S") : ("getString($S")) + ", " + originalValue + ")";
+                statement += "bundle.getString" + "($S, " + originalValue + ")";
                 break;
             case SERIALIZABLE:
-                statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
+                statement += castCode + "bundle.getSerializable($S)";
                 break;
             case PARCELABLE:
-                statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
+                statement += castCode + "bundle.getParcelable($S)";
                 break;
             case OBJECT:
-                statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new " + TYPE_WRAPPER + "<$T>(){}.getType())";
+                statement = "serializationService.parseObject(bundle.getString($S)" + ", new " + TYPE_WRAPPER + "<$T>(){}.getType())";
                 break;
         }
 
