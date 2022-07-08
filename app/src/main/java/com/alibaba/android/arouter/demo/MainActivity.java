@@ -244,6 +244,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         .withObject("objList", objList)
                         .withObject("map", map).navigation(this);
                 break;
+            case R.id.route1:
+                ARouter.getInstance().build("/module/1").navigation();
+                break;
+            case R.id.route2:
+                ARouter.getInstance().build("/test/multiRoute").navigation();
+                break;
+
             default:
                 break;
         }

@@ -1,6 +1,7 @@
 package com.alibaba.android.arouter.facade.annotation;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -12,6 +13,7 @@ import java.lang.annotation.Target;
  * @version 1.0
  * @since 16/8/15 下午9:29
  */
+@Repeatable(Routes.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS)
 public @interface Route {
