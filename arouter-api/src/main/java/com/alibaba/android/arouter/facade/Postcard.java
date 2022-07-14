@@ -168,6 +168,11 @@ public final class Postcard extends RouteMeta {
         ARouter.getInstance().navigation(mContext, this, requestCode, callback);
     }
 
+    public void navigation(android.support.v4.app.Fragment fragment, int requestCode) {
+        ARouter.getInstance().navigation(fragment, this, requestCode, null);
+    }
+
+
     /**
      * Green channel, it will skip all of interceptors.
      *

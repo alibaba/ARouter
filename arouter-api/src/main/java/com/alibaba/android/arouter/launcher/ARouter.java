@@ -7,7 +7,6 @@ import android.net.Uri;
 import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
-import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.facade.template.IRouteGroup;
 import com.alibaba.android.arouter.utils.Consts;
@@ -184,6 +183,10 @@ public final class ARouter {
      */
     public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
         return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
+    }
+
+    public Object navigation(android.support.v4.app.Fragment fragment, Postcard postcard, int requestCode, NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(fragment, fragment.getActivity(), postcard, requestCode, callback);
     }
 
     /**

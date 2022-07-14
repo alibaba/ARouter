@@ -273,15 +273,19 @@ final class _ARouter {
         }
     }
 
-    /**
-     * Use router navigation.
-     *
-     * @param context     Activity or null.
-     * @param postcard    Route metas
-     * @param requestCode RequestCode
-     * @param callback    cb
-     */
-    protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    protected Object navigation(Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        return navigation(null, context, postcard, requestCode, callback);
+    }
+
+        /**
+         * Use router navigation.
+         *
+         * @param context     Activity or null.
+         * @param postcard    Route metas
+         * @param requestCode RequestCode
+         * @param callback    cb
+         */
+    protected Object navigation(final android.support.v4.app.Fragment fragment, final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         PretreatmentService pretreatmentService = ARouter.getInstance().navigation(PretreatmentService.class);
         if (null != pretreatmentService && !pretreatmentService.onPretreatment(context, postcard)) {
             // Pretreatment failed, navigation canceled.
@@ -334,7 +338,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(postcard, requestCode, callback);
+                    _navigation(fragment, postcard, requestCode, callback);
                 }
 
                 /**
@@ -352,13 +356,13 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(postcard, requestCode, callback);
+            return _navigation(fragment, postcard, requestCode, callback);
         }
 
         return null;
     }
 
-    private Object _navigation(final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    private Object _navigation(final android.support.v4.app.Fragment fragment, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
         final Context currentContext = postcard.getContext();
 
         switch (postcard.getType()) {
@@ -388,7 +392,7 @@ final class _ARouter {
                 runInMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        startActivity(requestCode, currentContext, intent, postcard, callback);
+                        startActivity(fragment, requestCode, currentContext, intent, postcard, callback);
                     }
                 });
 
@@ -438,9 +442,11 @@ final class _ARouter {
      *
      * @see ActivityCompat
      */
-    private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
+    private void startActivity(android.support.v4.app.Fragment fragment, int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
         if (requestCode >= 0) {  // Need start for result
-            if (currentContext instanceof Activity) {
+            if (fragment != null) {
+                fragment.startActivityForResult(intent, requestCode);
+            } if (currentContext instanceof Activity) {
                 ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
             } else {
                 logger.warning(Consts.TAG, "Must use [navigation(activity, ...)] to support [startActivityForResult]");
