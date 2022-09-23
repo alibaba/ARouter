@@ -3,15 +3,8 @@ buildscript {
     ext.arouter_register_version = '1.0.2'
 
     repositories {
-
-        maven {
-            url 'https://maven.aliyun.com/repository/public'
-        }
-        maven {
-            url 'https://maven.aliyun.com/repository/google'
-        }
-      /*  mavenCentral()
-        google()*/
+        mavenCentral()
+        google()
     }
 
     dependencies {
@@ -25,18 +18,7 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url 'https://maven.aliyun.com/repository/public'
-        }
-        maven {
-            url 'https://maven.aliyun.com/repository/google'
-        }
-
-        /*mavenLocal()
         mavenCentral()
-        maven {
-            url "https://s01.oss.sonatype.org/content/repositories/releases/"
-        }
-        google()*/
+        google()
     }
 }
