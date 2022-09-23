@@ -7,6 +7,13 @@ dependencies {
 
 dependencies {
     compile 'com.android.tools.build:gradle:2.1.3'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    implementation 'org.ow2.asm:asm:6.0'
+    implementation 'org.ow2.asm:asm-util:6.0'
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
+    implementation group: 'com.android.tools.build', name: 'gradle-core', version: '2.0.0'
+    implementation group: 'com.android.tools.build', name: 'gradle-api', version: '2.0.0'
+
 }
 
 apply from: rootProject.file('gradle/publish.gradle')
