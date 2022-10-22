@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.4.10'
+    ext.kotlin_version = '1.6.10'
     ext.arouter_register_version = '1.0.2'
 
     repositories {
@@ -14,6 +14,11 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "com.alibaba:arouter-register:$arouter_register_version"
     }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.6.10' apply false
+    id 'com.google.devtools.ksp' version '1.6.10-1.0.4' apply false
 }
 
 allprojects {

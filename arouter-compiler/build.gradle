@@ -1,15 +1,26 @@
-apply plugin: 'java'
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm'
+}
 
 compileJava {
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
 }
 
-dependencies {
-    implementation 'com.alibaba:arouter-annotation:1.0.6'
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    kotlinOptions {
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
+}
 
-    annotationProcessor 'com.google.auto.service:auto-service:1.0-rc7'
-    compileOnly 'com.google.auto.service:auto-service-annotations:1.0-rc7'
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // implementation 'com.alibaba:arouter-annotation:1.0.7'
+    implementation project(":arouter-annotation")
 
     implementation 'com.squareup:javapoet:1.8.0'
 
@@ -17,6 +28,13 @@ dependencies {
     implementation 'org.apache.commons:commons-collections4:4.1'
 
     implementation 'com.alibaba:fastjson:1.2.69'
+
+    // ksp deps https://github.com/google/ksp/releases/tag/1.7.20-1.0.6
+    implementation 'com.google.devtools.ksp:symbol-processing-api:1.6.10-1.0.4'
+    // https://square.github.io/kotlinpoet/
+    implementation("com.squareup:kotlinpoet:1.11.0")
+    implementation("com.squareup:kotlinpoet-ksp:1.11.0")
+    implementation("com.squareup:kotlinpoet-metadata:1.11.0")
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

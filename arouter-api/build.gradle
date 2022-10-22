@@ -16,8 +16,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -31,9 +31,18 @@ android {
 }
 
 dependencies {
-    annotationProcessor 'com.alibaba:arouter-compiler:1.5.2'
-    api 'com.alibaba:arouter-annotation:1.0.6'
+    // annotationProcessor 'com.alibaba:arouter-compiler:1.5.3'
+    annotationProcessor project(':arouter-compiler')
+    // api 'com.alibaba:arouter-annotation:1.0.7'
+    api project(":arouter-annotation")
     implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
+}
+
+tasks.withType(Javadoc) {
+    failOnError false
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

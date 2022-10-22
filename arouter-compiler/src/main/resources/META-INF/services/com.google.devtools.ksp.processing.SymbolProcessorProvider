@@ -1,0 +1,3 @@
+com.alibaba.android.arouter.compiler.ksp.RouteSymbolProcessorProvider
+com.alibaba.android.arouter.compiler.ksp.InterceptorSymbolProcessorProvider
+com.alibaba.android.arouter.compiler.ksp.AutowiredSymbolProcessorProvider

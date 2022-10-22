@@ -18,6 +18,7 @@ import javax.lang.model.element.Element;
 public class RouteMeta {
     private RouteType type;         // Type of route
     private Element rawType;        // Raw type of route
+    private Object kspRawType;      // Raw type of ksp : KSClassDeclaration
     private Class<?> destination;   // Destination
     private String path;            // Path of route
     private String group;           // Group of route
@@ -88,6 +89,20 @@ public class RouteMeta {
     /**
      * Type
      *
+     * @param route      route
+     * @param kspRawType kspRawType
+     * @param type       type
+     * @param paramsType paramsType
+     */
+    public static RouteMeta build(Route route, Object kspRawType, RouteType type, Map<String, Integer> paramsType) {
+        RouteMeta meta = new RouteMeta(route, null, type, paramsType);
+        meta.setKspRawType(kspRawType);
+        return meta;
+    }
+
+    /**
+     * Type
+     *
      * @param type        type
      * @param rawType     rawType
      * @param destination destination
@@ -133,6 +148,14 @@ public class RouteMeta {
     public RouteMeta setRawType(Element rawType) {
         this.rawType = rawType;
         return this;
+    }
+
+    public void setKspRawType(Object kspRawType) {
+        this.kspRawType = kspRawType;
+    }
+
+    public Object getKspRawType() {
+        return kspRawType;
     }
 
     public RouteType getType() {

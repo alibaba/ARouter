@@ -1,8 +1,17 @@
 package com.alibaba.android.arouter.compiler.processor;
 
+import static com.alibaba.android.arouter.compiler.utils.Consts.ANNOTATION_TYPE_INTECEPTOR;
+import static com.alibaba.android.arouter.compiler.utils.Consts.IINTERCEPTOR;
+import static com.alibaba.android.arouter.compiler.utils.Consts.IINTERCEPTOR_GROUP;
+import static com.alibaba.android.arouter.compiler.utils.Consts.METHOD_LOAD_INTO;
+import static com.alibaba.android.arouter.compiler.utils.Consts.NAME_OF_INTERCEPTOR;
+import static com.alibaba.android.arouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
+import static com.alibaba.android.arouter.compiler.utils.Consts.SEPARATOR;
+import static com.alibaba.android.arouter.compiler.utils.Consts.WARNING_TIPS;
+import static javax.lang.model.element.Modifier.PUBLIC;
+
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.facade.annotation.Interceptor;
-import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -20,18 +29,11 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
-import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-
-import static com.alibaba.android.arouter.compiler.utils.Consts.*;
-import static javax.lang.model.element.Modifier.PUBLIC;
 
 /**
  * Process the annotation of #{@link Interceptor}
@@ -40,7 +42,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
  * @version 1.0
  * @since 16/8/23 14:11
  */
-@AutoService(Processor.class)
 @SupportedAnnotationTypes(ANNOTATION_TYPE_INTECEPTOR)
 public class InterceptorProcessor extends BaseProcessor {
     private Map<Integer, Element> interceptors = new TreeMap<>();

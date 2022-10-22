@@ -25,8 +25,10 @@ public class Consts {
 
     // System interface
     public static final String ACTIVITY = "android.app.Activity";
+    public static final String ACTIVITY_ANDROIDX = "androidx.appcompat.app.AppCompatActivity";
     public static final String FRAGMENT = "android.app.Fragment";
     public static final String FRAGMENT_V4 = "android.support.v4.app.Fragment";
+    public static final String FRAGMENT_ANDROIDX = "androidx.fragment.app.Fragment";
     public static final String SERVICE = "android.app.Service";
     public static final String PARCELABLE = "android.os.Parcelable";
 
@@ -42,6 +44,17 @@ public class Consts {
     public static final String CHAR = LANG + ".Character";
     public static final String STRING = LANG + ".String";
     public static final String SERIALIZABLE = "java.io.Serializable";
+    // Kotlin type
+    private static final String KOTLIN = "kotlin";
+    public static final String KBYTE = KOTLIN + ".Byte";
+    public static final String KSHORT = KOTLIN + ".Short";
+    public static final String KINTEGER = KOTLIN + ".Int";
+    public static final String KLONG = KOTLIN + ".Long";
+    public static final String KFLOAT = KOTLIN + ".Float";
+    public static final String KDOUBEL = KOTLIN + ".Double";
+    public static final String KBOOLEAN = KOTLIN + ".Boolean";
+    public static final String KCHAR = KOTLIN + ".Char";
+    public static final String KSTRING = KOTLIN + ".String";
 
     // Custom interface
     private static final String FACADE_PACKAGE = "com.alibaba.android.arouter.facade";
@@ -70,6 +83,11 @@ public class Consts {
             "            }\n" +
             "        }\n" +
             "    }\n" +
+            "}\n";
+
+    public static final String NO_MODULE_NAME_TIPS_KSP = "These no module name, at 'build.gradle', like :\n" +
+            "ksp {\n" +
+            "    arg(\"AROUTER_MODULE_NAME\", project.getName()) {\n" +
             "}\n";
 
     // Options of processor
