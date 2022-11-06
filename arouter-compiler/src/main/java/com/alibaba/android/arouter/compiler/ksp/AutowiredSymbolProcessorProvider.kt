@@ -131,15 +131,9 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
 
                 val parentRouteType = parent.routeType
 
-                /**
-                 *  Judge this file generate with isolating or aggregating mode
-                 *  More detail: https://kotlinlang.org/docs/ksp-incremental.html#symbolprocessorprovider-the-entry-point
-                 *  */
-                var aggregating = false
                 // Generate method body, start inject.
                 for (child in children) {
                     if (child.isSubclassOf(Consts.IPROVIDER)) { // It's provider, inject by IProvider
-                        aggregating = true
                         addProviderStatement(child, injectMethodBuilder, parentClassName)
                     } else { // It's normal intent value (activity or fragment)
                         addActivityOrFragmentStatement(
@@ -172,7 +166,13 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                 parent.containingFile?.let {
                     dependency.add(it)
                 }
-                file.writeTo(codeGenerator, aggregating, dependency)
+                /**
+                 *  Judge this file generate with isolating or aggregating mode
+                 *  More detail: https://kotlinlang.org/docs/ksp-incremental.html#symbolprocessorprovider-the-entry-point
+                 *  this beanch, I test @Autowired, it is a completely isolating mode processor
+                 *  https://github.com/JailedBird/ARouter/tree/test-autowired-incremental
+                 *  */
+                file.writeTo(codeGenerator, false, dependency)
                 logger.info(">>> " + parent.simpleName.asString() + " has been processed, " + autowiredClassName + " has been generated. <<<")
             }
             logger.info(">>> Autowired processor stop. <<<")
