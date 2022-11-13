@@ -102,9 +102,6 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                 Any::class.asTypeName().copy(nullable = true)
             ).build()
 
-            /** if(target == null) { return } */
-            val returnStatement = "if($parameterName == null) { return }"
-
             for (entry in parentAndChildren) {
                 val parent: KSClassDeclaration = entry.key
                 val children: List<KSPropertyDeclaration> = entry.value
@@ -116,7 +113,6 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                     .addModifiers(KModifier.OVERRIDE)
                     .addParameter(parameterSpec)
 
-                injectMethodBuilder.addStatement(returnStatement)
                 /** serializationService = ARouter.getInstance().navigation(SerializationService::class.java) */
                 injectMethodBuilder.addStatement(
                     "serializationService = %T.getInstance().navigation(%T::class.java)",
@@ -125,8 +121,8 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                 )
                 val parentClassName = parent.toClassName()
                 injectMethodBuilder.addStatement(
-                    "val substitute = target as %T",
-                    parentClassName
+                    "val substitute = (target as? %T)?: throw IllegalStateException(\n·\"\"\"The target that needs to be injected must be %T, please check your code!\"\"\"\n·)",
+                    parentClassName, parentClassName
                 )
 
                 val parentRouteType = parent.routeType
@@ -216,13 +212,14 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
          * Inject field for activity and fragment
          * */
         private fun addActivityOrFragmentStatement(
-            ksPropertyDeclaration: KSPropertyDeclaration,
-            injectMethodBuilder: FunSpec.Builder,
+            property: KSPropertyDeclaration,
+            method: FunSpec.Builder,
             type: TypeKind,
             parentRouteType: RouteType,
             parentClassName: ClassName
         ) {
-            val fieldName = ksPropertyDeclaration.simpleName.asString()
+            val fieldName = property.simpleName.asString()
+            val isNullable = property.type.resolve().isMarkedNullable
             val isActivity = when (parentRouteType) {
                 RouteType.ACTIVITY -> true
                 RouteType.FRAGMENT -> false
@@ -230,10 +227,11 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                     throw IllegalAccessException("The field [$fieldName] need autowired from intent, its parent must be activity or fragment!")
                 }
             }
-            val annotation = ksPropertyDeclaration.findAnnotationWithType<Autowired>()!!
+            val intent = if (isActivity) "intent?.extras" else "arguments"
+            val annotation = property.findAnnotationWithType<Autowired>()!!
             val bundleName = annotation.name.ifEmpty { fieldName }
 
-            val getObj: String = when (type) {
+            val getPrimitiveTypeMethod: String = when (type) {
                 TypeKind.BOOLEAN -> "getBoolean"
                 TypeKind.BYTE -> "getByte"
                 TypeKind.SHORT -> "getShort"
@@ -244,49 +242,79 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                 TypeKind.DOUBLE -> "getDouble"
                 else -> ""
             }
-            if (getObj.isNotEmpty()) {
-                val intent = if (isActivity) "intent?.extras" else "arguments"
-                val statementPrimaryFormat =
-                    "substitute.%L = if (substitute.${intent} != null) {  substitute.${intent}!!.${getObj}(%S, substitute.%L) } else  {  substitute.%L }"
-                injectMethodBuilder.addStatement(
-                    statementPrimaryFormat, fieldName, bundleName, fieldName, fieldName
-                )
+            if (getPrimitiveTypeMethod.isNotEmpty()) {
+                val primitiveCodeBlock = if (isNullable) {
+                    CodeBlock.builder()
+                        .beginControlFlow("substitute.${intent}?.let")
+                        .beginControlFlow("if(it.containsKey(%S))", bundleName)
+                        .addStatement(
+                            "substitute.%L = it.${getPrimitiveTypeMethod}(%S)",
+                            fieldName,
+                            bundleName
+                        )
+                        .endControlFlow()
+                        .endControlFlow()
+                        .build()
+                } else {
+                    CodeBlock.builder()
+                        .beginControlFlow("substitute.${intent}?.let")
+                        .addStatement(
+                            "substitute.%L = it.${getPrimitiveTypeMethod}(%S, substitute.%L)",
+                            fieldName,
+                            bundleName,
+                            fieldName
+                        )
+                        .endControlFlow()
+                        .build()
+                }
+                method.addCode(primitiveCodeBlock)
             } else {
                 // such as: val param = List<JailedBird> ==> %T ==> List<JailedBird>
-                val parameterClassName = ksPropertyDeclaration.getKotlinPoetTTypeGeneric()
+                val parameterClassName = property.getKotlinPoetTTypeGeneric()
 
                 when (type) {
                     TypeKind.STRING -> {
-                        val intent = if (isActivity) "intent?.extras" else "arguments"
-                        val statementPrimaryFormat =
-                            "substitute.%L = if (substitute.${intent} != null) {  substitute.${intent}!!.getString(%S, substitute.%L) } else  {  substitute.%L }"
-                        injectMethodBuilder.addStatement(
-                            statementPrimaryFormat, fieldName, bundleName, fieldName, fieldName
+                        method.addCode(
+                            CodeBlock.builder()
+                                .beginControlFlow("substitute.${intent}?.let")
+                                .addStatement(
+                                    "substitute.%L = it.getString(%S, substitute.%L)",
+                                    fieldName,
+                                    bundleName,
+                                    fieldName
+                                )
+                                .endControlFlow()
+                                .build()
                         )
                     }
                     TypeKind.SERIALIZABLE -> {
-                        val statement = if (isActivity) {
-                            "(substitute.intent?.getSerializableExtra(%S) as? %T)?.let { substitute.%L = it }"
+                        val beginStatement = if (isActivity) {
+                            "(substitute.intent?.getSerializableExtra(%S) as? %T)?.let"
                         } else {
-                            "(substitute.arguments?.getSerializable(%S) as? %T)?.let { substitute.%L = it }"
+                            "(substitute.arguments?.getSerializable(%S) as? %T)?.let"
                         }
-                        injectMethodBuilder.addStatement(
-                            statement, bundleName, parameterClassName, fieldName
+                        method.addCode(
+                            CodeBlock.builder()
+                                .beginControlFlow(beginStatement, bundleName, parameterClassName)
+                                .addStatement("substitute.%L = it", fieldName)
+                                .endControlFlow().build()
                         )
                     }
                     TypeKind.PARCELABLE -> {
-                        val statement = if (isActivity) {
-                            "substitute.intent?.getParcelableExtra<%T>(%S)?.let { substitute.%L = it }"
+                        val beginStatement = if (isActivity) {
+                            "substitute.intent?.getParcelableExtra<%T>(%S)?.let"
                         } else {
-                            "substitute.arguments?.getParcelable<%T>(%S)?.let { substitute.%L = it }"
+                            "substitute.arguments?.getParcelable<%T>(%S)?.let"
                         }
-                        injectMethodBuilder.addStatement(
-                            statement, parameterClassName, bundleName, fieldName
+                        method.addCode(
+                            CodeBlock.builder()
+                                .beginControlFlow(beginStatement, parameterClassName, bundleName)
+                                .addStatement("substitute.%L = it", fieldName)
+                                .endControlFlow().build()
                         )
                     }
                     TypeKind.OBJECT -> {
-                        val intent = if (isActivity) "intent?.extras" else "arguments"
-                        injectMethodBuilder.beginControlFlow("if(serializationService != null && substitute.${intent} != null)")
+                        method.beginControlFlow("if(serializationService != null && substitute.${intent} != null)")
                             .addStatement(
                                 "substitute.%L = serializationService!!.parseObject(substitute.${intent}!!.getString(%S), (object : TypeWrapper<%T>(){}).type)",
                                 fieldName, bundleName, parameterClassName
@@ -295,8 +323,8 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                             // Kotlin-poet Notice: Long lists line wrapping makes code not compile
                             // https://github.com/square/kotlinpoet/issues/1346 , temp using """  """ to wrap long string (perhaps can optimize it)
                             .addStatement(
-                                "Log.e(\"${Consts.TAG}\" , \"\"\"You want automatic inject the field '%L' in class '%L', then you should implement 'SerializationService' to support object auto inject!\"\"\")",
-                                fieldName, parentClassName.simpleName
+                                "Log.e(%S , \"\"\"You want automatic inject the field '%L' in class '%L', then you should implement 'SerializationService' to support object auto inject!\"\"\"·)",
+                                Consts.TAG, fieldName, parentClassName.simpleName
                             )
                             .endControlFlow()
                     }
@@ -307,12 +335,12 @@ class AutowiredSymbolProcessorProvider : SymbolProcessorProvider {
                 }
                 // Validator, Primitive type wont be check.
                 if (annotation.required) {
-                    injectMethodBuilder.beginControlFlow("if (substitute.$fieldName == null)")
+                    method.beginControlFlow("if (substitute.$fieldName == null)")
                         .addStatement(
                             "Log.e(\"${Consts.TAG}\" , \"\"\"The field '%L' in class '%L' is null!\"\"\")",
                             fieldName, parentClassName.simpleName
                         )
-                    injectMethodBuilder.endControlFlow()
+                    method.endControlFlow()
                 }
             }
 
