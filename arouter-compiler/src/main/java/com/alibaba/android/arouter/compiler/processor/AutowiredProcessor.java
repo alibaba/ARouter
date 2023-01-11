@@ -245,13 +245,13 @@ public class AutowiredProcessor extends BaseProcessor {
                 statement += "getDouble" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
                 break;
             case STRING:
-                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S") : ("getString($S")) + ", " + originalValue + ")";
+                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S") : "getString($S") + ", " + originalValue + ")";
                 break;
             case SERIALIZABLE:
-                statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
+                statement += isActivity ? "getSerializableExtra($S)" : "getSerializable($S)";
                 break;
             case PARCELABLE:
-                statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
+                statement += isActivity ? "getParcelableExtra($S)" : "getParcelable($S)";
                 break;
             case OBJECT:
                 statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new " + TYPE_WRAPPER + "<$T>(){}.getType())";
