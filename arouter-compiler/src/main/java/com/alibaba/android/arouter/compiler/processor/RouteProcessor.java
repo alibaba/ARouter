@@ -71,8 +71,8 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 @AutoService(Processor.class)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
 public class RouteProcessor extends BaseProcessor {
-    private Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
-    private Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
+    private final Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
+    private final Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
 
     private TypeMirror iProvider = null;
     private Writer docWriter;       // Writer used for write doc
@@ -81,21 +81,25 @@ public class RouteProcessor extends BaseProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
 
-        if (generateDoc) {
-            try {
-                docWriter = mFiler.createResource(
-                        StandardLocation.SOURCE_OUTPUT,
-                        PACKAGE_OF_GENERATE_DOCS,
-                        "arouter-map-of-" + moduleName + ".json"
-                ).openWriter();
-            } catch (IOException e) {
-                logger.error("Create doc writer failed, because " + e.getMessage());
-            }
-        }
-
         iProvider = elementUtils.getTypeElement(Consts.IPROVIDER).asType();
 
         logger.info(">>> RouteProcessor init. <<<");
+    }
+
+    private synchronized Writer getOrCreateDocWriter() {
+        if (docWriter != null) {
+            return docWriter;
+        }
+        try {
+            docWriter = mFiler.createResource(
+                StandardLocation.SOURCE_OUTPUT,
+                PACKAGE_OF_GENERATE_DOCS,
+                "arouter-map-of-" + moduleName + ".json"
+            ).openWriter();
+        } catch (IOException e) {
+            logger.error("Create doc writer failed, because " + e.getMessage());
+        }
+        return docWriter;
     }
 
     /**
@@ -336,9 +340,12 @@ public class RouteProcessor extends BaseProcessor {
 
             // Output route doc
             if (generateDoc) {
-                docWriter.append(JSON.toJSONString(docSource, SerializerFeature.PrettyFormat));
-                docWriter.flush();
-                docWriter.close();
+                Writer docWriter = getOrCreateDocWriter();
+                if (docWriter != null) {
+                    docWriter.append(JSON.toJSONString(docSource, SerializerFeature.PrettyFormat));
+                    docWriter.flush();
+                    docWriter.close();
+                }
             }
 
             // Write provider into disk
