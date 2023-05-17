@@ -218,33 +218,41 @@ public class LogisticsCenter {
      *
      * @param postcard Incomplete postcard, should complete by this method.
      */
-    public synchronized static void completion(Postcard postcard) {
+    public static void completion(Postcard postcard) {
         if (null == postcard) {
             throw new NoRouteFoundException(TAG + "No postcard!");
         }
 
         RouteMeta routeMeta = Warehouse.routes.get(postcard.getPath());
         if (null == routeMeta) {
-            // Maybe its does't exist, or didn't load.
-            if (!Warehouse.groupsIndex.containsKey(postcard.getGroup())) {
+            Class<? extends IRouteGroup> routeGroup = Warehouse.groupsIndex.get(postcard.getGroup());
+            if (routeGroup == null){             // Maybe its doesn't exist, or didn't load.
                 throw new NoRouteFoundException(TAG + "There is no route match the path [" + postcard.getPath() + "], in group [" + postcard.getGroup() + "]");
             } else {
-                // Load route and cache it into memory, then delete from metas.
-                try {
-                    if (ARouter.debuggable()) {
-                        logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] starts loading, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
+                synchronized (routeGroup){
+                    //Check again
+                    routeMeta = Warehouse.routes.get(postcard.getPath());
+                    if (routeMeta != null) {
+                        completion(postcard);
+                        return;
                     }
+                    // Load route and cache it into memory, then delete from metas.
+                    try {
+                        if (ARouter.debuggable()) {
+                            logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] starts loading, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
+                        }
 
-                    addRouteGroupDynamic(postcard.getGroup(), null);
+                        routeGroup.newInstance().loadInto(Warehouse.routes);
+                        Warehouse.groupsIndex.remove(postcard.getGroup());
 
-                    if (ARouter.debuggable()) {
-                        logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] has already been loaded, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
+                        if (ARouter.debuggable()) {
+                            logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] has already been loaded, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
+                        }
+                    } catch (Exception e) {
+                        throw new HandlerException(TAG + "Fatal exception when loading group meta. [" + e.getMessage() + "]");
                     }
-                } catch (Exception e) {
-                    throw new HandlerException(TAG + "Fatal exception when loading group meta. [" + e.getMessage() + "]");
+                    completion(postcard);   // Reload
                 }
-
-                completion(postcard);   // Reload
             }
         } else {
             postcard.setDestination(routeMeta.getDestination());
@@ -278,21 +286,23 @@ public class LogisticsCenter {
                 case PROVIDER:  // if the route is provider, should find its instance
                     // Its provider, so it must implement IProvider
                     Class<? extends IProvider> providerMeta = (Class<? extends IProvider>) routeMeta.getDestination();
-                    IProvider instance = Warehouse.providers.get(providerMeta);
-                    if (null == instance) { // There's no instance of this provider
-                        IProvider provider;
-                        try {
-                            provider = providerMeta.getConstructor().newInstance();
-                            provider.init(mContext);
-                            Warehouse.providers.put(providerMeta, provider);
-                            instance = provider;
-                        } catch (Exception e) {
-                            logger.error(TAG, "Init provider failed!", e);
-                            throw new HandlerException("Init provider failed!");
+                    synchronized (providerMeta) {
+                        IProvider instance = Warehouse.providers.get(providerMeta);
+                        if (null == instance) { // There's no instance of this provider
+                            IProvider provider;
+                            try {
+                                provider = providerMeta.getConstructor().newInstance();
+                                provider.init(mContext);
+                                Warehouse.providers.put(providerMeta, provider);
+                                instance = provider;
+                            } catch (Exception e) {
+                                logger.error(TAG, "Init provider failed!", e);
+                                throw new HandlerException("Init provider failed!");
+                            }
                         }
+                        postcard.setProvider(instance);
+                        postcard.greenChannel();    // Provider should skip all of interceptors
                     }
-                    postcard.setProvider(instance);
-                    postcard.greenChannel();    // Provider should skip all of interceptors
                     break;
                 case FRAGMENT:
                     postcard.greenChannel();    // Fragment needn't interceptors
@@ -355,12 +365,13 @@ public class LogisticsCenter {
         Warehouse.clear();
     }
 
-    public synchronized static void addRouteGroupDynamic(String groupName, IRouteGroup group) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        if (Warehouse.groupsIndex.containsKey(groupName)){
-            // If this group is included, but it has not been loaded
-            // load this group first, because dynamic route has high priority.
-            Warehouse.groupsIndex.get(groupName).getConstructor().newInstance().loadInto(Warehouse.routes);
-            Warehouse.groupsIndex.remove(groupName);
+    public static void addRouteGroupDynamic(String groupName, IRouteGroup group) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Class<? extends IRouteGroup> routeGroup = Warehouse.groupsIndex.get(groupName);
+        if (routeGroup != null) {
+            synchronized (routeGroup) {
+                routeGroup.newInstance().loadInto(Warehouse.routes);
+                Warehouse.groupsIndex.remove(groupName);
+            }
         }
 
         // cover old group.

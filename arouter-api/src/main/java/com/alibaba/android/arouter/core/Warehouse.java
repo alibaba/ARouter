@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Storage of route meta and other data.
@@ -20,8 +21,8 @@ import java.util.Map;
  */
 class Warehouse {
     // Cache route and metas
-    static Map<String, Class<? extends IRouteGroup>> groupsIndex = new HashMap<>();
-    static Map<String, RouteMeta> routes = new HashMap<>();
+    static Map<String, Class<? extends IRouteGroup>> groupsIndex = new ConcurrentHashMap<>();
+    static Map<String, RouteMeta> routes = new ConcurrentHashMap<>();
 
     // Cache provider
     static Map<Class, IProvider> providers = new HashMap<>();
