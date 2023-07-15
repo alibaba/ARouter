@@ -340,7 +340,7 @@ final class _ARouter {
                 /**
                  * Interrupt process, pipeline will be destory when this method called.
                  *
-                 * @param exception Reson of interrupt.
+                 * @param exception Reason of interrupt.
                  */
                 @Override
                 public void onInterrupt(Throwable exception) {
