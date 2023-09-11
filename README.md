@@ -8,7 +8,7 @@
 
 ---
 
-#### Lastest version
+#### Latest version
 
 module|arouter-api|arouter-compiler|arouter-register|arouter-idea-plugin
 ---|---|---|---|---
