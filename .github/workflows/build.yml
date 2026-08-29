@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  legacy-build:
+    name: Legacy build (JDK 8 / Android 29)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17 for Android SDK tools
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
+
+      - name: Install legacy Android SDK packages
+        run: sdkmanager "platforms;android-29" "build-tools;29.0.2"
+
+      - name: Set up JDK 8 for the build
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
+
+      - name: Build local Gradle plugin
+        run: ./gradlew --no-daemon --stacktrace :arouter-gradle-plugin:build
+
+      - name: Build libraries, compiler, and demo with local plugin
+        run: >-
+          ./gradlew --no-daemon --stacktrace -Parouter.useLocalRegisterPlugin
+          :arouter-annotation:build
+          :arouter-compiler:build
+          :arouter-api:assemble
+          assembleDebug
+
+      - name: Verify KAPT route documentation
+        run: test -s module-kotlin/build/generated/source/kapt/debug/com/alibaba/android/arouter/docs/arouter-map-of-modulekotlin.json
