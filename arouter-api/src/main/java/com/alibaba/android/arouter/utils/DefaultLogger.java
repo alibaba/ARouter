@@ -98,11 +98,10 @@ public class DefaultLogger implements ILogger {
     }
 
     public static String getExtInfo(StackTraceElement stackTraceElement) {
-
-        String separator = " & ";
-        StringBuilder sb = new StringBuilder("[");
-
         if (isShowStackTrace) {
+            String separator = " & ";
+            StringBuilder sb = new StringBuilder("[");
+
             String threadName = Thread.currentThread().getName();
             String fileName = stackTraceElement.getFileName();
             String className = stackTraceElement.getClassName();
@@ -116,9 +115,11 @@ public class DefaultLogger implements ILogger {
             sb.append("ClassName=").append(className).append(separator);
             sb.append("MethodName=").append(methodName).append(separator);
             sb.append("LineNumber=").append(lineNumber);
+
+            sb.append(" ] ");
+            return sb.toString();
         }
 
-        sb.append(" ] ");
-        return sb.toString();
+        return "";
     }
 }

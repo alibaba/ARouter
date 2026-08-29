@@ -67,6 +67,10 @@ class RegisterTransform extends Transform {
         long startTime = System.currentTimeMillis()
         boolean leftSlash = File.separator == '/'
 
+        if (!isIncremental){
+            outputProvider.deleteAll()
+        }
+
         inputs.each { TransformInput input ->
 
             // scan all jars
