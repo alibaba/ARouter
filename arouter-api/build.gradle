@@ -34,6 +34,9 @@ dependencies {
     annotationProcessor 'com.alibaba:arouter-compiler:1.5.2'
     api 'com.alibaba:arouter-annotation:1.0.6'
     implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

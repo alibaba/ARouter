@@ -282,14 +282,16 @@ final class _ARouter {
      * @param callback    cb
      */
     protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        final Context currentContext = resolveNavigationContext(context, mContext);
+
         PretreatmentService pretreatmentService = ARouter.getInstance().navigation(PretreatmentService.class);
-        if (null != pretreatmentService && !pretreatmentService.onPretreatment(context, postcard)) {
+        if (null != pretreatmentService && !pretreatmentService.onPretreatment(currentContext, postcard)) {
             // Pretreatment failed, navigation canceled.
             return null;
         }
 
-        // Set context to postcard.
-        postcard.setContext(null == context ? mContext : context);
+        // Pretreatment and the actual navigation must observe the same effective context.
+        postcard.setContext(currentContext);
 
         try {
             LogisticsCenter.completion(postcard);
@@ -356,6 +358,10 @@ final class _ARouter {
         }
 
         return null;
+    }
+
+    static Context resolveNavigationContext(Context context, Context applicationContext) {
+        return null == context ? applicationContext : context;
     }
 
     private Object _navigation(final Postcard postcard, final int requestCode, final NavigationCallback callback) {

@@ -9,6 +9,8 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.HashSet;
@@ -74,5 +76,17 @@ public abstract class BaseProcessor extends AbstractProcessor {
             this.add(KEY_MODULE_NAME);
             this.add(KEY_GENERATE_DOC_NAME);
         }};
+    }
+
+    /**
+     * Resolve a type that may not be present on the consuming module's classpath.
+     */
+    TypeMirror getTypeMirror(String className) {
+        TypeElement element = elementUtils.getTypeElement(className);
+        return element == null ? null : element.asType();
+    }
+
+    boolean isSubtypeOf(TypeMirror type, TypeMirror parent) {
+        return parent != null && types.isSubtype(type, parent);
     }
 }

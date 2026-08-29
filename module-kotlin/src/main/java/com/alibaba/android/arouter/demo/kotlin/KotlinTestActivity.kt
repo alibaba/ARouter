@@ -14,6 +14,10 @@ class KotlinTestActivity : Activity() {
     @JvmField var name: String? = null
     @Autowired
     @JvmField var age: Int? = 0
+    @Autowired
+    @JvmField var nullableAge: Int? = null
+    @Autowired
+    @JvmField var nullableEnabled: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ARouter.getInstance().inject(this)  // Start auto inject.
