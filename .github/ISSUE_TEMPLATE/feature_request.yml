@@ -1,0 +1,44 @@
+name: Feature request / 功能建议
+description: Propose a scoped ARouter capability / 提议范围明确的新能力
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve / 要解决的问题
+      description: Explain the user problem before proposing an API.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed design / 方案建议
+      description: Include API shape, compatibility impact, and alternatives considered.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / 模块
+      options:
+        - Runtime API
+        - Annotation processor
+        - Gradle plugin
+        - Kotlin/KSP
+        - AndroidX/Compose
+        - Documentation/tooling
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist / 检查项
+      options:
+        - label: I searched existing issues and Discussions. / 我已搜索已有 Issue 和 Discussions。
+          required: true

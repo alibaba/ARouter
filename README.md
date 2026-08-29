@@ -4,7 +4,7 @@
 
 [中文文档](https://github.com/alibaba/ARouter/blob/master/README_CN.md)
 
-##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+##### [![Join the chat at https://gitter.im/alibaba/ARouter](https://badges.gitter.im/alibaba/ARouter.svg)](https://gitter.im/alibaba/ARouter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0) [![Build](https://github.com/alibaba/ARouter/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/alibaba/ARouter/actions/workflows/build.yml)
 
 ---
 
@@ -16,7 +16,7 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
 
 #### Demo
 
-##### [Demo apk](https://github.com/alibaba/ARouter/blob/develop/demo/arouter-demo-1.5.2.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
+##### [Demo apk](https://github.com/alibaba/ARouter/blob/master/demo/arouter-demo-1.5.2.apk)、[Demo Gif](https://raw.githubusercontent.com/alibaba/ARouter/master/demo/arouter-demo.gif)
 
 #### I. Feature
 1. **Supports direct parsing of standard URLs for jumps and automatic injection of parameters into target pages**
@@ -133,7 +133,7 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
 7. use ide plugin for quick navigation to target class (Optional)
 
     Search for `ARouter Helper` in the Android Studio plugin market, or directly download the `arouter-idea-plugin` zip installation package listed in the `Latest version` above the documentation, after installation
-    plugin without any settings, U can find an icon at the beginning of the jump code. (![navigation](https://raw.githubusercontent.com/alibaba/ARouter/develop/arouter-idea-plugin/src/main/resources/icon/outline_my_location_black_18dp.png)) click the icon to jump to the target class that identifies the path in the code.
+    plugin without any settings, U can find an icon at the beginning of the jump code. (![navigation](https://raw.githubusercontent.com/alibaba/ARouter/master/arouter-idea-plugin/src/main/resources/icon/outline_my_location_black_18dp.png)) click the icon to jump to the target class that identifies the path in the code.
 
 #### IV. Advanced usage
 1. Jump via URL

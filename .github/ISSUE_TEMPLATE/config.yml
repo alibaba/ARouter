@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and support / 使用咨询
+    url: https://github.com/alibaba/ARouter/discussions
+    about: Use Discussions for integration questions and general support. 使用问题请发到 Discussions。

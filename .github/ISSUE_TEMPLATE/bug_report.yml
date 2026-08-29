@@ -1,0 +1,83 @@
+name: Bug report / 缺陷报告
+description: Report a reproducible ARouter defect / 报告可复现的 ARouter 缺陷
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Questions without a reproducible defect belong in Discussions.
+        请先搜索已有 Issue；无法复现的使用咨询请发到 Discussions。
+
+  - type: input
+    id: arouter-version
+    attributes:
+      label: ARouter versions / ARouter 版本
+      description: Include api, compiler, and register plugin versions.
+      placeholder: "api 1.5.2, compiler 1.5.2, register 1.0.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Build and runtime environment / 构建与运行环境
+      description: Include AGP, Gradle, JDK, Kotlin, compileSdk, Android version, device, and whether R8/minification is enabled.
+      placeholder: |
+        AGP:
+        Gradle:
+        JDK:
+        Kotlin:
+        compileSdk:
+        Android/device:
+        R8/minification:
+    validations:
+      required: true
+
+  - type: dropdown
+    id: registration
+    attributes:
+      label: Registration mode / 注册方式
+      options:
+        - arouter-register Gradle plugin
+        - Runtime class scanning
+        - Dynamic registration
+        - Unknown / 不清楚
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem description / 问题描述
+      description: Describe expected and actual behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal reproduction / 最小复现
+      description: Provide exact steps and a minimal repository or focused code sample.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and stack trace / 日志与堆栈
+      description: Remove credentials and private business data before posting.
+      render: shell
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist / 检查项
+      options:
+        - label: I searched open and closed issues for duplicates. / 我已搜索过已有 Issue。
+          required: true
+        - label: The reproduction does not contain credentials or private data. / 复现内容不含凭据或隐私数据。
+          required: true
