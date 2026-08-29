@@ -82,7 +82,7 @@ public class RouteProcessor extends BaseProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
 
-        iProvider = elementUtils.getTypeElement(Consts.IPROVIDER).asType();
+        iProvider = getTypeMirror(Consts.IPROVIDER);
 
         logger.info(">>> RouteProcessor init. <<<");
     }
@@ -134,10 +134,11 @@ public class RouteProcessor extends BaseProcessor {
 
             rootMap.clear();
 
-            TypeMirror type_Activity = elementUtils.getTypeElement(ACTIVITY).asType();
-            TypeMirror type_Service = elementUtils.getTypeElement(SERVICE).asType();
-            TypeMirror fragmentTm = elementUtils.getTypeElement(FRAGMENT).asType();
-            TypeMirror fragmentTmV4 = elementUtils.getTypeElement(Consts.FRAGMENT_V4).asType();
+            TypeMirror type_Activity = getTypeMirror(ACTIVITY);
+            TypeMirror type_Service = getTypeMirror(SERVICE);
+            TypeMirror fragmentTm = getTypeMirror(FRAGMENT);
+            TypeMirror fragmentTmV4 = getTypeMirror(Consts.FRAGMENT_V4);
+            TypeMirror fragmentTmAndroidX = getTypeMirror(Consts.FRAGMENT_ANDROIDX);
 
             // Interface of ARouter
             TypeElement type_IRouteGroup = elementUtils.getTypeElement(IROUTE_GROUP);
@@ -191,27 +192,31 @@ public class RouteProcessor extends BaseProcessor {
                 RouteMeta routeMeta;
 
                 // Activity or Fragment
-                if (types.isSubtype(tm, type_Activity) || types.isSubtype(tm, fragmentTm) || types.isSubtype(tm, fragmentTmV4)) {
+                boolean isActivity = isSubtypeOf(tm, type_Activity);
+                boolean isFragment = isSubtypeOf(tm, fragmentTm)
+                        || isSubtypeOf(tm, fragmentTmV4)
+                        || isSubtypeOf(tm, fragmentTmAndroidX);
+                if (isActivity || isFragment) {
                     // Get all fields annotation by @Autowired
                     Map<String, Integer> paramsType = new HashMap<>();
                     Map<String, Autowired> injectConfig = new HashMap<>();
                     injectParamCollector(element, paramsType, injectConfig);
 
-                    if (types.isSubtype(tm, type_Activity)) {
+                    if (isActivity) {
                         // Activity
                         logger.info(">>> Found activity route: " + tm.toString() + " <<<");
                         routeMeta = new RouteMeta(route, element, RouteType.ACTIVITY, paramsType);
                     } else {
                         // Fragment
                         logger.info(">>> Found fragment route: " + tm.toString() + " <<<");
-                        routeMeta = new RouteMeta(route, element, RouteType.parse(FRAGMENT), paramsType);
+                        routeMeta = new RouteMeta(route, element, RouteType.FRAGMENT, paramsType);
                     }
 
                     routeMeta.setInjectConfig(injectConfig);
-                } else if (types.isSubtype(tm, iProvider)) {         // IProvider
+                } else if (isSubtypeOf(tm, iProvider)) {         // IProvider
                     logger.info(">>> Found provider route: " + tm.toString() + " <<<");
                     routeMeta = new RouteMeta(route, element, RouteType.PROVIDER, null);
-                } else if (types.isSubtype(tm, type_Service)) {           // Service
+                } else if (isSubtypeOf(tm, type_Service)) {           // Service
                     logger.info(">>> Found service route: " + tm.toString() + " <<<");
                     routeMeta = new RouteMeta(route, element, RouteType.parse(SERVICE), null);
                 } else {

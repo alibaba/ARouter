@@ -8,7 +8,6 @@ import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -30,7 +29,6 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -52,6 +50,8 @@ public class AutowiredProcessor extends BaseProcessor {
     private Map<TypeElement, List<Element>> parentAndChild = new HashMap<>();   // Contain field need autowired and his super class.
     private static final ClassName ARouterClass = ClassName.get("com.alibaba.android.arouter.launcher", "ARouter");
     private static final ClassName AndroidLog = ClassName.get("android.util", "Log");
+    private static final ClassName AndroidBundle = ClassName.get("android.os", "Bundle");
+    private static final ClassName TypeWrapperClass = ClassName.get("com.alibaba.android.arouter.facade.model", "TypeWrapper");
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -80,10 +80,11 @@ public class AutowiredProcessor extends BaseProcessor {
     private void generateHelper() throws IOException, IllegalAccessException {
         TypeElement type_ISyringe = elementUtils.getTypeElement(ISYRINGE);
         TypeElement type_JsonService = elementUtils.getTypeElement(JSON_SERVICE);
-        TypeMirror iProvider = elementUtils.getTypeElement(Consts.IPROVIDER).asType();
-        TypeMirror activityTm = elementUtils.getTypeElement(Consts.ACTIVITY).asType();
-        TypeMirror fragmentTm = elementUtils.getTypeElement(Consts.FRAGMENT).asType();
-        TypeMirror fragmentTmV4 = elementUtils.getTypeElement(Consts.FRAGMENT_V4).asType();
+        TypeMirror iProvider = getTypeMirror(Consts.IPROVIDER);
+        TypeMirror activityTm = getTypeMirror(Consts.ACTIVITY);
+        TypeMirror fragmentTm = getTypeMirror(Consts.FRAGMENT);
+        TypeMirror fragmentTmV4 = getTypeMirror(Consts.FRAGMENT_V4);
+        TypeMirror fragmentTmAndroidX = getTypeMirror(Consts.FRAGMENT_ANDROIDX);
 
         // Build input param name.
         ParameterSpec objectParamSpec = ParameterSpec.builder(TypeName.OBJECT, "target").build();
@@ -116,11 +117,35 @@ public class AutowiredProcessor extends BaseProcessor {
                 injectMethodBuilder.addStatement("serializationService = $T.getInstance().navigation($T.class)", ARouterClass, ClassName.get(type_JsonService));
                 injectMethodBuilder.addStatement("$T substitute = ($T)target", ClassName.get(parent), ClassName.get(parent));
 
+                boolean hasAutowiredValues = false;
+                for (Element element : childs) {
+                    if (!isSubtypeOf(element.asType(), iProvider)) {
+                        hasAutowiredValues = true;
+                        break;
+                    }
+                }
+
+                if (hasAutowiredValues) {
+                    if (isSubtypeOf(parent.asType(), activityTm)) {
+                        injectMethodBuilder.addStatement(
+                                "$T bundle = substitute.getIntent() == null ? null : substitute.getIntent().getExtras()",
+                                AndroidBundle
+                        );
+                    } else if (isSubtypeOf(parent.asType(), fragmentTm)
+                            || isSubtypeOf(parent.asType(), fragmentTmV4)
+                            || isSubtypeOf(parent.asType(), fragmentTmAndroidX)) {
+                        injectMethodBuilder.addStatement("$T bundle = substitute.getArguments()", AndroidBundle);
+                    } else {
+                        throw new IllegalAccessException("The fields need autowired from intent, its parent must be activity or fragment! ["
+                                + parent.getQualifiedName() + "]");
+                    }
+                }
+
                 // Generate method body, start inject.
                 for (Element element : childs) {
                     Autowired fieldConfig = element.getAnnotation(Autowired.class);
                     String fieldName = element.getSimpleName().toString();
-                    if (types.isSubtype(element.asType(), iProvider)) {  // It's provider
+                    if (isSubtypeOf(element.asType(), iProvider)) {  // It's provider
                         if ("".equals(fieldConfig.name())) {    // User has not set service path, then use byType.
 
                             // Getter
@@ -147,33 +172,41 @@ public class AutowiredProcessor extends BaseProcessor {
                             injectMethodBuilder.endControlFlow();
                         }
                     } else {    // It's normal intent value
-                        String originalValue = "substitute." + fieldName;
-                        String statement = "substitute." + fieldName + " = " + buildCastCode(element) + "substitute.";
-                        boolean isActivity = false;
-                        if (types.isSubtype(parent.asType(), activityTm)) {  // Activity, then use getIntent()
-                            isActivity = true;
-                            statement += "getIntent().";
-                        } else if (types.isSubtype(parent.asType(), fragmentTm) || types.isSubtype(parent.asType(), fragmentTmV4)) {   // Fragment, then use getArguments()
-                            statement += "getArguments().";
-                        } else {
-                            throw new IllegalAccessException("The field [" + fieldName + "] need autowired from intent, its parent must be activity or fragment!");
-                        }
+                        String paramName = StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name();
+                        int type = typeUtils.typeExchange(element);
 
-                        statement = buildStatement(originalValue, statement, typeUtils.typeExchange(element), isActivity, isKtClass(parent));
-                        if (statement.startsWith("serializationService.")) {   // Not mortals
+                        injectMethodBuilder.beginControlFlow("if (null != bundle && bundle.containsKey($S))", paramName);
+                        if (type == TypeKind.OBJECT.ordinal()) {
                             injectMethodBuilder.beginControlFlow("if (null != serializationService)");
+                            TypeName fieldType = TypeName.get(element.asType());
+                            String valueName = fieldName + "Value";
                             injectMethodBuilder.addStatement(
-                                    "substitute." + fieldName + " = " + statement,
-                                    (StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name()),
-                                    ClassName.get(element.asType())
+                                    "$T " + valueName + " = serializationService.parseObject(bundle.getString($S), new $T<$T>(){}.getType())",
+                                    fieldType,
+                                    paramName,
+                                    TypeWrapperClass,
+                                    fieldType
                             );
+                            injectMethodBuilder.beginControlFlow("if (null != " + valueName + ")");
+                            injectMethodBuilder.addStatement("substitute." + fieldName + " = " + valueName);
+                            injectMethodBuilder.endControlFlow();
                             injectMethodBuilder.nextControlFlow("else");
                             injectMethodBuilder.addStatement(
                                     "$T.e(\"" + Consts.TAG + "\", \"You want automatic inject the field '" + fieldName + "' in class '$T' , then you should implement 'SerializationService' to support object auto inject!\")", AndroidLog, ClassName.get(parent));
                             injectMethodBuilder.endControlFlow();
+                        } else if (element.asType().getKind().isPrimitive()) {
+                            injectMethodBuilder.addStatement(
+                                    "substitute." + fieldName + " = bundle." + getBundleGetter(type) + "($S, substitute." + fieldName + ")",
+                                    paramName
+                            );
                         } else {
-                            injectMethodBuilder.addStatement(statement, StringUtils.isEmpty(fieldConfig.name()) ? fieldName : fieldConfig.name());
+                            injectMethodBuilder.addStatement(
+                                    "substitute." + fieldName + " = ($T) bundle.get($S)",
+                                    TypeName.get(element.asType()),
+                                    paramName
+                            );
                         }
+                        injectMethodBuilder.endControlFlow();
 
                         // Validator
                         if (fieldConfig.required() && !element.asType().getKind().isPrimitive()) {  // Primitive wont be check.
@@ -197,67 +230,27 @@ public class AutowiredProcessor extends BaseProcessor {
         }
     }
 
-    private boolean isKtClass(Element element) {
-        for (AnnotationMirror annotationMirror : elementUtils.getAllAnnotationMirrors(element)) {
-            if (annotationMirror.getAnnotationType().toString().contains("kotlin")) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private String buildCastCode(Element element) {
-        if (typeUtils.typeExchange(element) == TypeKind.SERIALIZABLE.ordinal()) {
-            return CodeBlock.builder().add("($T) ", ClassName.get(element.asType())).build().toString();
-        }
-        return "";
-    }
-
-    /**
-     * Build param inject statement
-     */
-    private String buildStatement(String originalValue, String statement, int type, boolean isActivity, boolean isKt) {
+    private String getBundleGetter(int type) {
         switch (TypeKind.values()[type]) {
             case BOOLEAN:
-                statement += "getBoolean" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getBoolean";
             case BYTE:
-                statement += "getByte" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getByte";
             case SHORT:
-                statement += "getShort" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getShort";
             case INT:
-                statement += "getInt" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getInt";
             case LONG:
-                statement += "getLong" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getLong";
             case CHAR:
-                statement += "getChar" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getChar";
             case FLOAT:
-                statement += "getFloat" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
+                return "getFloat";
             case DOUBLE:
-                statement += "getDouble" + (isActivity ? "Extra" : "") + "($S, " + originalValue + ")";
-                break;
-            case STRING:
-                statement += (isActivity ? ("getExtras() == null ? " + originalValue + " : substitute.getIntent().getExtras().getString($S") : ("getString($S")) + ", " + originalValue + ")";
-                break;
-            case SERIALIZABLE:
-                statement += (isActivity ? ("getSerializableExtra($S)") : ("getSerializable($S)"));
-                break;
-            case PARCELABLE:
-                statement += (isActivity ? ("getParcelableExtra($S)") : ("getParcelable($S)"));
-                break;
-            case OBJECT:
-                statement = "serializationService.parseObject(substitute." + (isActivity ? "getIntent()." : "getArguments().") + (isActivity ? "getStringExtra($S)" : "getString($S)") + ", new " + TYPE_WRAPPER + "<$T>(){}.getType())";
-                break;
+                return "getDouble";
+            default:
+                throw new IllegalArgumentException("Unsupported primitive type: " + TypeKind.values()[type]);
         }
-
-        return statement;
     }
 
     /**
