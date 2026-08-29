@@ -10,6 +10,8 @@ dependencies {
     compileOnly "com.android.tools.build:gradle:${rootProject.ext.android_gradle_plugin_version}"
 
     implementation 'org.ow2.asm:asm:7.0'
+
+    testImplementation 'junit:junit:4.13.2'
 }
 
 apply from: rootProject.file('gradle/publish.gradle')
