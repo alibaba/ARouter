@@ -1,8 +1,8 @@
 # Contributing to ARouter
 
-Thank you for helping maintain ARouter. The project accepts changes against `master`, the only release branch.
+Thank you for helping maintain ARouter. Submit changes to the `develop` integration branch. Maintainers merge validated release batches from `develop` into the release-only `master` branch.
 
-感谢你参与 ARouter 维护。所有变更都应提交到唯一发布分支 `master`。
+感谢你参与 ARouter 维护。所有变更都应提交到集成分支 `develop`；维护者会在发布批次验证通过后，将 `develop` 合并到仅用于发布的 `master`。
 
 ## Before opening an issue
 
@@ -32,7 +32,7 @@ Run the same core verification used by CI:
 
 ## Pull requests
 
-- Target `master` and link a focused issue.
+- Target `develop` and link a focused issue.
 - Keep compatibility fixes separate from large modernization work.
 - Add a minimal regression test or reproducible verification whenever possible.
 - Do not commit generated sources, build output, local SDK settings, credentials, or unrelated formatting.

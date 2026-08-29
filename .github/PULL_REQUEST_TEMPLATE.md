@@ -18,5 +18,5 @@ Closes #
 - [ ] `./gradlew :arouter-gradle-plugin:build` followed by `./gradlew -Parouter.useLocalRegisterPlugin :arouter-annotation:build :arouter-compiler:build :arouter-api:assemble assembleDebug`
 - [ ] Added or updated a focused regression test, or explained why no test is possible.
 - [ ] Verified the change does not include generated files, build output, credentials, or unrelated formatting.
-- [ ] The pull request targets `master`.
+- [ ] The pull request targets `develop`.
 - [ ] All commit authors have completed the required CLA check.

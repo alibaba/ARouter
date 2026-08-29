@@ -2,7 +2,7 @@ version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
-    target-branch: master
+    target-branch: develop
     schedule:
       interval: monthly
     open-pull-requests-limit: 5
