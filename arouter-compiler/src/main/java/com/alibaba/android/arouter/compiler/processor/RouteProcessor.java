@@ -1,15 +1,18 @@
 package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.entity.RouteDoc;
+import com.alibaba.android.arouter.compiler.utils.CollectionUtils;
 import com.alibaba.android.arouter.compiler.utils.Consts;
+import com.alibaba.android.arouter.compiler.utils.MapUtils;
+import com.alibaba.android.arouter.compiler.utils.StringUtils;
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.auto.service.AutoService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -17,10 +20,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -71,6 +70,8 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 @AutoService(Processor.class)
 @SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE, ANNOTATION_TYPE_AUTOWIRED})
 public class RouteProcessor extends BaseProcessor {
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
     private final Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
     private final Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
 
@@ -342,7 +343,7 @@ public class RouteProcessor extends BaseProcessor {
             if (generateDoc) {
                 Writer docWriter = getOrCreateDocWriter();
                 if (docWriter != null) {
-                    docWriter.append(JSON.toJSONString(docSource, SerializerFeature.PrettyFormat));
+                    docWriter.append(GSON.toJson(docSource));
                     docWriter.flush();
                     docWriter.close();
                 }

@@ -1,6 +1,7 @@
 package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.utils.Consts;
+import com.alibaba.android.arouter.compiler.utils.CollectionUtils;
 import com.alibaba.android.arouter.facade.annotation.Interceptor;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
@@ -10,8 +11,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import com.squareup.javapoet.WildcardTypeName;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.IOException;
 import java.util.Locale;

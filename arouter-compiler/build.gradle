@@ -13,10 +13,9 @@ dependencies {
 
     implementation 'com.squareup:javapoet:1.8.0'
 
-    implementation 'org.apache.commons:commons-lang3:3.5'
-    implementation 'org.apache.commons:commons-collections4:4.1'
-
-    implementation 'com.alibaba:fastjson:1.2.69'
+    implementation("com.google.code.gson:gson:$gson_version") {
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+    }
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

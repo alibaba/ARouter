@@ -2,6 +2,7 @@ buildscript {
     ext.kotlin_version = '1.4.10'
     ext.arouter_register_version = '1.0.2'
     ext.android_gradle_plugin_version = '4.1.1'
+    ext.gson_version = '2.14.0'
 
     def useLocalRegisterPlugin = gradle.startParameter.projectProperties.containsKey('arouter.useLocalRegisterPlugin')
     def localRegisterPluginJar = new File(rootDir, "arouter-gradle-plugin/build/libs/arouter-gradle-plugin-${arouter_register_version}.jar")

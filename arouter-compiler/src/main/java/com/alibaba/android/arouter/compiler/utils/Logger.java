@@ -1,7 +1,5 @@
 package com.alibaba.android.arouter.compiler.utils;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.annotation.processing.Messager;
 import javax.tools.Diagnostic;
 

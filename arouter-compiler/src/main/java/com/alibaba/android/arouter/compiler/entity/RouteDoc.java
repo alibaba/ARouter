@@ -1,8 +1,6 @@
 package com.alibaba.android.arouter.compiler.entity;
 
-import com.alibaba.fastjson.annotation.JSONField;
-
-import org.apache.commons.lang3.StringUtils;
+import com.alibaba.android.arouter.compiler.utils.StringUtils;
 
 import java.util.List;
 
@@ -14,21 +12,13 @@ import java.util.List;
  * @since 2018/8/9 11:59 AM
  */
 public class RouteDoc {
-    @JSONField(ordinal = 1)
     private String group;
-    @JSONField(ordinal = 2)
     private String path;
-    @JSONField(ordinal = 3)
     private String description;
-    @JSONField(ordinal = 4)
     private String prototype;
-    @JSONField(ordinal = 5)
     private String className;
-    @JSONField(ordinal = 6)
     private String type;
-    @JSONField(ordinal = 7)
     private int mark;
-    @JSONField(ordinal = 8)
     private List<Param> params;
 
     public String getGroup() {
@@ -106,13 +96,9 @@ public class RouteDoc {
     }
 
     public static class Param {
-        @JSONField(ordinal = 1)
         private String key;
-        @JSONField(ordinal = 2)
         private String type;
-        @JSONField(ordinal = 3)
         private String description;
-        @JSONField(ordinal = 4)
         private boolean required;
 
         public String getKey() {

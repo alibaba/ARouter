@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.service.SerializationService;
-import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
 
@@ -17,6 +17,8 @@ import java.lang.reflect.Type;
  */
 @Route(path = "/yourservicegroupname/json")
 public class JsonServiceImpl implements SerializationService {
+    private static final Gson GSON = new Gson();
+
     @Override
     public void init(Context context) {
 
@@ -24,16 +26,16 @@ public class JsonServiceImpl implements SerializationService {
 
     @Override
     public <T> T json2Object(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+        return GSON.fromJson(text, clazz);
     }
 
     @Override
     public String object2Json(Object instance) {
-        return JSON.toJSONString(instance);
+        return GSON.toJson(instance);
     }
 
     @Override
     public <T> T parseObject(String input, Type clazz) {
-        return JSON.parseObject(input, clazz);
+        return GSON.fromJson(input, clazz);
     }
 }

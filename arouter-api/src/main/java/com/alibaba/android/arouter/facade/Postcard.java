@@ -221,7 +221,7 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
-     * Set object value, the value will be convert to string by 'Fastjson'
+     * Set object value. The registered serialization service converts it to a string.
      *
      * @param key   a String, or null
      * @param value a Object, or null

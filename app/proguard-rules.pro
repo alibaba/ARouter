@@ -68,9 +68,6 @@
    public void *(android.view.View);  
 }
 
--dontwarn com.alibaba.fastjson.**
--keep class com.alibaba.fastjson.**{*;}
-
 # ARouter
 -keep public class com.alibaba.android.arouter.routes.**{*;}
 -keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}

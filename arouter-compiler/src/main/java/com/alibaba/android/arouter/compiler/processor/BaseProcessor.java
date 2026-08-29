@@ -1,9 +1,9 @@
 package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.utils.Logger;
+import com.alibaba.android.arouter.compiler.utils.MapUtils;
+import com.alibaba.android.arouter.compiler.utils.StringUtils;
 import com.alibaba.android.arouter.compiler.utils.TypeUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
