@@ -53,6 +53,7 @@ jobs:
           ./gradlew --no-daemon --stacktrace -Parouter.useLocalRegisterPlugin
           :arouter-annotation:build
           :arouter-compiler:build
+          :arouter-api:testDebugUnitTest
           :arouter-api:assemble
           assembleDebug
 
