@@ -1,6 +1,10 @@
 buildscript {
     ext.kotlin_version = '1.4.10'
     ext.arouter_register_version = '1.0.2'
+    ext.android_gradle_plugin_version = '4.1.1'
+
+    def useLocalRegisterPlugin = gradle.startParameter.projectProperties.containsKey('arouter.useLocalRegisterPlugin')
+    def localRegisterPluginJar = new File(rootDir, "arouter-gradle-plugin/build/libs/arouter-gradle-plugin-${arouter_register_version}.jar")
 
     repositories {
         mavenCentral()
@@ -8,11 +12,18 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        classpath "com.android.tools.build:gradle:$android_gradle_plugin_version"
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.alibaba:arouter-register:$arouter_register_version"
+        if (useLocalRegisterPlugin) {
+            if (!localRegisterPluginJar.isFile()) {
+                throw new GradleException("Local arouter-register plugin not found. Run :arouter-gradle-plugin:build first.")
+            }
+            classpath files(localRegisterPluginJar)
+        } else {
+            classpath "com.alibaba:arouter-register:$arouter_register_version"
+        }
     }
 }
 

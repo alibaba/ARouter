@@ -1,12 +1,15 @@
 apply plugin: 'groovy'
 
 dependencies {
-    compile gradleApi()
-    compile localGroovy()
-}
+    implementation gradleApi()
+    implementation localGroovy()
 
-dependencies {
-    compile 'com.android.tools.build:gradle:2.1.3'
+    // The Android Gradle Plugin is supplied by the consuming Android build.
+    // Compile against the same version as this repository without publishing
+    // AGP as a transitive dependency of arouter-register.
+    compileOnly "com.android.tools.build:gradle:${rootProject.ext.android_gradle_plugin_version}"
+
+    implementation 'org.ow2.asm:asm:7.0'
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

@@ -5,9 +5,12 @@ import com.alibaba.android.arouter.register.utils.ScanSetting
 import com.alibaba.android.arouter.register.utils.ScanUtil
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
-import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.security.MessageDigest
 
 /**
  * transform api
@@ -67,7 +70,7 @@ class RegisterTransform extends Transform {
         long startTime = System.currentTimeMillis()
         boolean leftSlash = File.separator == '/'
 
-        if (!isIncremental){
+        if (!isIncremental) {
             outputProvider.deleteAll()
         }
 
@@ -77,7 +80,7 @@ class RegisterTransform extends Transform {
             input.jarInputs.each { JarInput jarInput ->
                 String destName = jarInput.name
                 // rename jar files
-                def hexName = DigestUtils.md5Hex(jarInput.file.absolutePath)
+                def hexName = md5Hex(jarInput.file.absolutePath)
                 if (destName.endsWith(".jar")) {
                     destName = destName.substring(0, destName.length() - 4)
                 }
@@ -90,7 +93,7 @@ class RegisterTransform extends Transform {
                 if (ScanUtil.shouldProcessPreDexJar(src.absolutePath)) {
                     ScanUtil.scanJar(src, dest)
                 }
-                FileUtils.copyFile(src, dest)
+                Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
             }
             // scan class files
@@ -110,7 +113,10 @@ class RegisterTransform extends Transform {
                 }
 
                 // copy to dest
-                FileUtils.copyDirectory(directoryInput.file, dest)
+                project.copy {
+                    from directoryInput.file
+                    into dest
+                }
             }
         }
 
@@ -132,5 +138,10 @@ class RegisterTransform extends Transform {
         }
 
         Logger.i("Generate code finish, current cost time: " + (System.currentTimeMillis() - startTime) + "ms")
+    }
+
+    private static String md5Hex(String value) {
+        byte[] digest = MessageDigest.getInstance('MD5').digest(value.getBytes(StandardCharsets.UTF_8))
+        return digest.collect { String.format('%02x', it & 0xff) }.join()
     }
 }

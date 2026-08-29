@@ -2,7 +2,6 @@ package com.alibaba.android.arouter.register.core
 
 import com.alibaba.android.arouter.register.utils.Logger
 import com.alibaba.android.arouter.register.utils.ScanSetting
-import org.apache.commons.io.IOUtils
 import org.objectweb.asm.*
 
 import java.util.jar.JarEntry
@@ -56,7 +55,7 @@ class RegisterCodeGenerator {
                     def bytes = referHackWhenInit(inputStream)
                     jarOutputStream.write(bytes)
                 } else {
-                    jarOutputStream.write(IOUtils.toByteArray(inputStream))
+                    jarOutputStream.write(inputStream.bytes)
                 }
                 inputStream.close()
                 jarOutputStream.closeEntry()
