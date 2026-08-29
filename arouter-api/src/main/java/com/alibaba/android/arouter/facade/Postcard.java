@@ -497,7 +497,7 @@ public final class Postcard extends RouteMeta {
         mBundle.putShortArray(key, value);
         return this;
     }
-    
+
     /**
      * Inserts a boolean array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
