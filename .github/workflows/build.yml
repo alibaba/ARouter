@@ -75,18 +75,32 @@ jobs:
             wrapper: gradle-wrapper-7.4.properties
             pipeline: legacy
             configuration_cache: 'false'
+            compile_sdk: '33'
+            build_tools: 33.0.2
           - label: AGP 7.4 / Scoped Artifacts
             agp: 7.4.2
             jdk: '11'
             wrapper: gradle-wrapper.properties
             pipeline: scoped
             configuration_cache: 'true'
+            compile_sdk: '33'
+            build_tools: 33.0.2
           - label: AGP 8.2 / Scoped Artifacts
             agp: 8.2.2
             jdk: '17'
             wrapper: gradle-wrapper-8.2.properties
             pipeline: scoped
             configuration_cache: 'true'
+            compile_sdk: '34'
+            build_tools: 34.0.0
+          - label: AGP 9.3 / Scoped Artifacts
+            agp: 9.3.2
+            jdk: '17'
+            wrapper: gradle-wrapper-9.5.properties
+            pipeline: scoped
+            configuration_cache: 'true'
+            compile_sdk: '36'
+            build_tools: 36.0.0
 
     steps:
       - name: Checkout
@@ -109,6 +123,7 @@ jobs:
           "platforms;android-29" "build-tools;29.0.2"
           "platforms;android-33" "build-tools;33.0.2"
           "platforms;android-34" "build-tools;34.0.0"
+          "platforms;android-36" "build-tools;36.0.0"
 
       - name: Set up JDK 8 for local ARouter artifacts
         uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
@@ -138,4 +153,6 @@ jobs:
           AROUTER_GRADLE_WRAPPER_PROPERTIES: ${{ matrix.wrapper }}
           AROUTER_PLUGIN_PIPELINE: ${{ matrix.pipeline }}
           AROUTER_CONFIGURATION_CACHE: ${{ matrix.configuration_cache }}
+          AROUTER_COMPILE_SDK: ${{ matrix.compile_sdk }}
+          AROUTER_BUILD_TOOLS: ${{ matrix.build_tools }}
         run: ./gradle/verify-configuration-cache.sh

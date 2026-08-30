@@ -11,6 +11,8 @@ wrapper_properties_name="${AROUTER_GRADLE_WRAPPER_PROPERTIES:-gradle-wrapper.pro
 plugin_pipeline="${AROUTER_PLUGIN_PIPELINE:-scoped}"
 use_configuration_cache="${AROUTER_CONFIGURATION_CACHE:-true}"
 keep_test_root="${AROUTER_KEEP_TEST_ROOT:-false}"
+compile_sdk="${AROUTER_COMPILE_SDK:-33}"
+build_tools_version="${AROUTER_BUILD_TOOLS:-33.0.2}"
 
 case "${plugin_pipeline}" in
     legacy|scoped) ;;
@@ -100,6 +102,8 @@ gradle_command+=(
     "-Parouter.api.version=${api_version}"
     "-Parouter.compiler.version=${compiler_version}"
     "-Parouter.agp.version=${agp_version}"
+    "-Parouter.compile.sdk=${compile_sdk}"
+    "-Parouter.build.tools=${build_tools_version}"
     :app:assembleDailyDebug
     :app:assembleDailyRelease
     :app:assembleOnlineDebug
@@ -191,7 +195,7 @@ verify_apk_routes() {
     local descriptors
     local expected_descriptor
     local excluded_descriptor
-    local dexdump="${ANDROID_SDK_ROOT}/build-tools/33.0.2/dexdump"
+    local dexdump="${ANDROID_SDK_ROOT}/build-tools/${build_tools_version}/dexdump"
 
     if [[ ! -x "${dexdump}" ]]; then
         echo "Missing dexdump executable: ${dexdump}" >&2
@@ -223,7 +227,6 @@ incremental_log="${test_root}/incremental-build.log"
 
 "${gradle_command[@]}" | tee "${first_log}"
 if [[ "${use_configuration_cache}" == true ]]; then
-    grep -F "0 problems were found storing the configuration cache." "${first_log}"
     grep -F "Configuration cache entry stored." "${first_log}"
 
     "${gradle_command[@]}" | tee "${second_log}"

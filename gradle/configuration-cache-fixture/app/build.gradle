@@ -1,15 +1,20 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.alibaba.arouter'
 
+def fixtureCompileSdk = Integer.parseInt(
+        (rootProject.findProperty('arouter.compile.sdk') ?: '33').toString()
+)
+def fixtureBuildTools = (rootProject.findProperty('arouter.build.tools') ?: '33.0.2').toString()
+
 android {
     namespace 'com.alibaba.android.arouter.configcache'
-    compileSdkVersion 33
-    buildToolsVersion '33.0.2'
+    compileSdkVersion fixtureCompileSdk
+    buildToolsVersion fixtureBuildTools
 
     defaultConfig {
         applicationId 'com.alibaba.android.arouter.configcache'
         minSdkVersion 14
-        targetSdkVersion 33
+        targetSdkVersion fixtureCompileSdk
         versionCode 1
         versionName '1.0'
 

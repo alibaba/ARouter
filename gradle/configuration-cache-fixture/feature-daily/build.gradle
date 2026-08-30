@@ -1,9 +1,14 @@
 apply plugin: 'com.android.library'
 
+def fixtureCompileSdk = Integer.parseInt(
+        (rootProject.findProperty('arouter.compile.sdk') ?: '33').toString()
+)
+def fixtureBuildTools = (rootProject.findProperty('arouter.build.tools') ?: '33.0.2').toString()
+
 android {
     namespace 'com.alibaba.android.arouter.configcache.daily'
-    compileSdkVersion 33
-    buildToolsVersion '33.0.2'
+    compileSdkVersion fixtureCompileSdk
+    buildToolsVersion fixtureBuildTools
 
     defaultConfig {
         minSdkVersion 14

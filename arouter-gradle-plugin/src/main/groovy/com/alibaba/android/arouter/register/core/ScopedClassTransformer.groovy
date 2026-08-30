@@ -1,6 +1,7 @@
 package com.alibaba.android.arouter.register.core
 
 import com.alibaba.android.arouter.register.utils.ScanSetting
+import groovy.transform.CompileStatic
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -216,6 +217,7 @@ class ScopedClassTransformer {
         ClassWriter writer = new ClassWriter(reader, 0)
         ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9, writer) {
             @Override
+            @CompileStatic
             MethodVisitor visitMethod(int access, String name, String descriptor,
                                       String signature, String[] exceptions) {
                 MethodVisitor method = super.visitMethod(access, name, descriptor, signature, exceptions)
@@ -225,6 +227,7 @@ class ScopedClassTransformer {
 
                 return new MethodVisitor(Opcodes.ASM9, method) {
                     @Override
+                    @CompileStatic
                     void visitInsn(int opcode) {
                         if (opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN) {
                             registrations.each { String className ->
@@ -242,6 +245,7 @@ class ScopedClassTransformer {
                     }
 
                     @Override
+                    @CompileStatic
                     void visitMaxs(int maxStack, int maxLocals) {
                         super.visitMaxs(maxStack + 4, maxLocals)
                     }
