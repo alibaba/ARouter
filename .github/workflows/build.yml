@@ -162,9 +162,9 @@ jobs:
         run: ./gradle/verify-kapt-room.sh
 
   idea-plugin:
-    name: IDE navigation plugin (Java / Kotlin)
+    name: IDE navigation plugin (IntelliJ / Android Studio)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout

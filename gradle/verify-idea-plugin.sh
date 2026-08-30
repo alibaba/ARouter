@@ -57,6 +57,12 @@ verification_tasks=(
 
 cache_output="$("${gradle_command[@]}" "${verification_tasks[@]}" 2>&1)"
 if ! grep -Fq 'Configuration cache entry reused' <<<"${cache_output}"; then
+    # A cold IntelliJ Platform resolution can materialize a bundled JBR after Gradle has
+    # snapshotted JavaRuntimeMetadataValueSource. Allow that cache to stabilize once, then
+    # require the identical task graph to reuse it.
+    cache_output="$("${gradle_command[@]}" "${verification_tasks[@]}" 2>&1)"
+fi
+if ! grep -Fq 'Configuration cache entry reused' <<<"${cache_output}"; then
     echo "IDE plugin build did not reuse the Gradle configuration cache." >&2
     echo "${cache_output}" >&2
     exit 1
@@ -94,9 +100,14 @@ if grep -Fq 'until-build=' <<<"${descriptor}"; then
     exit 1
 fi
 
-if ! grep -R -Fq 'Compatible' "${plugin_dir}/build/reports/pluginVerifier"; then
-    echo "IntelliJ Plugin Verifier did not report a compatible build." >&2
-    exit 1
-fi
+for product_code in IC AI; do
+    verdict="$(find "${plugin_dir}/build/reports/pluginVerifier" -type f \
+        -path "*/${product_code}-*/plugins/arouter-roadsign/*/verification-verdict.txt" \
+        -print -quit)"
+    if [[ -z "${verdict}" ]] || ! grep -Fxq 'Compatible' "${verdict}"; then
+        echo "IntelliJ Plugin Verifier did not report ${product_code} as compatible." >&2
+        exit 1
+    fi
+done
 
 echo "ARouter IDE plugin verification passed."

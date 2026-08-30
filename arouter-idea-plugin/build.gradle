@@ -1,4 +1,5 @@
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -76,6 +77,9 @@ intellijPlatform {
     pluginVerification {
         ides {
             current()
+            create(
+                    IntelliJPlatformType.AndroidStudio,
+                    providers.gradleProperty('androidStudioVerificationVersion').get())
         }
     }
 }
