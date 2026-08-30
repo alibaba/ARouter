@@ -249,6 +249,17 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
     }
     ```
 
+    An interceptor must complete each request exactly once. When redirecting to a login route,
+    terminate the original request and normally bypass the same interceptor chain for the redirect:
+    ``` java
+    callback.onInterrupt(new IllegalStateException("Login is required"));
+    ARouter.getInstance()
+        .build("/account/login")
+        .greenChannel()
+        .navigation(postcard.getContext());
+    ```
+    Omitting both callback methods leaves the original navigation pending until its timeout.
+
 4. Processing jump results
     ``` java
     // U can get the result of a single jump

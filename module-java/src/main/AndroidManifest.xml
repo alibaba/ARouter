@@ -16,6 +16,8 @@
         <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.Test4Activity" />
         <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.TestDynamicActivity" />
         <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.ReorderProbeActivity" />
+        <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.RedirectLoginActivity" />
+        <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.RedirectProtectedActivity" />
     </application>
 
 </manifest>

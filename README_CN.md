@@ -264,6 +264,17 @@
     }
     ```
 
+    每次拦截都必须且只能完成一次。需要重定向到登录页时，应先终止原请求；重定向路由通常
+    应绕过同一条拦截器链：
+    ``` java
+    callback.onInterrupt(new IllegalStateException("Login is required"));
+    ARouter.getInstance()
+        .build("/account/login")
+        .greenChannel()
+        .navigation(postcard.getContext());
+    ```
+    如果两个回调都不调用，原导航会一直等待到超时。
+
 4. 处理跳转结果
     ``` java
     // 使用两个参数的navigation方法，可以获取单次跳转的结果

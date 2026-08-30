@@ -9,6 +9,10 @@
     *;
 }
 
+-keep class com.alibaba.android.arouter.demo.module1.testinterceptor.LoginRedirectInterceptor {
+    *;
+}
+
 -keep class com.alibaba.android.arouter.facade.Postcard {
     public *;
 }
