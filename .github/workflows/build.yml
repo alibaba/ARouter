@@ -59,3 +59,54 @@ jobs:
 
       - name: Verify KAPT route documentation
         run: test -s module-kotlin/build/generated/source/kapt/debug/com/alibaba/android/arouter/docs/arouter-map-of-modulekotlin.json
+
+  modern-gradle-plugin:
+    name: Modern plugin (AGP 7.4 / Configuration Cache)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17 for Android SDK tools
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
+
+      - name: Install Android SDK packages
+        run: >-
+          sdkmanager
+          "platforms;android-29" "build-tools;29.0.2"
+          "platforms;android-33" "build-tools;33.0.2"
+
+      - name: Set up JDK 8 for local ARouter artifacts
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
+
+      - name: Stage current ARouter artifacts
+        run: >-
+          ./gradlew --no-daemon --stacktrace
+          :arouter-annotation:installLocally
+          :arouter-compiler:installLocally
+          :arouter-api:installLocally
+          :arouter-gradle-plugin:installLocally
+
+      - name: Set up JDK 11 for AGP 7.4
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: gradle
+
+      - name: Verify Configuration Cache and route transforms
+        run: ./gradle/verify-configuration-cache.sh

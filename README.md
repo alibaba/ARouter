@@ -136,6 +136,8 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
     Optional, use the registration plugin provided by the ARouter to automatically load the routing table(power by [AutoRegister](https://github.com/luckybilly/AutoRegister)). By default, the ARouter will scanned the dex files .
     Performing an auto-registration via the gradle plugin can shorten the initialization time , it should be noted that the plugin must be used with api above 1.3.0!
 
+    With Android Gradle Plugin 7.4 or newer, the registration plugin uses the public Scoped Artifacts API and supports Gradle Configuration Cache. Older AGP versions use the legacy Transform API and cannot provide reliable Configuration Cache reuse.
+
 7. use ide plugin for quick navigation to target class (Optional)
 
     Search for `ARouter Helper` in the Android Studio plugin market, or directly download the `arouter-idea-plugin` zip installation package listed in the `Latest version` above the documentation, after installation

@@ -1,0 +1,27 @@
+buildscript {
+    def arouterRepository = project.findProperty('arouter.repository')
+    def registerVersion = project.findProperty('arouter.register.version')
+    if (!arouterRepository || !registerVersion) {
+        throw new GradleException('ARouter local repository and register version are required.')
+    }
+
+    repositories {
+        maven { url uri(arouterRepository) }
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath "com.alibaba:arouter-register:${registerVersion}"
+    }
+}
+
+allprojects {
+    def arouterRepository = rootProject.findProperty('arouter.repository')
+    repositories {
+        maven { url uri(arouterRepository) }
+        google()
+        mavenCentral()
+    }
+}

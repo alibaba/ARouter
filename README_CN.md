@@ -138,6 +138,8 @@
     进行加载通过 gradle 插件进行自动注册可以缩短初始化时间解决应用加固导致无法直接访问
     dex 文件，初始化失败的问题，需要注意的是，该插件必须搭配 api 1.3.0 以上版本使用！
 
+    Android Gradle Plugin 7.4 及以上版本会使用公开的 Scoped Artifacts API，并支持 Gradle Configuration Cache。更早的 AGP 版本仍使用旧 Transform API，无法保证 Configuration Cache 可靠复用。
+
 7. 使用 IDE 插件导航到目标类 (可选)
 
     在 Android Studio 插件市场中搜索 `ARouter Helper`, 或者直接下载文档上方 `最新版本` 中列出的 `arouter-idea-plugin` zip 安装包手动安装，安装后
