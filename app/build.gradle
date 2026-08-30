@@ -9,6 +9,7 @@ android {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
         versionName "0.0.1"
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     compileOptions {
@@ -54,4 +55,5 @@ dependencies {
 
     implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
     implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
 }

@@ -7,6 +7,7 @@ android {
     defaultConfig {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -37,6 +38,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:3.12.4'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

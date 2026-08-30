@@ -26,17 +26,28 @@ import static com.alibaba.android.arouter.utils.Consts.TAG;
  */
 @Route(path = "/arouter/service/interceptor")
 public class InterceptorServiceImpl implements InterceptorService {
-    private static boolean interceptorHasInit;
-    private static final Object interceptorInitLock = new Object();
+    private static final long INTERCEPTOR_INIT_TIMEOUT_SECONDS = 10;
+    private final InterceptorInitState interceptorInitState = new InterceptorInitState();
 
     @Override
     public void doInterceptions(final Postcard postcard, final InterceptorCallback callback) {
         if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
+            InterceptorInitState.Result initResult;
+            try {
+                initResult = interceptorInitState.await(INTERCEPTOR_INIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                HandlerException interruption = new HandlerException("Interceptor initialization was interrupted.");
+                interruption.initCause(ex);
+                callback.onInterrupt(interruption);
+                return;
+            }
 
-            checkInterceptorsInitStatus();
-
-            if (!interceptorHasInit) {
+            if (initResult.getOutcome() == InterceptorInitState.Outcome.TIMEOUT) {
                 callback.onInterrupt(new HandlerException("Interceptors initialization takes too much time."));
+                return;
+            } else if (initResult.getOutcome() == InterceptorInitState.Outcome.FAILURE) {
+                callback.onInterrupt(initResult.getFailure());
                 return;
             }
 
@@ -101,42 +112,44 @@ public class InterceptorServiceImpl implements InterceptorService {
 
     @Override
     public void init(final Context context) {
-        LogisticsCenter.executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
-                    for (Map.Entry<Integer, Class<? extends IInterceptor>> entry : Warehouse.interceptorsIndex.entrySet()) {
-                        Class<? extends IInterceptor> interceptorClass = entry.getValue();
-                        try {
-                            IInterceptor iInterceptor = interceptorClass.getConstructor().newInstance();
-                            iInterceptor.init(context);
-                            Warehouse.interceptors.add(iInterceptor);
-                        } catch (Exception ex) {
-                            throw new HandlerException(TAG + "ARouter init interceptor error! name = [" + interceptorClass.getName() + "], reason = [" + ex.getMessage() + "]");
+        interceptorInitState.start();
+        try {
+            LogisticsCenter.executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
+                        for (Map.Entry<Integer, Class<? extends IInterceptor>> entry : Warehouse.interceptorsIndex.entrySet()) {
+                            Class<? extends IInterceptor> interceptorClass = entry.getValue();
+                            try {
+                                IInterceptor iInterceptor = interceptorClass.getConstructor().newInstance();
+                                iInterceptor.init(context);
+                                Warehouse.interceptors.add(iInterceptor);
+                            } catch (Exception ex) {
+                                HandlerException failure = interceptorInitFailure(interceptorClass, ex);
+                                interceptorInitState.fail(failure);
+                                logger.error(TAG, failure.getMessage(), ex);
+                                return;
+                            }
                         }
-                    }
 
-                    interceptorHasInit = true;
-
-                    logger.info(TAG, "ARouter interceptors init over.");
-
-                    synchronized (interceptorInitLock) {
-                        interceptorInitLock.notifyAll();
+                        interceptorInitState.succeed();
+                        logger.info(TAG, "ARouter interceptors init over.");
+                    } else {
+                        interceptorInitState.succeed();
                     }
                 }
-            }
-        });
+            });
+        } catch (RuntimeException ex) {
+            HandlerException failure = new HandlerException(TAG + "ARouter interceptor init task rejected! reason = [" + ex.getMessage() + "]");
+            failure.initCause(ex);
+            interceptorInitState.fail(failure);
+            throw failure;
+        }
     }
 
-    private static void checkInterceptorsInitStatus() {
-        synchronized (interceptorInitLock) {
-            while (!interceptorHasInit) {
-                try {
-                    interceptorInitLock.wait(10 * 1000);
-                } catch (InterruptedException e) {
-                    throw new HandlerException(TAG + "Interceptor init cost too much time error! reason = [" + e.getMessage() + "]");
-                }
-            }
-        }
+    private static HandlerException interceptorInitFailure(Class<? extends IInterceptor> interceptorClass, Exception cause) {
+        HandlerException failure = new HandlerException(TAG + "ARouter init interceptor error! name = [" + interceptorClass.getName() + "], reason = [" + cause.getMessage() + "]");
+        failure.initCause(cause);
+        return failure;
     }
 }
