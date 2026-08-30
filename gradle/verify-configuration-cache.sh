@@ -210,6 +210,14 @@ verify_apk_routes() {
         done
     )"
 
+    for route_contract in IProviderGroup IRouteRoot; do
+        expected_descriptor="Lcom/alibaba/android/arouter/facade/template/${route_contract};"
+        if ! grep -Fq "${expected_descriptor}" <<< "${descriptors}"; then
+            echo "Missing ${route_contract} from ${apk}." >&2
+            exit 1
+        fi
+    done
+
     for route_kind in Providers Root; do
         expected_descriptor="Lcom/alibaba/android/arouter/routes/ARouter\$\$${route_kind}\$\$${feature_module};"
         excluded_descriptor="Lcom/alibaba/android/arouter/routes/ARouter\$\$${route_kind}\$\$${excluded_feature_module};"
