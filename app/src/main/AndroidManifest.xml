@@ -46,6 +46,9 @@
         <activity
             android:name=".ActivityResultHostActivity"
             android:exported="false" />
+        <activity
+            android:name=".AutowiredFragmentHostActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

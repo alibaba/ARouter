@@ -4,6 +4,9 @@ apply plugin: 'com.alibaba.arouter'
 android {
     compileSdkVersion Integer.parseInt(COMPILE_SDK_VERSION)
     buildToolsVersion BUILDTOOLS_VERSION
+    if (project.hasProperty('arouter.testBuildType')) {
+        testBuildType project.property('arouter.testBuildType')
+    }
 
     defaultConfig {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)

@@ -104,6 +104,12 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
     -keep public class com.alibaba.android.arouter.facade.**{*;}
     -keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
 
+    # Injector class names are derived from the target class name at runtime.
+    # Current arouter-api artifacts package this rule automatically; keep it for older/custom setups.
+    -keep,allowoptimization,allowshrinking class * {
+        @com.alibaba.android.arouter.facade.annotation.Autowired <fields>;
+    }
+
     # If you use the byType method to obtain Service, add the following rules to protect the interface:
     -keep interface * implements com.alibaba.android.arouter.facade.template.IProvider
 

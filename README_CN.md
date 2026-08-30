@@ -106,6 +106,12 @@
     -keep public class com.alibaba.android.arouter.facade.**{*;}
     -keep class * implements com.alibaba.android.arouter.facade.template.ISyringe{*;}
 
+    # 注入器类名由目标类名在运行时拼接得到。
+    # 当前 arouter-api 已自动携带此规则；旧版本或自定义混淆配置仍需手动保留。
+    -keep,allowoptimization,allowshrinking class * {
+        @com.alibaba.android.arouter.facade.annotation.Autowired <fields>;
+    }
+
     # 如果使用了 byType 的方式获取 Service，需添加下面规则，保护接口
     -keep interface * implements com.alibaba.android.arouter.facade.template.IProvider
 
