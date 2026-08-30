@@ -157,6 +157,10 @@ jobs:
           AROUTER_BUILD_TOOLS: ${{ matrix.build_tools }}
         run: ./gradle/verify-configuration-cache.sh
 
+      - name: Verify KAPT incremental processing with Room 2.4.3
+        if: matrix.agp == '7.4.2'
+        run: ./gradle/verify-kapt-room.sh
+
   idea-plugin:
     name: IDE navigation plugin (Java / Kotlin)
     runs-on: ubuntu-latest
