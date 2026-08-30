@@ -27,6 +27,7 @@ proguard/
 
 # IDEA Files
 .idea
+.intellijPlatform/
 *.iml
 /*.ipr
 /*.iws

@@ -147,6 +147,8 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
     Search for `ARouter Helper` in the Android Studio plugin market, or directly download the `arouter-idea-plugin` zip installation package listed in the `Latest version` above the documentation, after installation
     plugin without any settings, U can find an icon at the beginning of the jump code. (![navigation](https://raw.githubusercontent.com/alibaba/ARouter/master/arouter-idea-plugin/src/main/resources/icon/outline_my_location_black_18dp.png)) click the icon to jump to the target class that identifies the path in the code.
 
+    The current plugin recognizes Java and Kotlin `ARouter.getInstance().build(...)` calls whose paths are string literals or compile-time constants, and it can navigate to `@Route` destinations.
+
 #### IV. Advanced usage
 1. Jump via URL
     ``` java

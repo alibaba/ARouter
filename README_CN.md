@@ -149,6 +149,8 @@
     插件无任何设置，可以在跳转代码的行首找到一个图标 (![navigation](https://raw.githubusercontent.com/alibaba/ARouter/master/arouter-idea-plugin/src/main/resources/icon/outline_my_location_black_18dp.png))
     点击该图标，即可跳转到标识了代码中路径的目标类
 
+    当前插件支持 Java 和 Kotlin 中的 `ARouter.getInstance().build(...)` 调用，路径可以是字符串字面量或编译期常量，并可导航到 `@Route` 目标。
+
 #### 四、进阶用法
 1. 通过URL跳转
     ``` java

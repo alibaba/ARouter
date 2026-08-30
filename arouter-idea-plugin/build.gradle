@@ -1,38 +1,98 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
-    id "org.jetbrains.intellij" version '0.3.12'
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '2.0.21'
+    id 'org.jetbrains.intellij.platform' version '2.18.1'
 }
 
-intellij {
-    version support_idea_version
-    updateSinceUntilBuild false
-    plugins 'coverage'
-}
+group = 'com.alibaba'
+version = providers.gradleProperty('arouterIdeaPluginVersion').getOrElse('1.1.0')
 
-patchPluginXml {
-    changeNotes """
-      1.0.0
-      First Release
-      """
-}
-
-publishPlugin {
-    username intellijPublishUsername
-    password intellijPublishPassword
-    channels "beta"
+repositories {
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    intellijPlatform {
+        intellijIdeaCommunity(
+                providers.gradleProperty('intellijPlatformVersion').getOrElse('2024.3.7.1'))
+        bundledPlugin('com.intellij.java')
+        bundledPlugin('org.jetbrains.kotlin')
+        testFramework(TestFrameworkType.Platform.INSTANCE)
+        testFramework(TestFrameworkType.Plugin.Java.INSTANCE)
+    }
+
+    testImplementation 'junit:junit:4.13.2'
 }
 
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+sourceSets {
+    testApi {
+        java.srcDir 'src/testApi/java'
     }
 }
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+def testApiJarFile = layout.buildDirectory.file('test-api/arouter-test-api.jar')
+tasks.register('testApiJar', Jar) {
+    archiveFileName = 'arouter-test-api.jar'
+    destinationDirectory = layout.buildDirectory.dir('test-api')
+    from sourceSets.testApi.output.classesDirs
+}
+
+tasks.withType(Test).configureEach {
+    dependsOn tasks.named('testApiJar')
+    systemProperty 'arouter.test.api.jar', testApiJarFile.get().asFile.absolutePath
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        id = 'arouter-roadsign'
+        name = 'ARouter Helper'
+        version = project.version
+
+        description = '''
+            Adds gutter navigation from ARouter build calls in Java and Kotlin
+            to destinations annotated with @Route.
+        '''.stripIndent().trim()
+
+        ideaVersion {
+            sinceBuild = '243'
+        }
+
+        changeNotes = '''
+            <h3>1.1.0</h3>
+            <ul>
+              <li>Add Kotlin navigation through UAST.</li>
+              <li>Resolve string constants in route paths.</li>
+              <li>Move the build to IntelliJ Platform Gradle Plugin 2.x.</li>
+            </ul>
+        '''.stripIndent().trim()
     }
+
+    pluginVerification {
+        ides {
+            current()
+        }
+    }
+}
+
+kotlin {
+    jvmToolchain(21)
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_21
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    sourceCompatibility = '21'
+    targetCompatibility = '21'
+}
+
+tasks.named('compileTestApiJava', JavaCompile) {
+    options.release = 8
+    options.compilerArgs.add('-Xlint:-options')
 }

@@ -1,127 +1,168 @@
 package com.alibaba.android.arouter.idea.extensions
 
-import com.intellij.codeHighlighting.Pass
-import com.intellij.codeInsight.daemon.GutterIconNavigationHandler
 import com.intellij.codeInsight.daemon.LineMarkerInfo
 import com.intellij.codeInsight.daemon.LineMarkerProviderDescriptor
-import com.intellij.navigation.NavigationItem
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
-import com.intellij.openapi.editor.markup.GutterIconRenderer
+import com.intellij.codeInsight.navigation.NavigationGutterIconBuilder
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.IconLoader
-import com.intellij.psi.*
-import com.intellij.psi.impl.source.tree.java.PsiMethodCallExpressionImpl
+import com.intellij.psi.JavaPsiFacade
+import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.PsiAnnotationMemberValue
+import com.intellij.psi.PsiClass
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiExpression
+import com.intellij.psi.PsiModifierListOwner
+import com.intellij.psi.PsiVariable
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedMembersSearch
-import java.awt.event.MouseEvent
+import org.jetbrains.uast.UCallExpression
+import org.jetbrains.uast.UExpression
+import org.jetbrains.uast.UReferenceExpression
+import org.jetbrains.uast.toUElementOfType
 
-/**
- * Mark navigation target.
- *
- * @author zhilong <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
- * @version 1.0
- * @since 2018/12/13 12:30 PM
- */
-class NavigationLineMarker : LineMarkerProviderDescriptor(), GutterIconNavigationHandler<PsiElement> {
-    override fun getName(): String? {
-        return "ARouter Location"
-    }
+/** Adds route destination gutter navigation to Java and Kotlin ARouter calls. */
+class NavigationLineMarker : LineMarkerProviderDescriptor() {
+    override fun getName(): String = "ARouter Location"
 
-    override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? {
-        return if (isNavigationCall(element)) {
-            LineMarkerInfo<PsiElement>(element, element.textRange, navigationOnIcon,
-                    Pass.UPDATE_ALL, null, this,
-                    GutterIconRenderer.Alignment.LEFT)
-        } else {
-            null
+    override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? = null
+
+    override fun collectSlowLineMarkers(
+        elements: MutableList<out PsiElement>,
+        result: MutableCollection<in LineMarkerInfo<*>>
+    ) {
+        elements.forEach { element ->
+            createMarker(element)?.let(result::add)
         }
     }
 
-    override fun navigate(e: MouseEvent?, psiElement: PsiElement?) {
-        if (psiElement is PsiMethodCallExpression) {
-            val psiExpressionList = (psiElement as PsiMethodCallExpressionImpl).argumentList
-            if (psiExpressionList.expressions.size == 1) {
-                // Support `build(path)` only now.
-
-                val targetPath = psiExpressionList.expressions[0].text.replace("\"", "")
-                val fullScope = GlobalSearchScope.allScope(psiElement.project)
-                val routeAnnotationWrapper = AnnotatedMembersSearch.search(getAnnotationWrapper(psiElement, fullScope)
-                        ?: return, fullScope).findAll()
-                val target = routeAnnotationWrapper.find {
-                    it.modifierList?.annotations?.map { it.findAttributeValue("path")?.text?.replace("\"", "") }?.contains(targetPath)
-                            ?: false
-                }
-
-                if (null != target) {
-                    // Redirect to target.
-                    NavigationItem::class.java.cast(target).navigate(true)
-                    return
-                }
-            }
+    internal fun createMarker(element: PsiElement): LineMarkerInfo<*>? {
+        val call = navigationCall(element) ?: return null
+        val path = call.valueArguments.firstOrNull()?.constantString() ?: return null
+        val targets = RouteTargetResolver.findTargets(element.project, path)
+        if (targets.isEmpty()) {
+            return null
         }
 
-        notifyNotFound()
+        return NavigationGutterIconBuilder.create(NavigationIcons.route)
+            .setTargets(targets)
+            .setTooltipText("Navigate to ARouter destination")
+            .createLineMarkerInfo(element)
     }
 
-    private fun notifyNotFound() {
-        Notifications.Bus.notify(Notification(NOTIFY_SERVICE_NAME, NOTIFY_TITLE, NOTIFY_NO_TARGET_TIPS, NotificationType.WARNING))
+    internal fun navigationPath(element: PsiElement): String? {
+        return navigationCall(element)
+            ?.valueArguments
+            ?.firstOrNull()
+            ?.constantString()
     }
 
-    private fun getAnnotationWrapper(psiElement: PsiElement?, scope: GlobalSearchScope): PsiClass? {
-        if (null == routeAnnotationWrapper) {
-            routeAnnotationWrapper = JavaPsiFacade.getInstance(psiElement?.project).findClass(ROUTE_ANNOTATION_NAME, scope)
+    private fun navigationCall(element: PsiElement): UCallExpression? {
+        val call = generateSequence(element) { it.parent }
+            .take(MAX_CALL_ANCESTOR_DEPTH)
+            .mapNotNull { it.toUElementOfType<UCallExpression>() }
+            .firstOrNull { it.isAnchoredAt(element) }
+            ?: return null
+
+        val method = call.resolve() ?: return null
+        if (method.name != BUILD_METHOD_NAME || !isARouterClass(method.containingClass)) {
+            return null
         }
-
-        return routeAnnotationWrapper
+        return call
     }
 
-    override fun collectSlowLineMarkers(elements: MutableList<PsiElement>, result: MutableCollection<LineMarkerInfo<PsiElement>>) {}
+    private fun UCallExpression.isAnchoredAt(element: PsiElement): Boolean {
+        val sourceIdentifier = methodIdentifier?.sourcePsi ?: return false
+        return (sourceIdentifier.firstChild ?: sourceIdentifier) == element
+    }
 
-    /**
-     * Judge whether the code used for navigation.
-     */
-    private fun isNavigationCall(psiElement: PsiElement): Boolean {
-        if (psiElement is PsiCallExpression) {
-            val method = psiElement.resolveMethod() ?: return false
-            val parent = method.parent
+    private fun isARouterClass(psiClass: PsiClass?): Boolean {
+        return isARouterClass(psiClass, mutableSetOf())
+    }
 
-            if (method.name == "build" && parent is PsiClass) {
-                if (isClassOfARouter(parent)) {
-                    return true
-                }
-            }
+    private fun isARouterClass(psiClass: PsiClass?, visited: MutableSet<PsiClass>): Boolean {
+        if (psiClass == null || !visited.add(psiClass)) {
+            return false
         }
-        return false
-    }
-
-    /**
-     * Judge whether the caller was ARouter
-     */
-    private fun isClassOfARouter(psiClass: PsiClass): Boolean {
-        // It was ARouter
-        if (psiClass.name.equals(SDK_NAME)) {
+        if (psiClass.qualifiedName == AROUTER_CLASS_NAME) {
             return true
         }
+        return psiClass.supers.any { isARouterClass(it, visited) }
+    }
 
-        // It super class was ARouter
-        psiClass.supers.find { it.name == SDK_NAME } ?: return false
-
-        return true
+    private fun UExpression.constantString(): String? {
+        val uastValue = evaluate() as? String
+        if (uastValue != null) {
+            return uastValue
+        }
+        val helper = JavaPsiFacade.getInstance(sourcePsi?.project ?: return null)
+            .constantEvaluationHelper
+        val javaValue = (sourcePsi as? PsiExpression)
+            ?.let(helper::computeConstantExpression) as? String
+        if (javaValue != null) {
+            return javaValue
+        }
+        val initializer = ((this as? UReferenceExpression)?.resolve() as? PsiVariable)
+            ?.initializer
+            ?: return null
+        return helper.computeConstantExpression(initializer) as? String
     }
 
     companion object {
-        const val ROUTE_ANNOTATION_NAME = "com.alibaba.android.arouter.facade.annotation.Route"
-        const val SDK_NAME = "ARouter"
+        internal const val ROUTE_ANNOTATION_NAME =
+            "com.alibaba.android.arouter.facade.annotation.Route"
+        internal const val AROUTER_CLASS_NAME =
+            "com.alibaba.android.arouter.launcher.ARouter"
+        private const val BUILD_METHOD_NAME = "build"
+        private const val MAX_CALL_ANCESTOR_DEPTH = 12
+    }
+}
 
-        // Notify
-        const val NOTIFY_SERVICE_NAME = "ARouter Plugin Tips"
-        const val NOTIFY_TITLE = "Road Sign"
-        const val NOTIFY_NO_TARGET_TIPS = "No destination found or unsupported type."
+private object NavigationIcons {
+    val route = IconLoader.getIcon(
+        "/icon/outline_my_location_black_18dp.png",
+        NavigationLineMarker::class.java.classLoader
+    )
+}
 
-        val navigationOnIcon = IconLoader.getIcon("/icon/outline_my_location_black_18dp.png")
+internal object RouteTargetResolver {
+    fun findTargets(project: Project, path: String): List<PsiElement> {
+        val targetScope = GlobalSearchScope.projectScope(project)
+        val dependencyScope = GlobalSearchScope.allScope(project)
+        val facade = JavaPsiFacade.getInstance(project)
+        val annotation = facade.findClass(
+            NavigationLineMarker.ROUTE_ANNOTATION_NAME,
+            dependencyScope
+        ) ?: return emptyList()
+        return AnnotatedMembersSearch.search(annotation, targetScope)
+            .findAll()
+            .asSequence()
+            .filter { path in routePaths(it) }
+            .map { it.navigationElement }
+            .distinct()
+            .toList()
     }
 
-    // I'm 100% sure this point can not made memory leak.
-    private var routeAnnotationWrapper: PsiClass? = null
+    internal fun routePaths(owner: PsiModifierListOwner): Set<String> {
+        return owner.modifierList
+            ?.annotations
+            ?.flatMapTo(linkedSetOf()) { routePaths(it) }
+            ?: emptySet()
+    }
+
+    private fun routePaths(annotation: PsiAnnotation): Set<String> {
+        if (annotation.qualifiedName != NavigationLineMarker.ROUTE_ANNOTATION_NAME) {
+            return emptySet()
+        }
+        return annotation.findAttributeValue("path")
+            ?.constantString(annotation.project)
+            ?.let(::setOf)
+            ?: emptySet()
+    }
+
+    private fun PsiAnnotationMemberValue.constantString(project: Project): String? {
+        val javaValue = JavaPsiFacade.getInstance(project)
+            .constantEvaluationHelper
+            .computeConstantExpression(this) as? String
+        return javaValue ?: toUElementOfType<UExpression>()?.evaluate() as? String
+    }
 }
