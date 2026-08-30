@@ -39,6 +39,9 @@ android {
             minifyEnabled true
             signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (project.hasProperty('arouter.testBuildType')) {
+                proguardFile 'proguard-android-test.pro'
+            }
         }
     }
 
