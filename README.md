@@ -498,6 +498,7 @@ annotation，**Only the routing information of the same group can be registered 
     ```
 
 5. Generate router doc
+    Java modules using `annotationProcessor`:
     ``` gradle
     // Edit build.gradle, add option 'AROUTER_GENERATE_DOC = enable'
     // Doc file : build/generated/source/apt/(debug or release)/com/alibaba/android/arouter/docs/arouter-map-of-${moduleName}.json
@@ -512,6 +513,42 @@ annotation，**Only the routing information of the same group can be registered 
         }
     }
     ```
+
+    Kotlin modules must pass the same option through KAPT instead of
+    `javaCompileOptions`. The generated file is under `build/generated/source/kapt/<variant>/`.
+    The processor removes non-alphanumeric characters (except `_`) from the module name used in
+    the file name; for example, `module-kotlin` produces `arouter-map-of-modulekotlin.json`.
+    ``` gradle
+    apply plugin: 'kotlin-kapt'
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.name)
+            arg("AROUTER_GENERATE_DOC", "enable")
+        }
+    }
+    ```
+
+    With `build.gradle.kts`:
+    ``` kotlin
+    plugins {
+        kotlin("kapt")
+    }
+
+    dependencies {
+        implementation("com.alibaba:arouter-api:x.x.x")
+        kapt("com.alibaba:arouter-compiler:x.x.x")
+    }
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.name)
+            arg("AROUTER_GENERATE_DOC", "enable")
+        }
+    }
+    ```
+    Do not replace the `kapt` dependency with `annotationProcessor`: javac processors do not
+    receive annotations declared on Kotlin sources.
 
 #### VI. Other
 
@@ -550,6 +587,7 @@ annotation，**Only the routing information of the same group can be registered 
     kapt {
         arguments {
             arg("AROUTER_MODULE_NAME", project.getName())
+            arg("AROUTER_GENERATE_DOC", "enable") // Optional: generate the route document.
         }
     }
 

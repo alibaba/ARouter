@@ -42,3 +42,30 @@ android {
         lintOptions { abortOnError false }
     }
 }
+
+def routeDocModuleName = project.name.replaceAll("[^0-9a-zA-Z_]+", "")
+def debugRouteDoc = file("$buildDir/generated/source/kapt/debug/com/alibaba/android/arouter/docs/arouter-map-of-${routeDocModuleName}.json")
+def requiredDebugRoutes = ["/kotlin/test", "/kotlinalias/activity"]
+
+def verifyKaptRouteDoc = tasks.create("verifyKaptRouteDoc") {
+    group = "verification"
+    description = "Verifies that KAPT generated the Kotlin demo route document."
+    dependsOn "kaptDebugKotlin"
+
+    doLast {
+        if (!debugRouteDoc.isFile()) {
+            throw new GradleException("KAPT route document was not generated: $debugRouteDoc")
+        }
+
+        String routeDoc = debugRouteDoc.getText("UTF-8")
+        requiredDebugRoutes.each { String path ->
+            if (!routeDoc.contains("\"path\": \"$path\"")) {
+                throw new GradleException("KAPT route document is missing path [$path]: $debugRouteDoc")
+            }
+        }
+    }
+}
+
+afterEvaluate {
+    tasks.getByName("check").dependsOn verifyKaptRouteDoc
+}

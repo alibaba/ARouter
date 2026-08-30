@@ -524,6 +524,7 @@
     ```
 
 5. 生成路由文档
+    使用 `annotationProcessor` 的 Java 模块：
     ``` gradle
     // 更新 build.gradle, 添加参数 AROUTER_GENERATE_DOC = enable
     // 生成的文档路径 : build/generated/source/apt/(debug or release)/com/alibaba/android/arouter/docs/arouter-map-of-${moduleName}.json
@@ -538,6 +539,42 @@
         }
     }
     ```
+
+    Kotlin 模块必须通过 KAPT 传递同一个参数，不能放在 `javaCompileOptions` 中。
+    生成文件位于 `build/generated/source/kapt/<variant>/`。
+    处理器会删除文件名所用模块名中的非字母数字字符（保留 `_`）；例如
+    `module-kotlin` 会生成 `arouter-map-of-modulekotlin.json`。
+    ``` gradle
+    apply plugin: 'kotlin-kapt'
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.name)
+            arg("AROUTER_GENERATE_DOC", "enable")
+        }
+    }
+    ```
+
+    使用 `build.gradle.kts` 时：
+    ``` kotlin
+    plugins {
+        kotlin("kapt")
+    }
+
+    dependencies {
+        implementation("com.alibaba:arouter-api:x.x.x")
+        kapt("com.alibaba:arouter-compiler:x.x.x")
+    }
+
+    kapt {
+        arguments {
+            arg("AROUTER_MODULE_NAME", project.name)
+            arg("AROUTER_GENERATE_DOC", "enable")
+        }
+    }
+    ```
+    不能把这里的 `kapt` 依赖替换成 `annotationProcessor`：javac 处理器不会收到
+    Kotlin 源码上声明的注解。
 
 #### 六、其他
 
@@ -591,6 +628,7 @@
     kapt {
         arguments {
             arg("AROUTER_MODULE_NAME", project.getName())
+            arg("AROUTER_GENERATE_DOC", "enable") // 可选：生成路由文档
         }
     }
 
