@@ -55,6 +55,17 @@ public class LogisticsCenter {
     static ThreadPoolExecutor executor;
     private static boolean registerByPlugin;
 
+    static String describeFailure(Throwable failure) {
+        if (failure == null) {
+            return "unknown";
+        }
+
+        String type = failure.getClass().getName();
+        return TextUtils.isEmpty(failure.getMessage())
+                ? type
+                : type + ": " + failure.getMessage();
+    }
+
     /**
      * arouter-auto-register plugin will generate code inside this method
      * call this method to register all Routers, Interceptors and Providers
@@ -193,7 +204,10 @@ public class LogisticsCenter {
                 logger.debug(TAG, String.format(Locale.getDefault(), "LogisticsCenter has already been loaded, GroupIndex[%d], InterceptorIndex[%d], ProviderIndex[%d]", Warehouse.groupsIndex.size(), Warehouse.interceptorsIndex.size(), Warehouse.providersIndex.size()));
             }
         } catch (Exception e) {
-            throw new HandlerException(TAG + "ARouter init logistics center exception! [" + e.getMessage() + "]");
+            throw new HandlerException(
+                    TAG + "ARouter init logistics center exception! [" + describeFailure(e) + "]",
+                    e
+            );
         }
     }
 
@@ -241,7 +255,10 @@ public class LogisticsCenter {
         try {
             addRouteGroupDynamic(postcard.getGroup(), null);
         } catch (Exception e) {
-            throw new HandlerException(TAG + "Fatal exception when loading group meta. [" + e.getMessage() + "]");
+            throw new HandlerException(
+                    TAG + "Fatal exception when loading group meta. [" + describeFailure(e) + "]",
+                    e
+            );
         }
 
         return Warehouse.routes.containsKey(postcard.getPath());
@@ -275,7 +292,10 @@ public class LogisticsCenter {
                         logger.debug(TAG, String.format(Locale.getDefault(), "The group [%s] has already been loaded, trigger by [%s]", postcard.getGroup(), postcard.getPath()));
                     }
                 } catch (Exception e) {
-                    throw new HandlerException(TAG + "Fatal exception when loading group meta. [" + e.getMessage() + "]");
+                    throw new HandlerException(
+                            TAG + "Fatal exception when loading group meta. [" + describeFailure(e) + "]",
+                            e
+                    );
                 }
 
                 completion(postcard);   // Reload
@@ -322,7 +342,11 @@ public class LogisticsCenter {
                             instance = provider;
                         } catch (Exception e) {
                             logger.error(TAG, "Init provider failed!", e);
-                            throw new HandlerException("Init provider failed!");
+                            throw new HandlerException(
+                                    "Init provider failed! provider = [" + providerMeta.getName()
+                                            + "], reason = [" + describeFailure(e) + "]",
+                                    e
+                            );
                         }
                     }
                     postcard.setProvider(instance);

@@ -92,16 +92,21 @@ public class InterceptorServiceImpl implements InterceptorService {
                 }
             });
         } catch (RuntimeException ex) {
-            HandlerException failure = new HandlerException(TAG + "ARouter interceptor init task rejected! reason = [" + ex.getMessage() + "]");
-            failure.initCause(ex);
+            HandlerException failure = new HandlerException(
+                    TAG + "ARouter interceptor init task rejected! reason = ["
+                            + LogisticsCenter.describeFailure(ex) + "]",
+                    ex
+            );
             interceptorInitState.fail(failure);
             throw failure;
         }
     }
 
-    private static HandlerException interceptorInitFailure(Class<? extends IInterceptor> interceptorClass, Exception cause) {
-        HandlerException failure = new HandlerException(TAG + "ARouter init interceptor error! name = [" + interceptorClass.getName() + "], reason = [" + cause.getMessage() + "]");
-        failure.initCause(cause);
-        return failure;
+    static HandlerException interceptorInitFailure(Class<? extends IInterceptor> interceptorClass, Exception cause) {
+        return new HandlerException(
+                TAG + "ARouter init interceptor error! name = [" + interceptorClass.getName()
+                        + "], reason = [" + LogisticsCenter.describeFailure(cause) + "]",
+                cause
+        );
     }
 }

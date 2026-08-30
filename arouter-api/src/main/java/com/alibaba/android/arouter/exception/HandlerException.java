@@ -11,4 +11,8 @@ public class HandlerException extends RuntimeException {
     public HandlerException(String detailMessage) {
         super(detailMessage);
     }
+
+    public HandlerException(String detailMessage, Throwable cause) {
+        super(detailMessage, cause);
+    }
 }
