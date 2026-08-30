@@ -6,7 +6,9 @@ compileJava {
 }
 
 dependencies {
-    implementation 'com.alibaba:arouter-annotation:1.0.6'
+    // Compile and test against the annotation model in this checkout so
+    // coordinated model changes cannot silently use the last published jar.
+    implementation project(':arouter-annotation')
 
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc7'
     compileOnly 'com.google.auto.service:auto-service-annotations:1.0-rc7'

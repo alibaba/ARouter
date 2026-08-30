@@ -1,6 +1,7 @@
 package com.alibaba.android.arouter.compiler.processor;
 
 import com.alibaba.android.arouter.compiler.entity.RouteDoc;
+import com.alibaba.android.arouter.compiler.entity.RouteMeta;
 import com.alibaba.android.arouter.compiler.utils.CollectionUtils;
 import com.alibaba.android.arouter.compiler.utils.Consts;
 import com.alibaba.android.arouter.compiler.utils.MapUtils;
@@ -9,7 +10,6 @@ import com.alibaba.android.arouter.facade.annotation.Autowired;
 import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.enums.RouteType;
 import com.alibaba.android.arouter.facade.enums.TypeKind;
-import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -143,7 +143,7 @@ public class RouteProcessor extends BaseProcessor {
             // Interface of ARouter
             TypeElement type_IRouteGroup = elementUtils.getTypeElement(IROUTE_GROUP);
             TypeElement type_IProviderGroup = elementUtils.getTypeElement(IPROVIDER_GROUP);
-            ClassName routeMetaCn = ClassName.get(RouteMeta.class);
+            ClassName routeMetaCn = ClassName.get(com.alibaba.android.arouter.facade.model.RouteMeta.class);
             ClassName routeTypeCn = ClassName.get(RouteType.class);
 
             /*
@@ -167,7 +167,7 @@ public class RouteProcessor extends BaseProcessor {
             ParameterizedTypeName inputMapTypeOfGroup = ParameterizedTypeName.get(
                     ClassName.get(Map.class),
                     ClassName.get(String.class),
-                    ClassName.get(RouteMeta.class)
+                    ClassName.get(com.alibaba.android.arouter.facade.model.RouteMeta.class)
             );
 
             /*
