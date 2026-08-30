@@ -1,6 +1,7 @@
 buildscript {
     def arouterRepository = project.findProperty('arouter.repository')
     def registerVersion = project.findProperty('arouter.register.version')
+    def androidGradlePluginVersion = project.findProperty('arouter.agp.version') ?: '7.4.2'
     if (!arouterRepository || !registerVersion) {
         throw new GradleException('ARouter local repository and register version are required.')
     }
@@ -12,7 +13,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath "com.android.tools.build:gradle:${androidGradlePluginVersion}"
         classpath "com.alibaba:arouter-register:${registerVersion}"
     }
 }

@@ -1,0 +1,27 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'com.alibaba.android.arouter.configcache.online'
+    compileSdkVersion 33
+    buildToolsVersion '33.0.2'
+
+    defaultConfig {
+        minSdkVersion 14
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: 'featureonline']
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    implementation "com.alibaba:arouter-api:${rootProject.findProperty('arouter.api.version')}"
+    annotationProcessor "com.alibaba:arouter-compiler:${rootProject.findProperty('arouter.compiler.version')}"
+}

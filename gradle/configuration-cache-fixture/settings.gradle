@@ -7,4 +7,4 @@ pluginManagement {
 }
 
 rootProject.name = 'arouter-configuration-cache-fixture'
-include ':app'
+include ':app', ':feature-daily', ':feature-online'

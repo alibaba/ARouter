@@ -9,6 +9,7 @@ import org.junit.rules.TemporaryFolder
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 
+import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertTrue
 
@@ -32,7 +33,7 @@ class ScanUtilTest {
             output.close()
         }
 
-        ScanUtil.scanJar(input, temporaryFolder.newFile('destination.jar'))
+        assertFalse(ScanUtil.scanJar(input, []))
     }
 
     @Test
@@ -57,6 +58,40 @@ class ScanUtilTest {
         writer.visitNestHost('com/alibaba/android/arouter/routes/ModernRoute')
         writer.visitEnd()
 
-        ScanUtil.scanClass(new ByteArrayInputStream(writer.toByteArray()))
+        ScanUtil.scanClass(new ByteArrayInputStream(writer.toByteArray()), [])
+    }
+
+    @Test
+    void keepsImplementationsInTheCallingTransformState() {
+        String dailyClass = 'com/alibaba/android/arouter/routes/ARouter$$Root$$featuredaily'
+        String onlineClass = 'com/alibaba/android/arouter/routes/ARouter$$Root$$featureonline'
+        ScanSetting dailyRoot = new ScanSetting('IRouteRoot')
+        ScanSetting onlineRoot = new ScanSetting('IRouteRoot')
+
+        ScanUtil.scanClass(
+                new ByteArrayInputStream(routeClass(dailyClass, dailyRoot.interfaceName)),
+                [dailyRoot]
+        )
+        ScanUtil.scanClass(
+                new ByteArrayInputStream(routeClass(onlineClass, onlineRoot.interfaceName)),
+                [onlineRoot]
+        )
+
+        assertEquals([dailyClass], dailyRoot.classList)
+        assertEquals([onlineClass], onlineRoot.classList)
+    }
+
+    private static byte[] routeClass(String className, String interfaceName) {
+        ClassWriter writer = new ClassWriter(0)
+        writer.visit(
+                Opcodes.V1_8,
+                Opcodes.ACC_PUBLIC,
+                className,
+                null,
+                'java/lang/Object',
+                [interfaceName] as String[]
+        )
+        writer.visitEnd()
+        return writer.toByteArray()
     }
 }

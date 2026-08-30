@@ -23,8 +23,6 @@ import java.security.MessageDigest
 class RegisterTransform extends Transform {
 
     Project project
-    static ArrayList<ScanSetting> registerList
-    static File fileContainsInitClass;
 
     RegisterTransform(Project project) {
         this.project = project
@@ -69,10 +67,13 @@ class RegisterTransform extends Transform {
 
         long startTime = System.currentTimeMillis()
         boolean leftSlash = File.separator == '/'
+        ArrayList<ScanSetting> registerList = createRegisterList()
+        File fileContainsInitClass = null
 
-        if (!isIncremental) {
-            outputProvider.deleteAll()
-        }
+        // This transform declares isIncremental() == false, so every invocation must replace its
+        // complete output set. Do not trust the invocation flag: --rerun-tasks on legacy AGP can
+        // still pass true and leave jars for inputs whose resolved path has changed.
+        outputProvider.deleteAll()
 
         inputs.each { TransformInput input ->
 
@@ -91,7 +92,9 @@ class RegisterTransform extends Transform {
 
                 //scan jar file to find classes
                 if (ScanUtil.shouldProcessPreDexJar(src.absolutePath)) {
-                    ScanUtil.scanJar(src, dest)
+                    if (ScanUtil.scanJar(src, registerList)) {
+                        fileContainsInitClass = dest
+                    }
                 }
                 Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
@@ -108,7 +111,7 @@ class RegisterTransform extends Transform {
                         path = path.replaceAll("\\\\", "/")
                     }
                     if(file.isFile() && ScanUtil.shouldProcessClass(path)){
-                        ScanUtil.scanClass(file)
+                        ScanUtil.scanClass(file, registerList)
                     }
                 }
 
@@ -123,21 +126,33 @@ class RegisterTransform extends Transform {
         Logger.i('Scan finish, current cost time ' + (System.currentTimeMillis() - startTime) + "ms")
 
         if (fileContainsInitClass) {
+            Set<String> registrations = new TreeSet<>()
             registerList.each { ext ->
-                Logger.i('Insert register code to file ' + fileContainsInitClass.absolutePath)
-
                 if (ext.classList.isEmpty()) {
                     Logger.e("No class implements found for interface:" + ext.interfaceName)
                 } else {
                     ext.classList.each {
                         Logger.i(it)
                     }
-                    RegisterCodeGenerator.insertInitCodeTo(ext)
+                    registrations.addAll(ext.classList)
                 }
+            }
+
+            if (!registrations.isEmpty()) {
+                Logger.i('Insert register code to file ' + fileContainsInitClass.absolutePath)
+                RegisterCodeGenerator.insertInitCodeTo(registrations, fileContainsInitClass)
             }
         }
 
         Logger.i("Generate code finish, current cost time: " + (System.currentTimeMillis() - startTime) + "ms")
+    }
+
+    private static ArrayList<ScanSetting> createRegisterList() {
+        ArrayList<ScanSetting> list = new ArrayList<>(3)
+        list.add(new ScanSetting('IRouteRoot'))
+        list.add(new ScanSetting('IInterceptorGroup'))
+        list.add(new ScanSetting('IProviderGroup'))
+        return list
     }
 
     private static String md5Hex(String value) {

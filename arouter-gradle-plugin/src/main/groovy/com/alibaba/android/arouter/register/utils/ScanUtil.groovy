@@ -1,6 +1,5 @@
 package com.alibaba.android.arouter.register.utils
 
-import com.alibaba.android.arouter.register.core.RegisterTransform
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -19,27 +18,36 @@ class ScanUtil {
     /**
      * scan jar file
      * @param jarFile All jar files that are compiled into apk
-     * @param destFile dest file after this transform
+     * @param registerList interfaces and implementations for this transform invocation
+     * @return true when the jar contains LogisticsCenter.class
      */
-    static void scanJar(File jarFile, File destFile) {
-        if (jarFile) {
-            def file = new JarFile(jarFile)
+    static boolean scanJar(File jarFile, Collection<ScanSetting> registerList) {
+        if (!jarFile) {
+            return false
+        }
+
+        boolean containsInitClass = false
+        def file = new JarFile(jarFile)
+        try {
             Enumeration enumeration = file.entries()
             while (enumeration.hasMoreElements()) {
                 JarEntry jarEntry = (JarEntry) enumeration.nextElement()
                 String entryName = jarEntry.getName()
                 if (!jarEntry.isDirectory() && shouldProcessClass(entryName)) {
                     InputStream inputStream = file.getInputStream(jarEntry)
-                    scanClass(inputStream)
-                    inputStream.close()
+                    try {
+                        scanClass(inputStream, registerList)
+                    } finally {
+                        inputStream.close()
+                    }
                 } else if (ScanSetting.GENERATE_TO_CLASS_FILE_NAME == entryName) {
-                    // mark this jar file contains LogisticsCenter.class
-                    // After the scan is complete, we will generate register code into this file
-                    RegisterTransform.fileContainsInitClass = destFile
+                    containsInitClass = true
                 }
             }
+        } finally {
             file.close()
         }
+        return containsInitClass
     }
 
     static boolean shouldProcessPreDexJar(String path) {
@@ -56,28 +64,34 @@ class ScanUtil {
      * scan class file
      * @param class file
      */
-    static void scanClass(File file) {
-        scanClass(new FileInputStream(file))
+    static void scanClass(File file, Collection<ScanSetting> registerList) {
+        InputStream input = new FileInputStream(file)
+        try {
+            scanClass(input, registerList)
+        } finally {
+            input.close()
+        }
     }
 
-    static void scanClass(InputStream inputStream) {
+    static void scanClass(InputStream inputStream, Collection<ScanSetting> registerList) {
         ClassReader cr = new ClassReader(inputStream)
         ClassWriter cw = new ClassWriter(cr, 0)
-        ScanClassVisitor cv = new ScanClassVisitor(ScanSetting.ASM_API, cw)
+        ScanClassVisitor cv = new ScanClassVisitor(ScanSetting.ASM_API, cw, registerList)
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
-        inputStream.close()
     }
 
     static class ScanClassVisitor extends ClassVisitor {
+        private final Collection<ScanSetting> registerList
 
-        ScanClassVisitor(int api, ClassVisitor cv) {
+        ScanClassVisitor(int api, ClassVisitor cv, Collection<ScanSetting> registerList) {
             super(api, cv)
+            this.registerList = registerList
         }
 
         void visit(int version, int access, String name, String signature,
                    String superName, String[] interfaces) {
             super.visit(version, access, name, signature, superName, interfaces)
-            RegisterTransform.registerList.each { ext ->
+            registerList.each { ext ->
                 if (ext.interfaceName && interfaces != null) {
                     interfaces.each { itName ->
                         if (itName == ext.interfaceName) {

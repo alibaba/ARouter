@@ -49,4 +49,6 @@ android {
 dependencies {
     implementation "com.alibaba:arouter-api:${rootProject.findProperty('arouter.api.version')}"
     annotationProcessor "com.alibaba:arouter-compiler:${rootProject.findProperty('arouter.compiler.version')}"
+    dailyImplementation project(':feature-daily')
+    onlineImplementation project(':feature-online')
 }

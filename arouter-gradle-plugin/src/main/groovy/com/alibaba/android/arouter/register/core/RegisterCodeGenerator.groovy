@@ -13,18 +13,17 @@ import java.util.zip.ZipEntry
  * @author billy.qi email: qiyilike@163.com
  */
 class RegisterCodeGenerator {
-    ScanSetting extension
+    private final Collection<String> registrations
 
-    private RegisterCodeGenerator(ScanSetting extension) {
-        this.extension = extension
+    private RegisterCodeGenerator(Collection<String> registrations) {
+        this.registrations = new TreeSet<String>(registrations)
     }
 
-    static void insertInitCodeTo(ScanSetting registerSetting) {
-        if (registerSetting != null && !registerSetting.classList.isEmpty()) {
-            RegisterCodeGenerator processor = new RegisterCodeGenerator(registerSetting)
-            File file = RegisterTransform.fileContainsInitClass
-            if (file.getName().endsWith('.jar'))
-                processor.insertInitCodeIntoJarFile(file)
+    static void insertInitCodeTo(Collection<String> registrations, File file) {
+        if (registrations != null && !registrations.isEmpty() && file != null &&
+                file.getName().endsWith('.jar')) {
+            RegisterCodeGenerator processor = new RegisterCodeGenerator(registrations)
+            processor.insertInitCodeIntoJarFile(file)
         }
     }
 
@@ -112,7 +111,7 @@ class RegisterCodeGenerator {
         void visitInsn(int opcode) {
             //generate code before return
             if ((opcode >= Opcodes.IRETURN && opcode <= Opcodes.RETURN)) {
-                extension.classList.each { name ->
+                registrations.each { name ->
                     name = name.replaceAll("/", ".")
                     mv.visitLdcInsn(name)//类名
                     // generate invoke register method into LogisticsCenter.loadRouterMap()
