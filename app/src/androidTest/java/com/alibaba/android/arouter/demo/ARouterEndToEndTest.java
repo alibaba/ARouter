@@ -3,12 +3,14 @@ package com.alibaba.android.arouter.demo;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.widget.TextView;
 
 import com.alibaba.android.arouter.demo.kotlin.KotlinTestActivity;
+import com.alibaba.android.arouter.demo.kotlin.RecordingPretreatmentService;
 import com.alibaba.android.arouter.demo.module1.BlankFragment;
 import com.alibaba.android.arouter.demo.module1.testactivity.Test1Activity;
 import com.alibaba.android.arouter.demo.module1.testactivity.Test2Activity;
@@ -17,6 +19,7 @@ import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
 import com.alibaba.android.arouter.launcher.ARouter;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -40,6 +44,11 @@ public class ARouterEndToEndTest {
         ARouter.openDebug();
         ARouter.openLog();
         ARouter.init(application);
+    }
+
+    @After
+    public void clearPretreatmentRecording() {
+        RecordingPretreatmentService.stopRecording();
     }
 
     @Test
@@ -55,6 +64,38 @@ public class ARouterEndToEndTest {
         Bundle arguments = ((BlankFragment) fragment).getArguments();
         assertNotNull(arguments);
         assertEquals("fragment-user", arguments.getString("name"));
+    }
+
+    @Test
+    public void kotlinPretreatmentUsesApplicationContextForContextlessNavigation() {
+        RecordingPretreatmentService.startRecording();
+        Context applicationContext = InstrumentationRegistry.getTargetContext().getApplicationContext();
+
+        Object fragment = ARouter.getInstance()
+                .build("/test/fragment")
+                .navigation();
+
+        assertTrue(fragment instanceof BlankFragment);
+        assertEquals(1, RecordingPretreatmentService.invocationCount);
+        assertSame(applicationContext, RecordingPretreatmentService.lastContext);
+        assertNotNull(RecordingPretreatmentService.lastPostcard);
+        assertEquals("/test/fragment", RecordingPretreatmentService.lastPostcard.getPath());
+    }
+
+    @Test
+    public void kotlinPretreatmentPreservesExplicitNavigationContext() {
+        RecordingPretreatmentService.startRecording();
+        Context explicitContext = InstrumentationRegistry.getTargetContext();
+
+        Object fragment = ARouter.getInstance()
+                .build("/test/fragment")
+                .navigation(explicitContext);
+
+        assertTrue(fragment instanceof BlankFragment);
+        assertEquals(1, RecordingPretreatmentService.invocationCount);
+        assertSame(explicitContext, RecordingPretreatmentService.lastContext);
+        assertNotNull(RecordingPretreatmentService.lastPostcard);
+        assertEquals("/test/fragment", RecordingPretreatmentService.lastPostcard.getPath());
     }
 
     @Test

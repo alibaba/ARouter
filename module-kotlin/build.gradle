@@ -45,7 +45,10 @@ android {
 
 def routeDocModuleName = project.name.replaceAll("[^0-9a-zA-Z_]+", "")
 def debugRouteDoc = file("$buildDir/generated/source/kapt/debug/com/alibaba/android/arouter/docs/arouter-map-of-${routeDocModuleName}.json")
-def requiredDebugRoutes = ["/kotlin/test", "/kotlinalias/activity"]
+def requiredDebugRoutes = [
+        "/kotlin/test",
+        "/kotlin/service/pretreatment"
+]
 
 def verifyKaptRouteDoc = tasks.create("verifyKaptRouteDoc") {
     group = "verification"

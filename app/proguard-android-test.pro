@@ -13,6 +13,10 @@
     *;
 }
 
+-keep class com.alibaba.android.arouter.demo.kotlin.RecordingPretreatmentService {
+    *;
+}
+
 -keep class com.alibaba.android.arouter.facade.Postcard {
     public *;
 }
