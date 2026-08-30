@@ -84,6 +84,28 @@ public class ProcessorRegressionTest {
         assertTrue(fragmentHelper.contains("if (null != bundle && bundle.containsKey(\"title\"))"));
     }
 
+    @Test
+    public void interceptorProcessorUsesSemanticInterfaceComparison() throws Exception {
+        List<JavaFileObject> sources = commonSources();
+        sources.add(JavaFileObjects.forSourceLines(
+                "test.DirectInterceptor",
+                "package test;",
+                "import com.alibaba.android.arouter.facade.annotation.Interceptor;",
+                "import com.alibaba.android.arouter.facade.template.IInterceptor;",
+                "@Interceptor(priority = 1)",
+                "public final class DirectInterceptor implements IInterceptor {}"
+        ));
+
+        Compilation compilation = Compiler.javac()
+                .withOptions("-AAROUTER_MODULE_NAME=test")
+                .withProcessors(new InterceptorProcessor())
+                .compile(sources);
+
+        assertEquals(compilation.toString(), Compilation.Status.SUCCESS, compilation.status());
+        assertTrue(generatedSource(compilation, "ARouter$$Interceptors$$test.java")
+                .contains("DirectInterceptor.class"));
+    }
+
     private static String generatedSource(Compilation compilation, String fileName) throws IOException {
         for (JavaFileObject source : compilation.generatedSourceFiles()) {
             if (source.getName().endsWith(fileName)) {
@@ -124,6 +146,11 @@ public class ProcessorRegressionTest {
                         "public class Fragment { public android.os.Bundle getArguments() { return null; } }"),
                 source("android.util.Log", "public class Log { public static int e(String tag, String message) { return 0; } }"),
                 source("com.alibaba.android.arouter.facade.template.IProvider", "public interface IProvider {}"),
+                source("com.alibaba.android.arouter.facade.template.IInterceptor", "public interface IInterceptor {}"),
+                source("com.alibaba.android.arouter.facade.template.IInterceptorGroup",
+                        "public interface IInterceptorGroup {",
+                        "  void loadInto(java.util.Map<Integer, Class<? extends IInterceptor>> interceptors);",
+                        "}"),
                 source("com.alibaba.android.arouter.facade.template.ISyringe",
                         "public interface ISyringe { void inject(Object target); }"),
                 source("com.alibaba.android.arouter.facade.template.IRouteGroup",

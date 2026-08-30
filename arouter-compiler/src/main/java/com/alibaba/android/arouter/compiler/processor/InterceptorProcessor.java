@@ -163,7 +163,18 @@ public class InterceptorProcessor extends BaseProcessor {
      */
     private boolean verify(Element element) {
         Interceptor interceptor = element.getAnnotation(Interceptor.class);
-        // It must be implement the interface IInterceptor and marked with annotation Interceptor.
-        return null != interceptor && ((TypeElement) element).getInterfaces().contains(iInterceptor);
+        if (interceptor == null) {
+            return false;
+        }
+
+        // Keep the historical direct-implementation requirement, but compare
+        // compiler types semantically. TypeMirror.equals/contains is not stable
+        // across incremental javac rounds.
+        for (TypeMirror interfaceType : ((TypeElement) element).getInterfaces()) {
+            if (types.isSameType(interfaceType, iInterceptor)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
