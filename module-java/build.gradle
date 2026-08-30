@@ -28,8 +28,10 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        // Gson 2.14 contains Java 8 default interface methods. Enable Android's
+        // desugaring pipeline so this minSdk 14 demo module can package tests.
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
