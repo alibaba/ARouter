@@ -49,6 +49,9 @@
         <activity
             android:name=".AutowiredFragmentHostActivity"
             android:exported="false" />
+        <activity
+            android:name=".PostcardArrayHostActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

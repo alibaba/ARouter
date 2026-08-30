@@ -496,6 +496,58 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
+     * Inserts a String array value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key   a String, or null
+     * @param value a String array object, or null
+     * @return current
+     */
+    public Postcard withStringArray(@Nullable String key, @Nullable String[] value) {
+        mBundle.putStringArray(key, value);
+        return this;
+    }
+
+    /**
+     * Inserts an int array value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key   a String, or null
+     * @param value an int array object, or null
+     * @return current
+     */
+    public Postcard withIntArray(@Nullable String key, @Nullable int[] value) {
+        mBundle.putIntArray(key, value);
+        return this;
+    }
+
+    /**
+     * Inserts a long array value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key   a String, or null
+     * @param value a long array object, or null
+     * @return current
+     */
+    public Postcard withLongArray(@Nullable String key, @Nullable long[] value) {
+        mBundle.putLongArray(key, value);
+        return this;
+    }
+
+    /**
+     * Inserts a double array value into the mapping of this Bundle, replacing
+     * any existing value for the given key.  Either key or value may be null.
+     *
+     * @param key   a String, or null
+     * @param value a double array object, or null
+     * @return current
+     */
+    public Postcard withDoubleArray(@Nullable String key, @Nullable double[] value) {
+        mBundle.putDoubleArray(key, value);
+        return this;
+    }
+
+    /**
      * Inserts a byte array value into the mapping of this Bundle, replacing
      * any existing value for the given key.  Either key or value may be null.
      *
