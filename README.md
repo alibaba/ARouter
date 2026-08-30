@@ -257,6 +257,10 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
         ...
         }
     });
+
+    // Check the current route table without launching the destination.
+    // The route group is loaded lazily; invalid or unavailable paths return false.
+    boolean available = ARouter.getInstance().hasRoute("/test/1");
     ```
 
 5. Custom global demotion strategy

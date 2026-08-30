@@ -273,6 +273,10 @@
         ...
         }
     });
+
+    // 在不发起页面跳转的情况下检查当前路由表。
+    // 对应 group 会按需加载；非法路径或当前尚不可用的路径返回 false。
+    boolean available = ARouter.getInstance().hasRoute("/test/1");
     ```
 
 5. 自定义全局降级策略

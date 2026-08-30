@@ -165,6 +165,21 @@ public final class ARouter {
     }
 
     /**
+     * Check whether a path is registered without navigating to its destination.
+     *
+     * <p>This query honors {@link com.alibaba.android.arouter.facade.service.PathReplaceService}
+     * and loads route-group metadata on demand. It does not launch a page, execute interceptors,
+     * or instantiate the provider referenced by the queried path. Invalid paths return
+     * {@code false}.</p>
+     *
+     * @param path route path
+     * @return {@code true} when the path is registered in the current process
+     */
+    public boolean hasRoute(String path) {
+        return _ARouter.getInstance().hasRoute(path);
+    }
+
+    /**
      * Launch the navigation by type
      *
      * @param service interface of service

@@ -214,6 +214,40 @@ public class LogisticsCenter {
     }
 
     /**
+     * Check whether a route is registered in the current process.
+     *
+     * <p>The route's group is loaded on demand so the result does not depend on whether another
+     * navigation has already visited that group. This method only loads route metadata; it does
+     * not instantiate the destination, initialize a provider, or execute interceptors.</p>
+     *
+     * @param postcard postcard containing the resolved path and group
+     * @return {@code true} when the path is registered
+     */
+    public synchronized static boolean hasRoute(Postcard postcard) {
+        if (null == postcard
+                || TextUtils.isEmpty(postcard.getPath())
+                || TextUtils.isEmpty(postcard.getGroup())) {
+            return false;
+        }
+
+        if (Warehouse.routes.containsKey(postcard.getPath())) {
+            return true;
+        }
+
+        if (!Warehouse.groupsIndex.containsKey(postcard.getGroup())) {
+            return false;
+        }
+
+        try {
+            addRouteGroupDynamic(postcard.getGroup(), null);
+        } catch (Exception e) {
+            throw new HandlerException(TAG + "Fatal exception when loading group meta. [" + e.getMessage() + "]");
+        }
+
+        return Warehouse.routes.containsKey(postcard.getPath());
+    }
+
+    /**
      * Completion the postcard by route metas
      *
      * @param postcard Incomplete postcard, should complete by this method.

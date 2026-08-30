@@ -223,6 +223,20 @@ final class _ARouter {
     }
 
     /**
+     * Check route availability without navigating to the destination.
+     */
+    protected boolean hasRoute(String path) {
+        final Postcard postcard;
+        try {
+            postcard = build(path);
+        } catch (HandlerException invalidPath) {
+            return false;
+        }
+
+        return LogisticsCenter.hasRoute(postcard);
+    }
+
+    /**
      * Extract the default group from path.
      */
     private String extractGroup(String path) {
