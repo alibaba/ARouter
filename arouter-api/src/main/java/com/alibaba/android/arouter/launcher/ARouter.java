@@ -7,6 +7,7 @@ import android.net.Uri;
 import com.alibaba.android.arouter.exception.InitException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.callback.NavigationLauncher;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.facade.template.IRouteGroup;
@@ -184,6 +185,20 @@ public final class ARouter {
      */
     public Object navigation(Context mContext, Postcard postcard, int requestCode, NavigationCallback callback) {
         return _ARouter.getInstance().navigation(mContext, postcard, requestCode, callback);
+    }
+
+    /**
+     * Launch the navigation through a caller-owned activity launcher.
+     *
+     * @param mContext context used for route completion and pretreatment
+     * @param postcard route meta
+     * @param launcher caller-owned activity launcher
+     * @param callback navigation lifecycle callback
+     * @return provider or fragment instance for non-activity routes; otherwise {@code null}
+     */
+    public Object navigation(Context mContext, Postcard postcard, NavigationLauncher launcher,
+                             NavigationCallback callback) {
+        return _ARouter.getInstance().navigation(mContext, postcard, -1, launcher, callback);
     }
 
     /**

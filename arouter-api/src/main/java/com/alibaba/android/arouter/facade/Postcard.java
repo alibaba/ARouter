@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityOptionsCompat;
 import android.util.SparseArray;
 
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.callback.NavigationLauncher;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.service.SerializationService;
 import com.alibaba.android.arouter.facade.template.IProvider;
@@ -148,6 +149,26 @@ public final class Postcard extends RouteMeta {
      */
     public Object navigation(Context context, NavigationCallback callback) {
         return ARouter.getInstance().navigation(context, this, -1, callback);
+    }
+
+    /**
+     * Navigation to the route with a caller-owned activity launcher.
+     *
+     * <p>The launcher is invoked on the main thread after route completion, pretreatment, and
+     * interceptors have succeeded. It owns the activity-result registration and result callback;
+     * {@link NavigationCallback#onArrival(Postcard)} only reports that the route was dispatched.</p>
+     * <p>The caller also owns Activity Result API launch options; {@link #withOptionsCompat}
+     * applies only to ARouter's built-in launch path.</p>
+     *
+     * @param context  context used for route completion and pretreatment, or {@code null} to use
+     *                 the application context
+     * @param launcher caller-owned launcher, such as an adapter around AndroidX
+     *                 {@code ActivityResultLauncher<Intent>}
+     * @param callback navigation lifecycle callback, or {@code null}
+     * @return provider or fragment instance for non-activity routes; otherwise {@code null}
+     */
+    public Object navigation(Context context, NavigationLauncher launcher, NavigationCallback callback) {
+        return ARouter.getInstance().navigation(context, this, launcher, callback);
     }
 
     /**

@@ -412,6 +412,24 @@
     // navigation的第一个参数必须是Activity，第二个参数则是RequestCode
     ARouter.getInstance().build("/home/main", "ap").navigation(this, 5);
 
+    // Activity Result API：在Activity/Fragment中作为字段无条件注册launcher
+    private final ActivityResultLauncher<Intent> resultLauncher =
+        registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                // 在这里处理result.getResultCode()和result.getData()
+            });
+
+    // ARouter负责生成完整Intent并委托启动；生命周期与结果回调仍由调用方持有
+    ARouter.getInstance()
+        .build("/home/main")
+        .navigation(this, new NavigationLauncher() {
+            @Override
+            public void launch(Intent intent) {
+                resultLauncher.launch(intent);
+            }
+        }, null);
+
     // 直接传递Bundle
     Bundle params = new Bundle();
     ARouter.getInstance()

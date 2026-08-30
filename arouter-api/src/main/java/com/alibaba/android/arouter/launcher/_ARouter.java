@@ -20,6 +20,7 @@ import com.alibaba.android.arouter.exception.NoRouteFoundException;
 import com.alibaba.android.arouter.facade.Postcard;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.callback.NavigationCallback;
+import com.alibaba.android.arouter.facade.callback.NavigationLauncher;
 import com.alibaba.android.arouter.facade.model.RouteMeta;
 import com.alibaba.android.arouter.facade.service.*;
 import com.alibaba.android.arouter.facade.template.ILogger;
@@ -282,6 +283,20 @@ final class _ARouter {
      * @param callback    cb
      */
     protected Object navigation(final Context context, final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+        return navigation(context, postcard, requestCode, null, callback);
+    }
+
+    /**
+     * Use router navigation with an optional caller-owned activity launcher.
+     *
+     * @param context     Activity or null.
+     * @param postcard    Route metas
+     * @param requestCode RequestCode
+     * @param launcher    Caller-owned activity launcher
+     * @param callback    cb
+     */
+    protected Object navigation(final Context context, final Postcard postcard, final int requestCode,
+                                final NavigationLauncher launcher, final NavigationCallback callback) {
         final Context currentContext = resolveNavigationContext(context, mContext);
 
         PretreatmentService pretreatmentService = ARouter.getInstance().navigation(PretreatmentService.class);
@@ -336,7 +351,7 @@ final class _ARouter {
                  */
                 @Override
                 public void onContinue(Postcard postcard) {
-                    _navigation(postcard, requestCode, callback);
+                    _navigation(postcard, requestCode, launcher, callback);
                 }
 
                 /**
@@ -354,7 +369,7 @@ final class _ARouter {
                 }
             });
         } else {
-            return _navigation(postcard, requestCode, callback);
+            return _navigation(postcard, requestCode, launcher, callback);
         }
 
         return null;
@@ -364,7 +379,12 @@ final class _ARouter {
         return null == context ? applicationContext : context;
     }
 
-    private Object _navigation(final Postcard postcard, final int requestCode, final NavigationCallback callback) {
+    static boolean shouldAddNewTaskFlag(Context context, NavigationLauncher launcher) {
+        return null == launcher && !(context instanceof Activity);
+    }
+
+    private Object _navigation(final Postcard postcard, final int requestCode,
+                               final NavigationLauncher launcher, final NavigationCallback callback) {
         final Context currentContext = postcard.getContext();
 
         switch (postcard.getType()) {
@@ -380,7 +400,7 @@ final class _ARouter {
                 }
 
                 // Non activity, need FLAG_ACTIVITY_NEW_TASK
-                if (!(currentContext instanceof Activity)) {
+                if (shouldAddNewTaskFlag(currentContext, launcher)) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 }
 
@@ -394,7 +414,7 @@ final class _ARouter {
                 runInMainThread(new Runnable() {
                     @Override
                     public void run() {
-                        startActivity(requestCode, currentContext, intent, postcard, callback);
+                        startActivity(requestCode, currentContext, intent, postcard, launcher, callback);
                     }
                 });
 
@@ -444,8 +464,11 @@ final class _ARouter {
      *
      * @see ActivityCompat
      */
-    private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard, NavigationCallback callback) {
-        if (requestCode >= 0) {  // Need start for result
+    private void startActivity(int requestCode, Context currentContext, Intent intent, Postcard postcard,
+                               NavigationLauncher launcher, NavigationCallback callback) {
+        if (null != launcher) {
+            launcher.launch(intent);
+        } else if (requestCode >= 0) {  // Need start for result
             if (currentContext instanceof Activity) {
                 ActivityCompat.startActivityForResult((Activity) currentContext, intent, requestCode, postcard.getOptionsBundle());
             } else {

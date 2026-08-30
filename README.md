@@ -384,6 +384,24 @@ annotation，**Only the routing information of the same group can be registered 
     // The first parameter must be Activity and the second parameter is RequestCode
     ARouter.getInstance().build("/home/main", "ap").navigation(this, 5);
 
+    // Activity Result API: register this launcher unconditionally as an Activity/Fragment field.
+    private final ActivityResultLauncher<Intent> resultLauncher =
+        registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                // Handle result.getResultCode() and result.getData()
+            });
+
+    // ARouter completes the Intent and delegates the launch; the caller owns lifecycle and result handling.
+    ARouter.getInstance()
+        .build("/home/main")
+        .navigation(this, new NavigationLauncher() {
+            @Override
+            public void launch(Intent intent) {
+                resultLauncher.launch(intent);
+            }
+        }, null);
+
     // Pass Bundle directly
     Bundle params = new Bundle();
     ARouter.getInstance()
