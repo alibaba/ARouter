@@ -5,6 +5,10 @@
     *;
 }
 
+-keep class com.alibaba.android.arouter.demo.module1.testactivity.ReorderProbeActivity {
+    *;
+}
+
 -keep class com.alibaba.android.arouter.facade.Postcard {
     public *;
 }

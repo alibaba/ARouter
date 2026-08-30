@@ -419,11 +419,15 @@ annotation，**Only the routing information of the same group can be registered 
         .with(params)
         .navigation();
 
-    // Set Flag
+    // Task-stack flags depend on the launch Context. For REORDER_TO_FRONT in the current task,
+    // pass the current Activity explicitly. Calling navigation() without a Context uses the
+    // application Context, so Android requires ARouter to also add FLAG_ACTIVITY_NEW_TASK.
     ARouter.getInstance()
         .build("/home/main")
-        .withFlags();
-        .navigation();
+        .withFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        .navigation(this);
+
+    // When comparing with a direct startActivity call, use the same Context and final flags.
 
     // For fragment
     Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();

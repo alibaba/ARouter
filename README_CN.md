@@ -447,11 +447,15 @@
         .with(params)
         .navigation();
 
-    // 指定Flag
+    // 任务栈 Flag 的行为取决于启动时使用的 Context。需要在当前任务栈中执行
+    // REORDER_TO_FRONT 时，应显式传入当前 Activity。无 Context 的 navigation() 会使用
+    // Application Context，因此 Android 要求 ARouter 同时添加 FLAG_ACTIVITY_NEW_TASK。
     ARouter.getInstance()
         .build("/home/main")
-        .withFlags();
-        .navigation();
+        .withFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        .navigation(this);
+
+    // 与直接 startActivity 对比时，必须使用相同的 Context 和最终 Intent flags。
 
     // 获取Fragment
     Fragment fragment = (Fragment) ARouter.getInstance().build("/test/fragment").navigation();

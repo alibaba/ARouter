@@ -15,6 +15,7 @@
         <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.Test3Activity" />
         <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.Test4Activity" />
         <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.TestDynamicActivity" />
+        <activity android:name="com.alibaba.android.arouter.demo.module1.testactivity.ReorderProbeActivity" />
     </application>
 
 </manifest>
