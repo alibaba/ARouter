@@ -136,7 +136,12 @@ public class ARouterEndToEndTest {
             Activity activity = monitor.waitForActivityWithTimeout(5000);
             assertNotNull(activity);
             assertTrue(callback.await());
+            instrumentation.waitForIdleSync();
+            Thread.sleep(100);
+            assertEquals(1, monitor.getHits());
+            assertTrue(callback.found.get());
             assertTrue(callback.arrived.get());
+            assertFalse(callback.lost.get());
             assertFalse(callback.interrupted.get());
             assertEquals("interceptor-chain-passed", activity.getIntent().getStringExtra("key1"));
             finishActivity(instrumentation, activity);

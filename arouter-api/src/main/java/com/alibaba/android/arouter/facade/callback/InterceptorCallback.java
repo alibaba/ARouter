@@ -3,7 +3,8 @@ package com.alibaba.android.arouter.facade.callback;
 import com.alibaba.android.arouter.facade.Postcard;
 
 /**
- * The callback of interceptor.
+ * The callback of interceptor. The first call to either callback method
+ * completes the current interceptor; duplicate or late calls are ignored.
  *
  * @author Alex <a href="mailto:zhilong.liu@aliyun.com">Contact me.</a>
  * @version 1.0

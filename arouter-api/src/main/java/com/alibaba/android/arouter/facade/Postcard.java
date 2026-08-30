@@ -103,9 +103,11 @@ public final class Postcard extends RouteMeta {
     }
 
     /**
-     * Set timeout of navigation this time.
+     * Set the total interceptor-chain timeout for this navigation, in seconds.
+     * Configure it before calling {@code navigation}; it is not a per-interceptor
+     * timeout.
      *
-     * @param timeout timeout
+     * @param timeout total timeout in seconds
      * @return this
      */
     public Postcard setTimeout(int timeout) {

@@ -8,7 +8,6 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.template.IInterceptor;
-import com.alibaba.android.arouter.thread.CancelableCountDownLatch;
 import com.alibaba.android.arouter.utils.MapUtils;
 
 import java.util.Map;
@@ -51,62 +50,15 @@ public class InterceptorServiceImpl implements InterceptorService {
                 return;
             }
 
-            LogisticsCenter.executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    CancelableCountDownLatch interceptorCounter = new CancelableCountDownLatch(Warehouse.interceptors.size());
-                    try {
-                        _execute(0, interceptorCounter, postcard);
-                        interceptorCounter.await(postcard.getTimeout(), TimeUnit.SECONDS);
-                        if (interceptorCounter.getCount() > 0) {    // Cancel the navigation this time, if it hasn't return anythings.
-                            callback.onInterrupt(new HandlerException("The interceptor processing timed out."));
-                        } else if (null != postcard.getTag()) {    // Maybe some exception in the tag.
-                            callback.onInterrupt((Throwable) postcard.getTag());
-                        } else {
-                            callback.onContinue(postcard);
-                        }
-                    } catch (Exception e) {
-                        callback.onInterrupt(e);
-                    }
-                }
-            });
+            InterceptorChain interceptorChain = new InterceptorChain(Warehouse.interceptors, postcard, callback);
+            try {
+                interceptorChain.scheduleTimeout(postcard.getTimeout(), TimeUnit.SECONDS);
+                LogisticsCenter.executor.execute(interceptorChain);
+            } catch (RuntimeException exception) {
+                interceptorChain.interrupt(exception);
+            }
         } else {
             callback.onContinue(postcard);
-        }
-    }
-
-    /**
-     * Excute interceptor
-     *
-     * @param index    current interceptor index
-     * @param counter  interceptor counter
-     * @param postcard routeMeta
-     */
-    private static void _execute(final int index, final CancelableCountDownLatch counter, final Postcard postcard) {
-        if (index < Warehouse.interceptors.size()) {
-            IInterceptor iInterceptor = Warehouse.interceptors.get(index);
-            iInterceptor.process(postcard, new InterceptorCallback() {
-                @Override
-                public void onContinue(Postcard postcard) {
-                    // Last interceptor excute over with no exception.
-                    counter.countDown();
-                    _execute(index + 1, counter, postcard);  // When counter is down, it will be execute continue ,but index bigger than interceptors size, then U know.
-                }
-
-                @Override
-                public void onInterrupt(Throwable exception) {
-                    // Last interceptor execute over with fatal exception.
-
-                    postcard.setTag(null == exception ? new HandlerException("No message.") : exception);    // save the exception message for backup.
-                    counter.cancel();
-                    // Be attention, maybe the thread in callback has been changed,
-                    // then the catch block(L207) will be invalid.
-                    // The worst is the thread changed to main thread, then the app will be crash, if you throw this exception!
-//                    if (!Looper.getMainLooper().equals(Looper.myLooper())) {    // You shouldn't throw the exception if the thread is main thread.
-//                        throw new HandlerException(exception.getMessage());
-//                    }
-                }
-            });
         }
     }
 
