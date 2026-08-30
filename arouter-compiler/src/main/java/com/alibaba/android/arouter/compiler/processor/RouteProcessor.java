@@ -74,6 +74,7 @@ public class RouteProcessor extends BaseProcessor {
 
     private final Map<String, Set<RouteMeta>> groupMap = new HashMap<>(); // ModuleName and routeMeta.
     private final Map<String, String> rootMap = new TreeMap<>();  // Map of root metas, used for generate class file in order.
+    private final Map<String, RouteMeta> routePathMap = new HashMap<>();
 
     private TypeMirror iProvider = null;
     private Writer docWriter;       // Writer used for write doc
@@ -428,12 +429,22 @@ public class RouteProcessor extends BaseProcessor {
     /**
      * Sort metas in group.
      *
-     * @param routeMete metas.
+     * @param routeMeta meta.
      */
-    private void categories(RouteMeta routeMete) {
-        if (routeVerify(routeMete)) {
-            logger.info(">>> Start categories, group = " + routeMete.getGroup() + ", path = " + routeMete.getPath() + " <<<");
-            Set<RouteMeta> routeMetas = groupMap.get(routeMete.getGroup());
+    private void categories(RouteMeta routeMeta) {
+        if (routeVerify(routeMeta)) {
+            RouteMeta existing = routePathMap.get(routeMeta.getPath());
+            if (existing != null) {
+                logger.error("Duplicate route path [" + routeMeta.getPath() + "] found on ["
+                        + existing.getRawType() + "] and [" + routeMeta.getRawType()
+                        + "]. Route priority is metadata and does not select between duplicate paths; "
+                        + "use unique route paths.");
+                return;
+            }
+            routePathMap.put(routeMeta.getPath(), routeMeta);
+
+            logger.info(">>> Start categories, group = " + routeMeta.getGroup() + ", path = " + routeMeta.getPath() + " <<<");
+            Set<RouteMeta> routeMetas = groupMap.get(routeMeta.getGroup());
             if (CollectionUtils.isEmpty(routeMetas)) {
                 Set<RouteMeta> routeMetaSet = new TreeSet<>(new Comparator<RouteMeta>() {
                     @Override
@@ -446,13 +457,13 @@ public class RouteProcessor extends BaseProcessor {
                         }
                     }
                 });
-                routeMetaSet.add(routeMete);
-                groupMap.put(routeMete.getGroup(), routeMetaSet);
+                routeMetaSet.add(routeMeta);
+                groupMap.put(routeMeta.getGroup(), routeMetaSet);
             } else {
-                routeMetas.add(routeMete);
+                routeMetas.add(routeMeta);
             }
         } else {
-            logger.warning(">>> Route meta verify error, group is " + routeMete.getGroup() + " <<<");
+            logger.warning(">>> Route meta verify error, group is " + routeMeta.getGroup() + " <<<");
         }
     }
 

@@ -143,6 +143,8 @@ public class ARouterEndToEndTest {
             assertTrue(callback.arrived.get());
             assertFalse(callback.lost.get());
             assertFalse(callback.interrupted.get());
+            assertNotNull(callback.foundPostcard.get());
+            assertEquals(7, callback.foundPostcard.get().getPriority());
             assertEquals("interceptor-chain-passed", activity.getIntent().getStringExtra("key1"));
             finishActivity(instrumentation, activity);
         } finally {
@@ -192,9 +194,11 @@ public class ARouterEndToEndTest {
         private final AtomicBoolean lost = new AtomicBoolean();
         private final AtomicBoolean arrived = new AtomicBoolean();
         private final AtomicBoolean interrupted = new AtomicBoolean();
+        private final AtomicReference<Postcard> foundPostcard = new AtomicReference<Postcard>();
 
         @Override
         public void onFound(Postcard postcard) {
+            foundPostcard.set(postcard);
             found.set(true);
         }
 

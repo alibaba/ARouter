@@ -38,7 +38,9 @@ public @interface Route {
     int extras() default Integer.MIN_VALUE;
 
     /**
-     * The priority of route.
+     * Route metadata priority copied to RouteMeta and Postcard.
+     * It does not select between destinations that declare the same path;
+     * static route paths must be unique.
      */
     int priority() default -1;
 }

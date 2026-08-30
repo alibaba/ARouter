@@ -19,6 +19,70 @@ import static org.junit.Assert.assertTrue;
 public class ProcessorRegressionTest {
 
     @Test
+    public void routeProcessorRejectsDuplicatePaths() {
+        List<JavaFileObject> sources = commonSources();
+        sources.add(JavaFileObjects.forSourceLines(
+                "test.FirstActivity",
+                "package test;",
+                "import com.alibaba.android.arouter.facade.annotation.Route;",
+                "@Route(path = \"/duplicate/page\")",
+                "public class FirstActivity extends android.app.Activity {}"
+        ));
+        sources.add(JavaFileObjects.forSourceLines(
+                "test.SecondActivity",
+                "package test;",
+                "import com.alibaba.android.arouter.facade.annotation.Route;",
+                "@Route(path = \"/duplicate/page\")",
+                "public class SecondActivity extends android.app.Activity {}"
+        ));
+
+        Compilation compilation = Compiler.javac()
+                .withOptions("-AAROUTER_MODULE_NAME=test")
+                .withProcessors(new RouteProcessor())
+                .compile(sources);
+
+        assertEquals(compilation.toString(), Compilation.Status.FAILURE, compilation.status());
+        assertTrue(compilation.errors().toString(), compilation.errors().toString()
+                .contains("Duplicate route path [/duplicate/page]"));
+    }
+
+    @Test
+    public void routeProcessorRejectsDuplicateProviderPathsRegardlessOfPriority() {
+        List<JavaFileObject> sources = commonSources();
+        sources.add(JavaFileObjects.forSourceLines(
+                "test.DuplicateService",
+                "package test;",
+                "public interface DuplicateService extends "
+                        + "com.alibaba.android.arouter.facade.template.IProvider {}"
+        ));
+        sources.add(JavaFileObjects.forSourceLines(
+                "test.FirstProvider",
+                "package test;",
+                "import com.alibaba.android.arouter.facade.annotation.Route;",
+                "@Route(path = \"/duplicate/provider\", priority = 1)",
+                "public class FirstProvider implements DuplicateService {}"
+        ));
+        sources.add(JavaFileObjects.forSourceLines(
+                "test.SecondProvider",
+                "package test;",
+                "import com.alibaba.android.arouter.facade.annotation.Route;",
+                "@Route(path = \"/duplicate/provider\", priority = 2)",
+                "public class SecondProvider implements DuplicateService {}"
+        ));
+
+        Compilation compilation = Compiler.javac()
+                .withOptions("-AAROUTER_MODULE_NAME=test")
+                .withProcessors(new RouteProcessor())
+                .compile(sources);
+
+        assertEquals(compilation.toString(), Compilation.Status.FAILURE, compilation.status());
+        String errors = compilation.errors().toString();
+        assertTrue(errors, errors.contains("Duplicate route path [/duplicate/provider]"));
+        assertTrue(errors, errors.contains(
+                "Route priority is metadata and does not select between duplicate paths"));
+    }
+
+    @Test
     public void routeProcessorSupportsAndroidXWithoutLegacySupportFragment() throws Exception {
         List<JavaFileObject> sources = commonSources();
         sources.add(JavaFileObjects.forSourceLines(

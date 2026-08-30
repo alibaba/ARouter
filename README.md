@@ -76,6 +76,10 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
     }
     ```
 
+    Static route paths must be unique within one module. `Route.priority` is copied into route
+    metadata; it is not an override rule and does not select between destinations that declare
+    the same path.
+
 3. Initialize the SDK
     ``` java
     if (isDebug()) {           // These two lines must be written before init, otherwise these configurations will be invalid in the init process
