@@ -8,8 +8,9 @@ dependencies {
     // Compile against the same version as this repository without publishing
     // AGP as a transitive dependency of arouter-register.
     compileOnly "com.android.tools.build:gradle:${rootProject.ext.android_gradle_plugin_version}"
+    testRuntimeOnly "com.android.tools.build:gradle:${rootProject.ext.android_gradle_plugin_version}"
 
-    implementation 'org.ow2.asm:asm:7.0'
+    implementation 'org.ow2.asm:asm:9.2'
 
     testImplementation 'junit:junit:4.13.2'
 }

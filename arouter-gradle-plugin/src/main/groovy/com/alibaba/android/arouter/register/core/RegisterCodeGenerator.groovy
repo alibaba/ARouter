@@ -75,7 +75,7 @@ class RegisterCodeGenerator {
     private byte[] referHackWhenInit(InputStream inputStream) {
         ClassReader cr = new ClassReader(inputStream)
         ClassWriter cw = new ClassWriter(cr, 0)
-        ClassVisitor cv = new MyClassVisitor(Opcodes.ASM5, cw)
+        ClassVisitor cv = new MyClassVisitor(ScanSetting.ASM_API, cw)
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
         return cw.toByteArray()
     }
@@ -96,7 +96,7 @@ class RegisterCodeGenerator {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions)
             //generate code into this method
             if (name == ScanSetting.GENERATE_TO_METHOD_NAME) {
-                mv = new RouteMethodVisitor(Opcodes.ASM5, mv)
+                mv = new RouteMethodVisitor(ScanSetting.ASM_API, mv)
             }
             return mv
         }

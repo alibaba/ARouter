@@ -1,4 +1,7 @@
 package com.alibaba.android.arouter.register.utils
+
+import org.objectweb.asm.Opcodes
+
 /**
  * register setting
  * @author billy.qi email: qiyilike@163.com
@@ -6,6 +9,7 @@ package com.alibaba.android.arouter.register.utils
  */
 class ScanSetting {
     static final String PLUGIN_NAME = "com.alibaba.arouter"
+    static final int ASM_API = Opcodes.ASM7
     /**
      * The register code is generated into this class
      */

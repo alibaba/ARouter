@@ -1,5 +1,7 @@
 package com.alibaba.android.arouter.register.utils
 
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Opcodes
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -39,5 +41,22 @@ class ScanUtilTest {
         assertFalse(ScanUtil.shouldProcessClass('com/alibaba/android/arouter/routes/'))
         assertFalse(ScanUtil.shouldProcessClass('com/alibaba/android/arouter/routes/metadata.json'))
         assertFalse(ScanUtil.shouldProcessClass('other/package/Route.class'))
+    }
+
+    @Test
+    void acceptsModernJavaClassFiles() {
+        ClassWriter writer = new ClassWriter(0)
+        writer.visit(
+                Opcodes.V17,
+                Opcodes.ACC_PUBLIC,
+                'com/alibaba/android/arouter/routes/ModernRoute$Nested',
+                null,
+                'java/lang/Object',
+                null
+        )
+        writer.visitNestHost('com/alibaba/android/arouter/routes/ModernRoute')
+        writer.visitEnd()
+
+        ScanUtil.scanClass(new ByteArrayInputStream(writer.toByteArray()))
     }
 }

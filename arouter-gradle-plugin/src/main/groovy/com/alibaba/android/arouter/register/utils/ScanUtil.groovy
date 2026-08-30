@@ -4,7 +4,6 @@ import com.alibaba.android.arouter.register.core.RegisterTransform
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes
 
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
@@ -64,7 +63,7 @@ class ScanUtil {
     static void scanClass(InputStream inputStream) {
         ClassReader cr = new ClassReader(inputStream)
         ClassWriter cw = new ClassWriter(cr, 0)
-        ScanClassVisitor cv = new ScanClassVisitor(Opcodes.ASM5, cw)
+        ScanClassVisitor cv = new ScanClassVisitor(ScanSetting.ASM_API, cw)
         cr.accept(cv, ClassReader.EXPAND_FRAMES)
         inputStream.close()
     }
