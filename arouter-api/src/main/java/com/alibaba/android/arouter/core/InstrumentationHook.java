@@ -3,6 +3,8 @@ package com.alibaba.android.arouter.core;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.alibaba.android.arouter.utils.Consts;
@@ -47,23 +49,47 @@ public class InstrumentationHook extends Instrumentation {
         Object instanceOfTarget = targetActivity.newInstance();
 
         if (ARouter.canAutoInject()) {
-            String[] autoInjectParams = intent.getStringArrayExtra(ARouter.AUTO_INJECT);
-            if (null != autoInjectParams && autoInjectParams.length > 0) {
-                for (String paramsName : autoInjectParams) {
-                    Object value = intent.getExtras().get(TextUtils.getLeft(paramsName));
-                    if (null != value) {
-                        try {
-                            Field injectField = targetActivity.getDeclaredField(TextUtils.getLeft(paramsName));
-                            injectField.setAccessible(true);
-                            injectField.set(instanceOfTarget, value);
-                        } catch (Exception e) {
-                            ARouter.logger.error(Consts.TAG, "Inject values for activity error! [" + e.getMessage() + "]");
+            try {
+                String[] autoInjectParams = intent.getStringArrayExtra(ARouter.AUTO_INJECT);
+                if (null != autoInjectParams && autoInjectParams.length > 0) {
+                    Bundle extras = intent.getExtras();
+                    for (String paramsName : autoInjectParams) {
+                        String fieldName = TextUtils.getLeft(paramsName);
+                        Object value = null == extras ? null : extras.get(fieldName);
+                        if (null != value) {
+                            try {
+                                Field injectField = targetActivity.getDeclaredField(fieldName);
+                                injectField.setAccessible(true);
+                                injectField.set(instanceOfTarget, value);
+                            } catch (Exception e) {
+                                logError("Inject values for activity error! [" + e.getMessage() + "]");
+                            }
                         }
                     }
                 }
+            } catch (RuntimeException malformedExtras) {
+                // Activity creation must not be aborted by malformed or unparcelable Intent extras.
+                logWarning("Skip legacy auto-inject for malformed activity extras. ["
+                        + malformedExtras.getClass().getSimpleName() + "]");
             }
         }
 
         return (Activity) instanceOfTarget;
+    }
+
+    private static void logError(String message) {
+        if (ARouter.logger == null) {
+            Log.e(Consts.TAG, message);
+        } else {
+            ARouter.logger.error(Consts.TAG, message);
+        }
+    }
+
+    private static void logWarning(String message) {
+        if (ARouter.logger == null) {
+            Log.w(Consts.TAG, message);
+        } else {
+            ARouter.logger.warning(Consts.TAG, message);
+        }
     }
 }
