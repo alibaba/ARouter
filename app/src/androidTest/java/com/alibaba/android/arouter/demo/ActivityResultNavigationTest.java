@@ -114,7 +114,7 @@ public class ActivityResultNavigationTest {
     }
 
     @Test
-    public void callerOwnedLauncherReceivesRealActivityResultExactlyOnce() throws Exception {
+    public void callerOwnedLauncherRemovesForwardResultAndReceivesResultExactlyOnce() throws Exception {
         final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         ActivityResultHostActivity host = launchHostActivity(instrumentation);
         activityToFinish = host;
@@ -125,7 +125,8 @@ public class ActivityResultNavigationTest {
         try {
             final Postcard postcard = ARouter.getInstance()
                     .build("/test/activity2")
-                    .withString("key1", "result-value");
+                    .withString("key1", "result-value")
+                    .withFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             final ActivityResultHostActivity resultHost = host;
             instrumentation.runOnMainSync(new Runnable() {
                 @Override
@@ -138,6 +139,9 @@ public class ActivityResultNavigationTest {
             assertNotNull(target);
             assertTrue(navigated.await(5, TimeUnit.SECONDS));
             assertEquals("result-value", target.getIntent().getStringExtra("key1"));
+            assertEquals(0, target.getIntent().getFlags() & Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            assertTrue((target.getIntent().getFlags() & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0);
+            assertTrue((postcard.getFlags() & Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0);
             assertEquals(1, monitor.getHits());
             assertEquals(asList("found", "arrival"), events);
 
@@ -185,6 +189,66 @@ public class ActivityResultNavigationTest {
             assertNotNull(target);
             assertTrue(navigated.await(5, TimeUnit.SECONDS));
             assertEquals("legacy-result-value", target.getIntent().getStringExtra("key1"));
+            assertEquals(1, monitor.getHits());
+            assertEquals(asList("found", "arrival"), events);
+
+            final Activity resultActivity = target;
+            instrumentation.runOnMainSync(new Runnable() {
+                @Override
+                public void run() {
+                    resultActivity.finish();
+                }
+            });
+
+            assertTrue(host.awaitResult());
+            assertEquals(ActivityResultHostActivity.REQUEST_CODE, host.getReceivedRequestCode());
+            assertEquals(999, host.getReceivedResultCode());
+            assertNull(host.getReceivedData());
+            instrumentation.waitForIdleSync();
+            assertEquals(1, monitor.getHits());
+        } finally {
+            instrumentation.removeMonitor(monitor);
+        }
+    }
+
+    @Test
+    public void requestCodeNavigationRemovesForwardResultFlagAndReturnsResult() throws Exception {
+        final Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
+        ActivityResultHostActivity host = launchHostActivity(instrumentation);
+        activityToFinish = host;
+        Instrumentation.ActivityMonitor monitor = instrumentation.addMonitor(Test2Activity.class.getName(), null, false);
+        final CountDownLatch navigated = new CountDownLatch(1);
+        final List<String> events = Collections.synchronizedList(new ArrayList<String>());
+        final AtomicReference<Throwable> launchFailure = new AtomicReference<Throwable>();
+
+        try {
+            final Postcard postcard = ARouter.getInstance()
+                    .build("/test/activity2")
+                    .withString("key1", "forward-result-value")
+                    .withFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            final ActivityResultHostActivity resultHost = host;
+            instrumentation.runOnMainSync(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        resultHost.navigateWithLegacyRequestCode(
+                                postcard,
+                                new RecordingCallback(events, navigated)
+                        );
+                    } catch (Throwable failure) {
+                        launchFailure.set(failure);
+                    }
+                }
+            });
+
+            assertNull("navigation must not pass conflicting flags to Android", launchFailure.get());
+            Activity target = monitor.waitForActivityWithTimeout(5000);
+            assertNotNull(target);
+            assertTrue(navigated.await(5, TimeUnit.SECONDS));
+            assertEquals("forward-result-value", target.getIntent().getStringExtra("key1"));
+            assertEquals(0, target.getIntent().getFlags() & Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            assertTrue((target.getIntent().getFlags() & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0);
+            assertTrue((postcard.getFlags() & Intent.FLAG_ACTIVITY_FORWARD_RESULT) != 0);
             assertEquals(1, monitor.getHits());
             assertEquals(asList("found", "arrival"), events);
 

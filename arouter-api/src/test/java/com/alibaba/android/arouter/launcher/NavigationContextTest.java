@@ -1,11 +1,13 @@
 package com.alibaba.android.arouter.launcher;
 
 import android.content.Context;
+import android.content.Intent;
 
 import com.alibaba.android.arouter.facade.callback.NavigationLauncher;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -41,5 +43,33 @@ public class NavigationContextTest {
         NavigationLauncher launcher = mock(NavigationLauncher.class);
 
         assertFalse(_ARouter.shouldAddNewTaskFlag(applicationContext, launcher));
+    }
+
+    @Test
+    public void resultRequestRemovesForwardResultAndPreservesOtherFlags() {
+        int flags = Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_CLEAR_TOP;
+
+        assertEquals(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP,
+                _ARouter.sanitizeActivityFlags(flags, 0, null)
+        );
+    }
+
+    @Test
+    public void callerOwnedLauncherRemovesForwardResultFlag() {
+        int flags = Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_CLEAR_TOP;
+        NavigationLauncher launcher = mock(NavigationLauncher.class);
+
+        assertEquals(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP,
+                _ARouter.sanitizeActivityFlags(flags, -1, launcher)
+        );
+    }
+
+    @Test
+    public void normalNavigationPreservesForwardResultFlagWithoutResultLauncher() {
+        int flags = Intent.FLAG_ACTIVITY_FORWARD_RESULT | Intent.FLAG_ACTIVITY_CLEAR_TOP;
+
+        assertEquals(flags, _ARouter.sanitizeActivityFlags(flags, -1, null));
     }
 }

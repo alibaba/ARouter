@@ -383,6 +383,18 @@ final class _ARouter {
         return null == launcher && !(context instanceof Activity);
     }
 
+    /**
+     * Android does not allow forwarding an existing result target while requesting a new result.
+     * A legacy requestCode or caller-owned result launcher wins for this launch; the caller's
+     * Postcard remains unchanged.
+     */
+    static int sanitizeActivityFlags(int flags, int requestCode, NavigationLauncher launcher) {
+        if (requestCode >= 0 || null != launcher) {
+            return flags & ~Intent.FLAG_ACTIVITY_FORWARD_RESULT;
+        }
+        return flags;
+    }
+
     private Object _navigation(final Postcard postcard, final int requestCode,
                                final NavigationLauncher launcher, final NavigationCallback callback) {
         final Context currentContext = postcard.getContext();
@@ -394,7 +406,14 @@ final class _ARouter {
                 intent.putExtras(postcard.getExtras());
 
                 // Set flags.
-                int flags = postcard.getFlags();
+                int requestedFlags = postcard.getFlags();
+                int flags = sanitizeActivityFlags(requestedFlags, requestCode, launcher);
+                if (flags != requestedFlags) {
+                    logger.warning(
+                            Consts.TAG,
+                            "FLAG_ACTIVITY_FORWARD_RESULT is incompatible with a result request and has been removed."
+                    );
+                }
                 if (0 != flags) {
                     intent.setFlags(flags);
                 }
