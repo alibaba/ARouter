@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.alibaba.android.arouter.facade.template.ILogger;
+import com.alibaba.android.arouter.launcher.ARouter;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -22,17 +26,23 @@ import static org.mockito.Mockito.when;
 
 public class PackageUtilsTest {
     private Context context;
+    private PackageManager packageManager;
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
     private PackageInfo packageInfo;
+    private ILogger originalLogger;
+    private ILogger testLogger;
 
     @Before
     public void setUp() throws Exception {
         context = mock(Context.class);
         preferences = mock(SharedPreferences.class);
         editor = mock(SharedPreferences.Editor.class);
-        PackageManager packageManager = mock(PackageManager.class);
+        packageManager = mock(PackageManager.class);
         packageInfo = mock(PackageInfo.class);
+        originalLogger = ARouter.logger;
+        testLogger = mock(ILogger.class);
+        ARouter.logger = testLogger;
 
         packageInfo.versionName = "1.0";
         packageInfo.versionCode = 1;
@@ -50,6 +60,11 @@ public class PackageUtilsTest {
         when(editor.putString(LAST_VERSION_NAME, "1.0")).thenReturn(editor);
         when(editor.putInt(LAST_VERSION_CODE, 1)).thenReturn(editor);
         when(editor.putLong(LAST_UPDATE_TIME, 200L)).thenReturn(editor);
+    }
+
+    @After
+    public void tearDown() {
+        ARouter.logger = originalLogger;
     }
 
     @Test
@@ -84,5 +99,18 @@ public class PackageUtilsTest {
 
         verify(editor).putLong(LAST_UPDATE_TIME, 200L);
         verify(editor).apply();
+    }
+
+    @Test
+    public void packageManagerFailureFallsBackToRouteMapRebuild() throws Exception {
+        RuntimeException failure = new RuntimeException("Package manager has died");
+        when(packageManager.getPackageInfo(eq("repro.cache"), eq(PackageManager.GET_CONFIGURATIONS)))
+                .thenThrow(failure);
+
+        assertTrue(PackageUtils.isNewVersion(context));
+        PackageUtils.updateVersion(context);
+
+        verify(testLogger).error(Consts.TAG, "Get package info error.", failure);
+        verify(editor, never()).apply();
     }
 }

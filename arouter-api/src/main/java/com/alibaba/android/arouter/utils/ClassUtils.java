@@ -115,7 +115,7 @@ public class ClassUtils {
      * @throws IOException
      */
     public static List<String> getSourcePaths(Context context) throws PackageManager.NameNotFoundException, IOException {
-        ApplicationInfo applicationInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
+        ApplicationInfo applicationInfo = getProcessApplicationInfo(context);
         File sourceApk = new File(applicationInfo.sourceDir);
 
         List<String> sourcePaths = new ArrayList<>();
@@ -148,6 +148,17 @@ public class ClassUtils {
             sourcePaths.addAll(tryLoadInstantRunDexFile(applicationInfo));
         }
         return sourcePaths;
+    }
+
+    static ApplicationInfo getProcessApplicationInfo(Context context) throws PackageManager.NameNotFoundException {
+        // Use the ApplicationInfo already attached to this process. Besides avoiding another
+        // PackageManager Binder call when the service is temporarily unavailable, this keeps the
+        // APK paths consistent with the code that the current process is actually running.
+        ApplicationInfo applicationInfo = context.getApplicationInfo();
+        if (applicationInfo == null) {
+            throw new PackageManager.NameNotFoundException(context.getPackageName());
+        }
+        return applicationInfo;
     }
 
     /**

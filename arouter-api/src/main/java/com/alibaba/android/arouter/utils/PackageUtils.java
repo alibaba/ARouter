@@ -76,7 +76,7 @@ public class PackageUtils {
         try {
             packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), PackageManager.GET_CONFIGURATIONS);
         } catch (Exception ex) {
-            logger.error(Consts.TAG, "Get package info error.");
+            logger.error(Consts.TAG, "Get package info error.", ex);
         }
 
         return packageInfo;
