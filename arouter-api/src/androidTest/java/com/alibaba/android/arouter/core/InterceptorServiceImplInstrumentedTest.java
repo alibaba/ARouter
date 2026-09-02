@@ -1,8 +1,9 @@
 package com.alibaba.android.arouter.core;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.exception.HandlerException;
 import com.alibaba.android.arouter.facade.Postcard;
@@ -205,7 +206,7 @@ public class InterceptorServiceImplInstrumentedTest {
     }
 
     private static Context targetContext() {
-        return InstrumentationRegistry.getTargetContext();
+        return InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
     private static long elapsedMillis(long startedAt) {

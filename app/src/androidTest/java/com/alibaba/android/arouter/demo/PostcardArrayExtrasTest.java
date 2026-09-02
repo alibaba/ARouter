@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Intent;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.demo.module1.testactivity.Test2Activity;
 import com.alibaba.android.arouter.launcher.ARouter;
@@ -29,7 +30,7 @@ public class PostcardArrayExtrasTest {
 
     @BeforeClass
     public static void initializeRouter() {
-        Application application = (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+        Application application = (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.openLog();
         ARouter.init(application);
@@ -56,7 +57,7 @@ public class PostcardArrayExtrasTest {
         Instrumentation.ActivityMonitor monitor = instrumentation.addMonitor(Test2Activity.class.getName(), null, false);
 
         try {
-            Intent hostIntent = new Intent(InstrumentationRegistry.getTargetContext(), PostcardArrayHostActivity.class);
+            Intent hostIntent = new Intent(InstrumentationRegistry.getInstrumentation().getTargetContext(), PostcardArrayHostActivity.class);
             hostIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activities.add(instrumentation.startActivitySync(hostIntent));
 

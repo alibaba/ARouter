@@ -7,7 +7,7 @@ android {
     defaultConfig {
         minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
-        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         consumerProguardFiles 'consumer-rules.pro'
 
         javaCompileOptions {
@@ -35,11 +35,13 @@ android {
 dependencies {
     annotationProcessor project(':arouter-compiler')
     api project(':arouter-annotation')
-    implementation "com.android.support:support-v4:${SUPPORT_LIB_VERSION}"
+    api "androidx.core:core:${ANDROIDX_CORE_VERSION}"
+    implementation "androidx.fragment:fragment:${ANDROIDX_FRAGMENT_VERSION}"
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:3.12.4'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation "androidx.test:runner:${ANDROIDX_TEST_RUNNER_VERSION}"
+    androidTestImplementation "androidx.test.ext:junit:${ANDROIDX_TEST_EXT_JUNIT_VERSION}"
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

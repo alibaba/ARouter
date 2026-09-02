@@ -6,8 +6,9 @@ import android.app.Instrumentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.demo.module1.BlankFragment;
 import com.alibaba.android.arouter.demo.module1.testactivity.Test2Activity;
@@ -43,7 +44,7 @@ public class ActivityResultNavigationTest {
 
     @BeforeClass
     public static void initializeRouter() {
-        Application application = (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+        Application application = (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.openLog();
         ARouter.init(application);
@@ -82,7 +83,7 @@ public class ActivityResultNavigationTest {
                     .withString("key1", "launcher-value")
                     .withAction("com.alibaba.android.arouter.TEST_RESULT")
                     .withFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    .navigation(InstrumentationRegistry.getTargetContext(), new NavigationLauncher() {
+                    .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), new NavigationLauncher() {
                         @Override
                         public void launch(Intent intent) {
                             events.add("launch");
@@ -282,7 +283,7 @@ public class ActivityResultNavigationTest {
             ARouter.getInstance()
                     .build("/test/activity2")
                     .withString("key1", "legacy-value")
-                    .navigation(InstrumentationRegistry.getTargetContext(), new RecordingCallback(events, completed));
+                    .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), new RecordingCallback(events, completed));
 
             Activity target = monitor.waitForActivityWithTimeout(5000);
             assertNotNull(target);
@@ -311,10 +312,10 @@ public class ActivityResultNavigationTest {
         Object fragment = ARouter.getInstance()
                 .build("/test/fragment")
                 .withString("name", "fragment-value")
-                .navigation(InstrumentationRegistry.getTargetContext(), launcher, null);
+                .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), launcher, null);
         Object provider = ARouter.getInstance()
                 .build("/yourservicegroupname/hello")
-                .navigation(InstrumentationRegistry.getTargetContext(), launcher, null);
+                .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), launcher, null);
 
         assertTrue(fragment instanceof BlankFragment);
         Bundle arguments = ((BlankFragment) fragment).getArguments();
@@ -332,7 +333,7 @@ public class ActivityResultNavigationTest {
 
         ARouter.getInstance()
                 .build("/missing/activity-result-route")
-                .navigation(InstrumentationRegistry.getTargetContext(), new NavigationLauncher() {
+                .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), new NavigationLauncher() {
                     @Override
                     public void launch(Intent intent) {
                         launches.incrementAndGet();
@@ -345,7 +346,7 @@ public class ActivityResultNavigationTest {
     }
 
     private static ActivityResultHostActivity launchHostActivity(Instrumentation instrumentation) {
-        Intent intent = new Intent(InstrumentationRegistry.getTargetContext(), ActivityResultHostActivity.class);
+        Intent intent = new Intent(InstrumentationRegistry.getInstrumentation().getTargetContext(), ActivityResultHostActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         return (ActivityResultHostActivity) instrumentation.startActivitySync(intent);
     }

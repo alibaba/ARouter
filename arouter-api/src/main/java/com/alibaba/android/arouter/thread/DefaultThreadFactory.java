@@ -1,6 +1,6 @@
 package com.alibaba.android.arouter.thread;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 import com.alibaba.android.arouter.utils.Consts;

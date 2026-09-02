@@ -3,8 +3,9 @@ package com.alibaba.android.arouter.demo;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.demo.module1.testactivity.RedirectLoginActivity;
 import com.alibaba.android.arouter.demo.module1.testactivity.RedirectProtectedActivity;
@@ -39,7 +40,7 @@ public class InterceptorRedirectInstrumentedTest {
     public void setUp() {
         instrumentation = InstrumentationRegistry.getInstrumentation();
         Application application =
-                (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+                (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.init(application);
         LoginRedirectInterceptor.resetProbe();
@@ -107,7 +108,7 @@ public class InterceptorRedirectInstrumentedTest {
             RecordingNavigationCallback normal = new RecordingNavigationCallback();
             ARouter.getInstance()
                     .build("/test/activity2")
-                    .navigation(InstrumentationRegistry.getTargetContext(), normal);
+                    .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), normal);
             currentActivity = normalMonitor.waitForActivityWithTimeout(5000);
 
             assertNotNull(currentActivity);
@@ -126,7 +127,7 @@ public class InterceptorRedirectInstrumentedTest {
     private void navigateProtected(RecordingNavigationCallback callback) {
         ARouter.getInstance()
                 .build("/redirect/protected")
-                .navigation(InstrumentationRegistry.getTargetContext(), callback);
+                .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), callback);
     }
 
     private void finishCurrentActivity() {

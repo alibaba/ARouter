@@ -43,6 +43,12 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
 4. Cross-module communication, decouple components by IoC
 
 #### III. Configuration
+The current development line uses AndroidX natively. Applications consuming it must enable
+`android.useAndroidX=true`; ARouter itself does not require Jetifier. Projects that still use
+the legacy Support Library should remain on an ARouter 1.x release until the application has
+migrated to AndroidX. The namespace change is a source and binary compatibility boundary, so
+its release will be handled as a major-version change.
+
 1. Adding dependencies and configurations
     ``` gradle
     android {
@@ -55,6 +61,9 @@ version|[![Download](https://maven-badges.herokuapp.com/maven-central/com.alibab
             }
         }
     }
+
+    // Required by the current AndroidX development line.
+    // gradle.properties: android.useAndroidX=true
 
     dependencies {
         // Replace with the latest version
