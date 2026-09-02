@@ -68,7 +68,7 @@ public class InterceptorRedirectInstrumentedTest {
             instrumentation.waitForIdleSync();
             assertEquals(1, loginMonitor.getHits());
             assertEquals(0, protectedMonitor.getHits());
-            assertEquals(1, LoginRedirectInterceptor.processCount());
+            assertEquals(1, LoginRedirectInterceptor.protectedProcessCount());
             assertTrue(callback.found.get());
             assertTrue(callback.interrupted.get());
             assertFalse(callback.lost.get());
@@ -98,17 +98,20 @@ public class InterceptorRedirectInstrumentedTest {
                 assertTrue(redirect.await());
                 assertTrue(redirect.interrupted.get());
                 assertFalse(redirect.arrived.get());
-                assertEquals(index + 1, LoginRedirectInterceptor.processCount());
+                assertEquals(index + 1, LoginRedirectInterceptor.protectedProcessCount());
                 finishCurrentActivity();
             }
 
             assertEquals(0, protectedMonitor.getHits());
-            assertEquals(REDIRECT_COUNT, LoginRedirectInterceptor.processCount());
+            assertEquals(REDIRECT_COUNT, LoginRedirectInterceptor.protectedProcessCount());
 
             RecordingNavigationCallback normal = new RecordingNavigationCallback();
-            ARouter.getInstance()
-                    .build("/test/activity2")
-                    .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), normal);
+            Postcard normalPostcard = ARouter.getInstance().build("/test/activity2");
+            LoginRedirectInterceptor.watchPostcard(normalPostcard);
+            normalPostcard.navigation(
+                    InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                    normal
+            );
             currentActivity = normalMonitor.waitForActivityWithTimeout(5000);
 
             assertNotNull(currentActivity);
@@ -116,7 +119,7 @@ public class InterceptorRedirectInstrumentedTest {
             assertTrue(normal.found.get());
             assertTrue(normal.arrived.get());
             assertFalse(normal.interrupted.get());
-            assertEquals(REDIRECT_COUNT + 1, LoginRedirectInterceptor.processCount());
+            assertEquals(1, LoginRedirectInterceptor.watchedPostcardProcessCount());
         } finally {
             instrumentation.removeMonitor(loginMonitor);
             instrumentation.removeMonitor(protectedMonitor);
