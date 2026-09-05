@@ -17,7 +17,7 @@ android {
     buildToolsVersion BUILDTOOLS_VERSION
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
+        minSdkVersion Integer.parseInt(DEMO_MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
 
         javaCompileOptions {
@@ -29,7 +29,7 @@ android {
 
     compileOptions {
         // Gson 2.14 contains Java 8 default interface methods. Enable Android's
-        // desugaring pipeline so this minSdk 14 demo module can package tests.
+        // desugaring pipeline for the demo; Gson's runtime minimum is API 21.
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }

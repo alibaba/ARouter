@@ -9,7 +9,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion Integer.parseInt(MIN_SDK_VERSION)
+        minSdkVersion Integer.parseInt(DEMO_MIN_SDK_VERSION)
         targetSdkVersion Integer.parseInt(TARGET_SDK_VERSION)
         versionName "0.0.1"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'

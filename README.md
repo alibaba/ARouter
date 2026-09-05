@@ -49,6 +49,9 @@ the legacy Support Library should remain on an ARouter 1.x release until the app
 migrated to AndroidX. The namespace change is a source and binary compatibility boundary, so
 its release will be handled as a major-version change.
 
+ARouter's runtime keeps `minSdkVersion=14`. The demo application and its Gson-based
+`module-java` use `minSdkVersion=21`; Gson is not an ARouter runtime dependency.
+
 1. Adding dependencies and configurations
     ``` gradle
     android {

@@ -2,8 +2,9 @@
 
 These checks validate development artifacts, not a release or publication.
 ARouter's published minimum dependencies and `minSdkVersion=14` are unchanged.
-Device coverage starts at API 21; it does not establish runtime coverage for
-every API level between 14 and 20.
+The complete demo CI matrix runs on API 21 and API 34. Minimum-API framework
+and consumer checks are separate; they do not establish coverage for every
+intermediate API level.
 
 ## Complete framework device suite
 
@@ -31,6 +32,37 @@ they are not part of the published consumer rules.
 The verifier requires fresh, nonempty JUnit reports with no failures, errors,
 or skipped tests. Local copies are retained by API and build type under
 `build/reports/device-tests/`, so later runs do not erase earlier matrix results.
+
+## Minimum API 14 runtime checks
+
+Connect exactly one booted API 14 emulator and verify its API level before
+running the standalone framework tests with JDK 8:
+
+```sh
+"${ANDROID_HOME}/platform-tools/adb" shell getprop ro.build.version.sdk
+./gradlew :arouter-api:connectedDebugAndroidTest
+```
+
+For end-to-end routing and Release/R8, run the published-artifact consumer
+below on the same emulator with the minimum dependencies and `AROUTER_MIN_SDK=14`.
+This exercises both daily/online Debug/Release variants without test-only keep
+rules. Preserve the fixture and check its fresh JUnit reports, not just APK
+assembly. The consumer covers Activity and provider routing, Fragment and
+DialogFragment creation, arguments and injection. `withOptionsCompat` requires
+API 16 and is deliberately not exercised on API 14.
+
+The demo's Gson 2.14 dependency requires [API 21 or newer](https://github.com/google/gson#minimum-android-api-level).
+The demo application and its Gson-based `module-java` therefore use
+`DEMO_MIN_SDK_VERSION=21`, separately from the runtime's `MIN_SDK_VERSION=14`.
+Do not use the demo as proof of the runtime library's minimum API. Gson is a
+JVM compiler/demo dependency, not an ARouter runtime dependency.
+
+The official API 14 ARM image uses the old `kernel-qemu`/classic engine.
+Emulator 36.1.9 cannot boot it. An isolated SDK Tools 25.2.5 classic engine
+was validated on macOS through Rosetta; the [official macOS archive](https://dl.google.com/android/repository/tools_r25.2.5-macosx.zip)
+can be extracted separately without replacing a working SDK emulator.
+See the [SDK Tools release history](https://developer.android.com/tools/releases/sdk-tools)
+and keep the chosen engine version and system-image checksum with test results.
 
 ## Published-artifact consumer
 
