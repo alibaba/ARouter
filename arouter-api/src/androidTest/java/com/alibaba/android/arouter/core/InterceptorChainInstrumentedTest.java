@@ -345,10 +345,12 @@ public class InterceptorChainInstrumentedTest {
         assertEquals(0, continued.get());
         assertEquals(navigationCount, interrupted.get());
 
-        Warehouse.interceptors.clear();
-        Warehouse.interceptors.add(new CountingInterceptor());
+        Warehouse.clear();
+        Warehouse.interceptorsIndex.put(1, CountingInterceptor.class);
+        InterceptorServiceImpl subsequentService = new InterceptorServiceImpl();
+        subsequentService.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
         RecordingCallback subsequentNavigation = new RecordingCallback();
-        service.doInterceptions(new Postcard("/test/subsequent", "test").setTimeout(2), subsequentNavigation);
+        subsequentService.doInterceptions(new Postcard("/test/subsequent", "test").setTimeout(2), subsequentNavigation);
 
         assertTrue(subsequentNavigation.await(1, TimeUnit.SECONDS));
         assertEquals(1, subsequentNavigation.continueCount.get());
@@ -478,7 +480,7 @@ public class InterceptorChainInstrumentedTest {
         }
     }
 
-    private static final class CountingInterceptor implements IInterceptor {
+    public static final class CountingInterceptor implements IInterceptor {
         private final AtomicInteger processCount = new AtomicInteger();
 
         @Override
