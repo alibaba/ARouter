@@ -469,7 +469,8 @@ final class _ARouter {
 
                     return instance;
                 } catch (Exception ex) {
-                    logger.error(Consts.TAG, "Fetch fragment instance error, " + TextUtils.formatStackTrace(ex.getStackTrace()));
+                    logger.error(Consts.TAG, "Fetch fragment instance error, "
+                            + (fragmentMeta == null ? "null" : fragmentMeta.getName()), ex);
                 }
             case METHOD:
             case SERVICE:
