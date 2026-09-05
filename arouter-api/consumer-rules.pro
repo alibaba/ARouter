@@ -25,5 +25,14 @@
     public <init>();
 }
 
+# Fragment routes use the same reflective public no-argument constructor contract.
+# Older AndroidX releases do not supply their own Fragment constructor rules.
+-keepclassmembers,allowoptimization,allowobfuscation class * extends androidx.fragment.app.Fragment {
+    public <init>();
+}
+-keepclassmembers,allowoptimization,allowobfuscation class * extends android.app.Fragment {
+    public <init>();
+}
+
 # by-type provider lookup uses the interface's canonical name as the generated map key.
 -keep,allowoptimization interface * implements com.alibaba.android.arouter.facade.template.IProvider

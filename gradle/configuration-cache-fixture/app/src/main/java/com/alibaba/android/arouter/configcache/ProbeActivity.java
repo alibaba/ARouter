@@ -43,6 +43,20 @@ public class ProbeActivity extends Activity {
             throw new IllegalStateException("Cannot inject AndroidX Fragment route arguments");
         }
 
+        Object dialog = ARouter.getInstance().build("/cache/androidx-dialog")
+                .withString("source", "dialog-fixture").navigation();
+        if (!(dialog instanceof AndroidXProbeDialogFragment)) {
+            throw new IllegalStateException("Cannot resolve AndroidX DialogFragment route");
+        }
+        AndroidXProbeDialogFragment routedDialog = (AndroidXProbeDialogFragment) dialog;
+        ARouter.getInstance().inject(routedDialog);
+        if (routedDialog.getArguments() == null
+                || !"dialog-fixture".equals(routedDialog.getArguments().getString("source"))
+                || !"dialog-fixture".equals(routedDialog.source)
+                || routedDialog.isAdded() || routedDialog.getDialog() != null) {
+            throw new IllegalStateException("DialogFragment creation/injection contract changed");
+        }
+
         Postcard activityPostcard = ARouter.getInstance().build("/cache/second");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             ActivityOptionsCompat options = ActivityOptionsCompat.makeCustomAnimation(

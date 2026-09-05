@@ -42,9 +42,11 @@ First stage all four local artifacts using JDK 8:
 ./gradle/verify-androidx.sh
 ```
 
-The existing Gradle plugin matrix checks the minimum AndroidX dependency set.
-An additional API 34 consumer job uses Core 1.17.0 and Fragment 1.8.9, pinned
-stable versions compatible with the fixture's SDK 36 toolchain. This is a
+The Gradle plugin matrix checks the minimum AndroidX dependency set. Consumer
+device jobs cover both the published minimum (Core 1.0.2 / Fragment 1.0.0 on
+API 21) and upgraded dependencies (Core 1.17.0 / Fragment 1.8.9 on API 34), with
+all four daily/online Debug/Release variants in each job. The upgraded versions
+are pinned baselines compatible with the fixture's SDK 36 toolchain. This is a
 consumer dependency override, not an upgrade of ARouter's published minimums.
 See the [Core](https://developer.android.com/jetpack/androidx/releases/core#1.17.0)
 and [Fragment](https://developer.android.com/jetpack/androidx/releases/fragment#1.8.9)
@@ -66,9 +68,17 @@ AROUTER_RUN_DEVICE_TESTS=true AROUTER_KEEP_TEST_ROOT=true \
 This verifies configuration-cache reuse, incremental route updates, flavor
 isolation, and all four daily/online Debug/Release variants. Device tests launch
 the consumer through Android components and check actual routing after provider,
-Fragment argument/injection, and ActivityOptionsCompat checks. There are no
-test-only keep rules in this consumer, including its Release/R8 runs. Jetifier
+Fragment/DialogFragment argument/injection, and ActivityOptionsCompat checks.
+There are no test-only keep rules in this consumer, including its Release/R8 runs. Jetifier
 is disabled throughout.
+
+To run the minimum dependency job on an API 21 emulator, use the same command
+with `AROUTER_MIN_SDK=14`, `AROUTER_ANDROIDX_CORE_VERSION=1.0.2`, and
+`AROUTER_ANDROIDX_FRAGMENT_VERSION=1.0.0`. Do not substitute newer dependencies
+for this check: newer Fragment artifacts have constructor keep rules that can
+hide missing rules in ARouter. Fragment routes require public no-argument
+constructors, and ARouter's own consumer rules preserve them. Routing a
+DialogFragment only creates the instance; the caller owns displaying it.
 
 CI preserves device reports and R8 mappings even when tests fail. Set
 `AROUTER_KEEP_TEST_ROOT=true` to retain local fixture output; its exact path is

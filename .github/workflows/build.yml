@@ -189,10 +189,20 @@ jobs:
             api: 34
             build_type: release
             consumer: false
-          - label: API 34 / AndroidX consumer / Debug and R8
+          - label: API 21 / minimum AndroidX consumer / Debug and R8
+            api: 21
+            build_type: consumer
+            consumer: true
+            min_sdk: '14'
+            core_version: '1.0.2'
+            fragment_version: '1.0.0'
+          - label: API 34 / upgraded AndroidX consumer / Debug and R8
             api: 34
             build_type: consumer
             consumer: true
+            min_sdk: '23'
+            core_version: '1.17.0'
+            fragment_version: '1.8.9'
 
     steps:
       - name: Checkout
@@ -251,7 +261,7 @@ jobs:
           disable-animations: true
           script: env JAVA_HOME="$AROUTER_JAVA8_HOME" ./gradle/verify-device-tests.sh "$AROUTER_TEST_BUILD_TYPE"
 
-      - name: Verify upgraded AndroidX consumer without Jetifier
+      - name: Verify AndroidX consumer without Jetifier
         if: matrix.consumer
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         env:
@@ -259,14 +269,14 @@ jobs:
           AROUTER_GRADLE_WRAPPER_PROPERTIES: gradle-wrapper-9.5.properties
           AROUTER_COMPILE_SDK: '36'
           AROUTER_BUILD_TOOLS: 36.0.0
-          AROUTER_MIN_SDK: '23'
-          AROUTER_ANDROIDX_CORE_VERSION: 1.17.0
-          AROUTER_ANDROIDX_FRAGMENT_VERSION: 1.8.9
+          AROUTER_MIN_SDK: ${{ matrix.min_sdk }}
+          AROUTER_ANDROIDX_CORE_VERSION: ${{ matrix.core_version }}
+          AROUTER_ANDROIDX_FRAGMENT_VERSION: ${{ matrix.fragment_version }}
           AROUTER_RUN_DEVICE_TESTS: 'true'
           AROUTER_KEEP_TEST_ROOT: 'true'
           TMPDIR: ${{ runner.temp }}
         with:
-          api-level: 34
+          api-level: ${{ matrix.api }}
           arch: x86_64
           target: default
           disable-animations: true
