@@ -165,6 +165,130 @@ jobs:
         if: matrix.agp == '7.4.2'
         run: ./gradle/verify-kapt-room.sh
 
+  device-tests:
+    name: Device tests (${{ matrix.label }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: API 21 / Debug
+            api: 21
+            build_type: debug
+            consumer: false
+          - label: API 21 / Release R8
+            api: 21
+            build_type: release
+            consumer: false
+          - label: API 34 / Debug
+            api: 34
+            build_type: debug
+            consumer: false
+          - label: API 34 / Release R8
+            api: 34
+            build_type: release
+            consumer: false
+          - label: API 34 / AndroidX consumer / Debug and R8
+            api: 34
+            build_type: consumer
+            consumer: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 8 for local ARouter artifacts
+        id: java8
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: gradle
+
+      - name: Set up JDK 17 for SDK tools and the consumer fixture
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4
+
+      - name: Install build SDK packages
+        run: sdkmanager "platforms;android-29" "build-tools;29.0.2" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Stage current ARouter artifacts for the consumer fixture
+        if: matrix.consumer
+        env:
+          JAVA_HOME: ${{ steps.java8.outputs.path }}
+        run: >-
+          ./gradlew --no-daemon --stacktrace
+          :arouter-annotation:installLocally
+          :arouter-compiler:installLocally
+          :arouter-api:installLocally
+          :arouter-gradle-plugin:installLocally
+
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run complete device tests
+        if: ${{ !matrix.consumer }}
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        env:
+          AROUTER_JAVA8_HOME: ${{ steps.java8.outputs.path }}
+          AROUTER_EXPECT_API: ${{ matrix.api }}
+          AROUTER_TEST_BUILD_TYPE: ${{ matrix.build_type }}
+        with:
+          api-level: ${{ matrix.api }}
+          arch: x86_64
+          target: default
+          disable-animations: true
+          script: env JAVA_HOME="$AROUTER_JAVA8_HOME" ./gradle/verify-device-tests.sh "$AROUTER_TEST_BUILD_TYPE"
+
+      - name: Verify upgraded AndroidX consumer without Jetifier
+        if: matrix.consumer
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
+        env:
+          AROUTER_AGP_VERSION: 9.3.2
+          AROUTER_GRADLE_WRAPPER_PROPERTIES: gradle-wrapper-9.5.properties
+          AROUTER_COMPILE_SDK: '36'
+          AROUTER_BUILD_TOOLS: 36.0.0
+          AROUTER_MIN_SDK: '23'
+          AROUTER_ANDROIDX_CORE_VERSION: 1.17.0
+          AROUTER_ANDROIDX_FRAGMENT_VERSION: 1.8.9
+          AROUTER_RUN_DEVICE_TESTS: 'true'
+          AROUTER_KEEP_TEST_ROOT: 'true'
+          TMPDIR: ${{ runner.temp }}
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          disable-animations: true
+          script: ./gradle/verify-configuration-cache.sh
+
+      - name: Preserve device reports and R8 mappings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: device-tests-api-${{ matrix.api }}-${{ matrix.build_type }}
+          retention-days: 14
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+            app/build/outputs/mapping/release/
+            arouter-api/build/reports/androidTests/
+            arouter-api/build/outputs/androidTest-results/
+            ${{ runner.temp }}/arouter-gradle-plugin.*/device-*.log
+            ${{ runner.temp }}/arouter-gradle-plugin.*/project/app/build/reports/androidTests/
+            ${{ runner.temp }}/arouter-gradle-plugin.*/project/app/build/outputs/androidTest-results/
+            ${{ runner.temp }}/arouter-gradle-plugin.*/project/app/build/outputs/mapping/
+
   idea-plugin:
     name: IDE navigation plugin (IntelliJ / Android Studio)
     runs-on: ubuntu-latest

@@ -3,6 +3,9 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "${script_dir}/.." && pwd)"
+for tool in rg unzip strings; do
+    command -v "${tool}" >/dev/null || { echo "Missing required tool: ${tool}" >&2; exit 1; }
+done
 dependency_log="$(mktemp "${TMPDIR:-/tmp}/arouter-androidx-dependencies.XXXXXX")"
 classes_jar="$(mktemp "${TMPDIR:-/tmp}/arouter-androidx-classes.XXXXXX")"
 class_strings="$(mktemp "${TMPDIR:-/tmp}/arouter-androidx-strings.XXXXXX")"
@@ -37,6 +40,12 @@ if rg --line-number \
     echo "Legacy Support Library references remain in AndroidX runtime sources:" >&2
     cat "${dependency_log}" >&2
     exit 1
+else
+    scan_status=$?
+    if [[ ${scan_status} -ne 1 ]]; then
+        echo "Failed to scan AndroidX runtime sources (exit ${scan_status})." >&2
+        exit "${scan_status}"
+    fi
 fi
 
 grep -Fxq 'android.useAndroidX=true' gradle.properties
@@ -44,8 +53,14 @@ grep -Fxq 'android.enableJetifier=false' gradle.properties
 grep -Fxq 'android.useAndroidX=true' gradle/configuration-cache-fixture/gradle.properties
 grep -Fxq 'android.enableJetifier=false' gradle/configuration-cache-fixture/gradle.properties
 
-./gradlew --no-daemon --console=plain -q -Parouter.useLocalRegisterPlugin \
+./gradlew "$@" --no-daemon --console=plain -q -Parouter.useLocalRegisterPlugin \
     :app:dependencies --configuration debugRuntimeClasspath >"${dependency_log}"
+
+if grep -Eq '(^|[[:space:]])FAILED([[:space:]]|$)' "${dependency_log}"; then
+    echo "The AndroidX dependency graph contains unresolved dependencies:" >&2
+    cat "${dependency_log}" >&2
+    exit 1
+fi
 
 if grep -Fq 'com.android.support' "${dependency_log}"; then
     echo "Legacy Support Library artifacts remain on the demo runtime classpath:" >&2

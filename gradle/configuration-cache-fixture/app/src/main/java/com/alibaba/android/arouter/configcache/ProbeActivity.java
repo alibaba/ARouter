@@ -38,6 +38,10 @@ public class ProbeActivity extends Activity {
                 || !"configuration-cache-fixture".equals(arguments.getString("source"))) {
             throw new IllegalStateException("Cannot pass AndroidX Fragment route arguments");
         }
+        ARouter.getInstance().inject(fragment);
+        if (!"configuration-cache-fixture".equals(((AndroidXProbeFragment) fragment).source)) {
+            throw new IllegalStateException("Cannot inject AndroidX Fragment route arguments");
+        }
 
         Postcard activityPostcard = ARouter.getInstance().build("/cache/second");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
