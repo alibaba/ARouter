@@ -4,9 +4,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Intent;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.widget.TextView;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.launcher.ARouter;
 
@@ -25,7 +26,7 @@ public class AutowiredR8InjectionTest {
 
     @BeforeClass
     public static void initializeRouter() {
-        Application application = (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+        Application application = (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.openLog();
         ARouter.init(application);
@@ -51,7 +52,7 @@ public class AutowiredR8InjectionTest {
     @Test
     public void fragmentFieldsAreInjectedAfterMinification() {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
-        Intent intent = new Intent(InstrumentationRegistry.getTargetContext(), AutowiredFragmentHostActivity.class);
+        Intent intent = new Intent(InstrumentationRegistry.getInstrumentation().getTargetContext(), AutowiredFragmentHostActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity = instrumentation.startActivitySync(intent);
 

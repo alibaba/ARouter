@@ -1,6 +1,6 @@
 package com.alibaba.android.arouter.demo.module1.testactivity;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.alibaba.android.arouter.facade.annotation.Autowired;
 

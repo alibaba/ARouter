@@ -10,13 +10,17 @@ android {
     namespace 'com.alibaba.android.arouter.configcache'
     compileSdkVersion fixtureCompileSdk
     buildToolsVersion fixtureBuildTools
+    if (rootProject.hasProperty('arouter.test.build.type')) {
+        testBuildType rootProject.property('arouter.test.build.type')
+    }
 
     defaultConfig {
         applicationId 'com.alibaba.android.arouter.configcache'
-        minSdkVersion 14
+        minSdkVersion Integer.parseInt((rootProject.findProperty('arouter.min.sdk') ?: '14').toString())
         targetSdkVersion fixtureCompileSdk
         versionCode 1
         versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
         javaCompileOptions {
             annotationProcessorOptions {
@@ -54,6 +58,13 @@ android {
 dependencies {
     implementation "com.alibaba:arouter-api:${rootProject.findProperty('arouter.api.version')}"
     annotationProcessor "com.alibaba:arouter-compiler:${rootProject.findProperty('arouter.compiler.version')}"
+    // The default checks the published minimum; overrides model a consumer
+    // upgrading AndroidX without changing ARouter's published dependencies.
+    if (rootProject.hasProperty('arouter.androidx.core.version')) {
+        implementation "androidx.core:core:${rootProject.property('arouter.androidx.core.version')}"
+    }
+    implementation "androidx.fragment:fragment:${rootProject.findProperty('arouter.androidx.fragment.version') ?: '1.0.0'}"
+    androidTestImplementation 'androidx.test:runner:1.3.0'
     dailyImplementation project(':feature-daily')
     onlineImplementation project(':feature-online')
 }

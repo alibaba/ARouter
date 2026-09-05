@@ -6,8 +6,9 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.demo.module1.testactivity.ReorderProbeActivity;
 import com.alibaba.android.arouter.launcher.ARouter;
@@ -34,7 +35,7 @@ public class ActivityTaskFlagsInstrumentedTest {
     @Before
     public void setUp() {
         instrumentation = InstrumentationRegistry.getInstrumentation();
-        application = (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+        application = (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.init(application);
     }

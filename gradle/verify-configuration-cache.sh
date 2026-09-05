@@ -13,6 +13,31 @@ use_configuration_cache="${AROUTER_CONFIGURATION_CACHE:-true}"
 keep_test_root="${AROUTER_KEEP_TEST_ROOT:-false}"
 compile_sdk="${AROUTER_COMPILE_SDK:-33}"
 build_tools_version="${AROUTER_BUILD_TOOLS:-33.0.2}"
+run_device_tests="${AROUTER_RUN_DEVICE_TESTS:-false}"
+
+case "${run_device_tests}" in
+    true|false) ;;
+    *) echo "AROUTER_RUN_DEVICE_TESTS must be true or false." >&2; exit 1 ;;
+esac
+if [[ "${run_device_tests}" == true ]]; then
+    adb="${ANDROID_SDK_ROOT:?Set ANDROID_SDK_ROOT for device tests}/platform-tools/adb"
+    device_list="$("${adb}" devices)"
+    serial="$(awk 'NR > 1 && $2 == "device" { print $1 }' <<< "${device_list}")"
+    if [[ "$(awk 'NR > 1 && NF { count++ } END { print count+0 }' <<< "${device_list}")" != 1 \
+            || "${serial}" != emulator-* ]]; then
+        echo "Connect exactly one booted emulator for the consumer device tests." >&2
+        exit 1
+    fi
+    if [[ -n "${ANDROID_SERIAL:-}" && "${ANDROID_SERIAL}" != "${serial}" ]]; then
+        echo "ANDROID_SERIAL does not match the consumer test emulator." >&2
+        exit 1
+    fi
+    export ANDROID_SERIAL="${serial}"
+    if [[ "$("${adb}" shell getprop sys.boot_completed | tr -d '\r')" != 1 ]]; then
+        echo "The consumer test emulator has not finished booting." >&2
+        exit 1
+    fi
+fi
 
 case "${plugin_pipeline}" in
     legacy|scoped) ;;
@@ -104,6 +129,16 @@ gradle_command+=(
     "-Parouter.agp.version=${agp_version}"
     "-Parouter.compile.sdk=${compile_sdk}"
     "-Parouter.build.tools=${build_tools_version}"
+    "-Parouter.min.sdk=${AROUTER_MIN_SDK:-14}"
+    "-Parouter.androidx.fragment.version=${AROUTER_ANDROIDX_FRAGMENT_VERSION:-1.0.0}"
+)
+if [[ -n "${AROUTER_ANDROIDX_CORE_VERSION:-}" ]]; then
+    gradle_command+=("-Parouter.androidx.core.version=${AROUTER_ANDROIDX_CORE_VERSION}")
+fi
+if [[ -n "${AROUTER_GRADLE_INIT_SCRIPT:-}" ]]; then
+    gradle_command+=(--init-script "${AROUTER_GRADLE_INIT_SCRIPT}")
+fi
+assemble_tasks=(
     :app:assembleDailyDebug
     :app:assembleDailyRelease
     :app:assembleOnlineDebug
@@ -233,11 +268,11 @@ first_log="${test_root}/first-build.log"
 second_log="${test_root}/second-build.log"
 incremental_log="${test_root}/incremental-build.log"
 
-"${gradle_command[@]}" | tee "${first_log}"
+"${gradle_command[@]}" "${assemble_tasks[@]}" | tee "${first_log}"
 if [[ "${use_configuration_cache}" == true ]]; then
     grep -F "Configuration cache entry stored." "${first_log}"
 
-    "${gradle_command[@]}" | tee "${second_log}"
+    "${gradle_command[@]}" "${assemble_tasks[@]}" | tee "${second_log}"
     grep -F "Reusing configuration cache." "${second_log}"
     grep -F "Configuration cache entry reused." "${second_log}"
 fi
@@ -247,7 +282,7 @@ perl -pi -e 's#/cache/second#/cache/updated#g' \
     "${project_dir}/app/src/main/java/com/alibaba/android/arouter/configcache/ProbeActivity.java" \
     "${project_dir}/app/src/main/java/com/alibaba/android/arouter/configcache/SecondActivity.java"
 
-"${gradle_command[@]}" | tee "${incremental_log}"
+"${gradle_command[@]}" "${assemble_tasks[@]}" | tee "${incremental_log}"
 if [[ "${use_configuration_cache}" == true ]]; then
     grep -F "Reusing configuration cache." "${incremental_log}"
     grep -F "Configuration cache entry reused." "${incremental_log}"
@@ -292,5 +327,33 @@ verify_apk_routes "${daily_debug_apk}" featuredaily featureonline
 verify_apk_routes "${daily_release_apk}" featuredaily featureonline
 verify_apk_routes "${online_debug_apk}" featureonline featuredaily
 verify_apk_routes "${online_release_apk}" featureonline featuredaily
+
+if [[ "${run_device_tests}" == true ]]; then
+    # Assembly/configuration-cache contracts were checked above. Device tasks
+    # are run separately, against both flavors and the genuinely shrunk APKs.
+    for test_type in debug release; do
+        if [[ "${test_type}" == debug ]]; then test_variant=Debug; else test_variant=Release; fi
+        report_marker="$(mktemp "${test_root}/device-${test_type}.XXXXXX")"
+        "${gradle_command[@]}" --no-configuration-cache \
+            "-Parouter.test.build.type=${test_type}" \
+            ":app:connectedDaily${test_variant}AndroidTest" \
+            ":app:connectedOnline${test_variant}AndroidTest" \
+            | tee "${test_root}/device-${test_type}.log"
+        report_count=0
+        while IFS= read -r -d '' report; do
+            if ! grep -Eq '<testsuite .*tests="[1-9][0-9]*"' "${report}" \
+                    || grep -Eq ' (failures|errors|skipped)="[1-9][0-9]*"' "${report}"; then
+                echo "Empty, failed, or skipped consumer device tests in ${report}." >&2
+                exit 1
+            fi
+            report_count=$((report_count + 1))
+        done < <(find "${project_dir}/app/build/outputs/androidTest-results/connected" \
+            -type f -name 'TEST-*.xml' -newer "${report_marker}" -print0)
+        if [[ ${report_count} -ne 2 ]]; then
+            echo "Expected fresh ${test_type} reports for both consumer flavors, found ${report_count}." >&2
+            exit 1
+        fi
+    done
+fi
 
 echo "ARouter Gradle plugin verification passed for AGP ${agp_version} (${plugin_pipeline})."

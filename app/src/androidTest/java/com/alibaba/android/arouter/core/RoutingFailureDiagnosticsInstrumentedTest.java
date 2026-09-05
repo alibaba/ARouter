@@ -1,8 +1,9 @@
 package com.alibaba.android.arouter.core;
 
 import android.app.Application;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.demo.module1.testservice.FailingProvider;
 import com.alibaba.android.arouter.exception.HandlerException;
@@ -30,7 +31,7 @@ public class RoutingFailureDiagnosticsInstrumentedTest {
             // The first test in a fresh process has no initialized router to destroy.
         }
 
-        Application application = (Application) InstrumentationRegistry
+        Application application = (Application) InstrumentationRegistry.getInstrumentation()
                 .getTargetContext()
                 .getApplicationContext();
         ARouter.init(application);

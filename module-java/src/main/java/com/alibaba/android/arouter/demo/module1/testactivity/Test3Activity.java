@@ -1,8 +1,9 @@
 package com.alibaba.android.arouter.demo.module1.testactivity;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.alibaba.android.arouter.demo.module1.R;
 import com.alibaba.android.arouter.facade.annotation.Autowired;

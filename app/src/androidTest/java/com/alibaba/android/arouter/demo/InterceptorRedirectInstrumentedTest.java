@@ -3,8 +3,13 @@ package com.alibaba.android.arouter.demo;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.runner.lifecycle.ActivityLifecycleCallback;
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitor;
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry;
+import androidx.test.runner.lifecycle.Stage;
 
 import com.alibaba.android.arouter.demo.module1.testactivity.RedirectLoginActivity;
 import com.alibaba.android.arouter.demo.module1.testactivity.RedirectProtectedActivity;
@@ -26,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -39,15 +45,19 @@ public class InterceptorRedirectInstrumentedTest {
     public void setUp() {
         instrumentation = InstrumentationRegistry.getInstrumentation();
         Application application =
-                (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+                (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.init(application);
         LoginRedirectInterceptor.resetProbe();
     }
 
     @After
-    public void tearDown() {
-        finishCurrentActivity();
+    public void tearDown() throws InterruptedException {
+        try {
+            finishCurrentActivity();
+        } finally {
+            LoginRedirectInterceptor.resetProbe();
+        }
     }
 
     @Test
@@ -67,7 +77,7 @@ public class InterceptorRedirectInstrumentedTest {
             instrumentation.waitForIdleSync();
             assertEquals(1, loginMonitor.getHits());
             assertEquals(0, protectedMonitor.getHits());
-            assertEquals(1, LoginRedirectInterceptor.processCount());
+            assertEquals(1, LoginRedirectInterceptor.protectedProcessCount());
             assertTrue(callback.found.get());
             assertTrue(callback.interrupted.get());
             assertFalse(callback.lost.get());
@@ -80,34 +90,47 @@ public class InterceptorRedirectInstrumentedTest {
 
     @Test
     public void repeatedRedirectsDoNotBlockLaterNavigation() throws Exception {
-        Instrumentation.ActivityMonitor loginMonitor =
-                instrumentation.addMonitor(RedirectLoginActivity.class.getName(), null, false);
         Instrumentation.ActivityMonitor protectedMonitor =
                 instrumentation.addMonitor(RedirectProtectedActivity.class.getName(), null, false);
         Instrumentation.ActivityMonitor normalMonitor =
                 instrumentation.addMonitor(Test2Activity.class.getName(), null, false);
 
         try {
+            Activity previousLogin = null;
             for (int index = 0; index < REDIRECT_COUNT; index++) {
-                RecordingNavigationCallback redirect = new RecordingNavigationCallback();
-                navigateProtected(redirect);
-                currentActivity = loginMonitor.waitForActivityWithTimeout(5000);
+                // ActivityMonitor can record the same instance during both
+                // creation and resume. Reusing it can mistake the previous
+                // login's resume for the next redirect's arrival.
+                Instrumentation.ActivityMonitor loginMonitor =
+                        instrumentation.addMonitor(RedirectLoginActivity.class.getName(), null, false);
+                try {
+                    RecordingNavigationCallback redirect = new RecordingNavigationCallback();
+                    navigateProtected(redirect);
+                    currentActivity = instrumentation.waitForMonitorWithTimeout(loginMonitor, 5000);
 
-                assertNotNull(currentActivity);
-                assertTrue(redirect.await());
-                assertTrue(redirect.interrupted.get());
-                assertFalse(redirect.arrived.get());
-                assertEquals(index + 1, LoginRedirectInterceptor.processCount());
+                    assertNotNull("Login redirect " + index + " did not arrive", currentActivity);
+                    assertNotSame("A redirect reused the previous monitor result", previousLogin, currentActivity);
+                    previousLogin = currentActivity;
+                    assertTrue(redirect.await());
+                    assertTrue(redirect.interrupted.get());
+                    assertFalse(redirect.arrived.get());
+                    assertEquals(index + 1, LoginRedirectInterceptor.protectedProcessCount());
+                } finally {
+                    instrumentation.removeMonitor(loginMonitor);
+                }
                 finishCurrentActivity();
             }
 
             assertEquals(0, protectedMonitor.getHits());
-            assertEquals(REDIRECT_COUNT, LoginRedirectInterceptor.processCount());
+            assertEquals(REDIRECT_COUNT, LoginRedirectInterceptor.protectedProcessCount());
 
             RecordingNavigationCallback normal = new RecordingNavigationCallback();
-            ARouter.getInstance()
-                    .build("/test/activity2")
-                    .navigation(InstrumentationRegistry.getTargetContext(), normal);
+            Postcard normalPostcard = ARouter.getInstance().build("/test/activity2");
+            LoginRedirectInterceptor.watchPostcard(normalPostcard);
+            normalPostcard.navigation(
+                    InstrumentationRegistry.getInstrumentation().getTargetContext(),
+                    normal
+            );
             currentActivity = normalMonitor.waitForActivityWithTimeout(5000);
 
             assertNotNull(currentActivity);
@@ -115,9 +138,8 @@ public class InterceptorRedirectInstrumentedTest {
             assertTrue(normal.found.get());
             assertTrue(normal.arrived.get());
             assertFalse(normal.interrupted.get());
-            assertEquals(REDIRECT_COUNT + 1, LoginRedirectInterceptor.processCount());
+            assertEquals(1, LoginRedirectInterceptor.watchedPostcardProcessCount());
         } finally {
-            instrumentation.removeMonitor(loginMonitor);
             instrumentation.removeMonitor(protectedMonitor);
             instrumentation.removeMonitor(normalMonitor);
         }
@@ -126,23 +148,50 @@ public class InterceptorRedirectInstrumentedTest {
     private void navigateProtected(RecordingNavigationCallback callback) {
         ARouter.getInstance()
                 .build("/redirect/protected")
-                .navigation(InstrumentationRegistry.getTargetContext(), callback);
+                .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), callback);
     }
 
-    private void finishCurrentActivity() {
+    private void finishCurrentActivity() throws InterruptedException {
         final Activity activity = currentActivity;
         currentActivity = null;
-        if (activity == null || activity.isFinishing()) {
+        if (activity == null) {
             return;
         }
 
+        final CountDownLatch destroyed = new CountDownLatch(1);
+        final ActivityLifecycleMonitor lifecycle = ActivityLifecycleMonitorRegistry.getInstance();
+        final ActivityLifecycleCallback callback = new ActivityLifecycleCallback() {
+            @Override
+            public void onActivityLifecycleChanged(Activity changed, Stage stage) {
+                if (changed == activity && stage == Stage.DESTROYED) {
+                    destroyed.countDown();
+                }
+            }
+        };
         instrumentation.runOnMainSync(new Runnable() {
             @Override
             public void run() {
-                activity.finish();
+                lifecycle.addLifecycleCallback(callback);
+                if (lifecycle.getLifecycleStageOf(activity) == Stage.DESTROYED) {
+                    destroyed.countDown();
+                } else {
+                    activity.finish();
+                }
             }
         });
-        instrumentation.waitForIdleSync();
+        try {
+            // An idle main queue does not mean the platform has completed the
+            // close transaction. Wait before installing the next login monitor.
+            assertTrue("The previous activity was not destroyed", destroyed.await(5, TimeUnit.SECONDS));
+            instrumentation.waitForIdleSync();
+        } finally {
+            instrumentation.runOnMainSync(new Runnable() {
+                @Override
+                public void run() {
+                    lifecycle.removeLifecycleCallback(callback);
+                }
+            });
+        }
     }
 
     private static final class RecordingNavigationCallback implements NavigationCallback {

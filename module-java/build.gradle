@@ -7,7 +7,7 @@ dependencies {
 
     implementation project(':module-java-export')
 
-    implementation "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    implementation "androidx.appcompat:appcompat:${ANDROIDX_APPCOMPAT_VERSION}"
     implementation("com.google.code.gson:gson:$gson_version") {
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
     }

@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 import android.widget.TextView;
+
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.demo.kotlin.KotlinTestActivity;
 import com.alibaba.android.arouter.demo.kotlin.RecordingPretreatmentService;
@@ -40,7 +44,7 @@ public class ARouterEndToEndTest {
 
     @BeforeClass
     public static void initializeRouter() {
-        Application application = (Application) InstrumentationRegistry.getTargetContext().getApplicationContext();
+        Application application = (Application) InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
         ARouter.openDebug();
         ARouter.openLog();
         ARouter.init(application);
@@ -60,6 +64,7 @@ public class ARouterEndToEndTest {
                 .navigation();
 
         assertNotNull(service);
+        assertTrue(fragment instanceof Fragment);
         assertTrue(fragment instanceof BlankFragment);
         Bundle arguments = ((BlankFragment) fragment).getArguments();
         assertNotNull(arguments);
@@ -67,9 +72,27 @@ public class ARouterEndToEndTest {
     }
 
     @Test
+    public void androidXActivityOptionsRemainPartOfPostcardContract() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            return;
+        }
+
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeCustomAnimation(
+                context,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+        );
+        Postcard postcard = ARouter.getInstance().build("/test/activity2");
+
+        assertSame(postcard, postcard.withOptionsCompat(options));
+        assertNotNull(postcard.getOptionsBundle());
+    }
+
+    @Test
     public void kotlinPretreatmentUsesApplicationContextForContextlessNavigation() {
         RecordingPretreatmentService.startRecording();
-        Context applicationContext = InstrumentationRegistry.getTargetContext().getApplicationContext();
+        Context applicationContext = InstrumentationRegistry.getInstrumentation().getTargetContext().getApplicationContext();
 
         Object fragment = ARouter.getInstance()
                 .build("/test/fragment")
@@ -85,7 +108,7 @@ public class ARouterEndToEndTest {
     @Test
     public void kotlinPretreatmentPreservesExplicitNavigationContext() {
         RecordingPretreatmentService.startRecording();
-        Context explicitContext = InstrumentationRegistry.getTargetContext();
+        Context explicitContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         Object fragment = ARouter.getInstance()
                 .build("/test/fragment")
@@ -112,7 +135,7 @@ public class ARouterEndToEndTest {
                     .withBoolean("boy", true)
                     .withLong("high", 181)
                     .withString("url", "https://example.test")
-                    .navigation(InstrumentationRegistry.getTargetContext(), callback);
+                    .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), callback);
 
             Activity activity = monitor.waitForActivityWithTimeout(5000);
             assertNotNull(activity);
@@ -172,7 +195,7 @@ public class ARouterEndToEndTest {
             ARouter.getInstance()
                     .build("/test/activity2")
                     .withString("key1", "interceptor-chain-passed")
-                    .navigation(InstrumentationRegistry.getTargetContext(), callback);
+                    .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), callback);
 
             Activity activity = monitor.waitForActivityWithTimeout(5000);
             assertNotNull(activity);
@@ -199,7 +222,7 @@ public class ARouterEndToEndTest {
 
         ARouter.getInstance()
                 .build("/missing/route")
-                .navigation(InstrumentationRegistry.getTargetContext(), callback);
+                .navigation(InstrumentationRegistry.getInstrumentation().getTargetContext(), callback);
 
         assertTrue(callback.await());
         assertTrue(callback.lost.get());

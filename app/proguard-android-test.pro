@@ -32,3 +32,9 @@
 -keep interface com.alibaba.android.arouter.facade.callback.NavigationLauncher {
     *;
 }
+
+# The target APK is minified separately from the instrumentation APK. Preserve
+# the AndroidX factory invoked directly by the cross-APK public API test.
+-keep class androidx.core.app.ActivityOptionsCompat {
+    public static androidx.core.app.ActivityOptionsCompat makeCustomAnimation(android.content.Context, int, int);
+}

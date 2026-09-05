@@ -1,8 +1,9 @@
 package com.alibaba.android.arouter.core;
 
 import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.exception.HandlerException;
 import com.alibaba.android.arouter.facade.Postcard;
@@ -317,7 +318,7 @@ public class InterceptorChainInstrumentedTest {
         Warehouse.interceptorsIndex.put(1, MissingCallbackInterceptor.class);
 
         InterceptorServiceImpl service = new InterceptorServiceImpl();
-        service.init(InstrumentationRegistry.getTargetContext());
+        service.init(InstrumentationRegistry.getInstrumentation().getTargetContext());
         final CountDownLatch completed = new CountDownLatch(navigationCount);
         final AtomicInteger continued = new AtomicInteger();
         final AtomicInteger interrupted = new AtomicInteger();

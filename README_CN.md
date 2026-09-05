@@ -44,6 +44,11 @@
 4. 跨模块API调用，通过控制反转来做组件解耦
 
 #### 三、基础功能
+当前开发线已原生迁移到 AndroidX。接入方必须启用 `android.useAndroidX=true`，ARouter
+自身不需要 Jetifier。仍使用旧 Support Library 的项目应继续使用 ARouter 1.x，待应用完成
+AndroidX 迁移后再升级。命名空间变化构成源码和二进制兼容边界，因此正式发布时会按大版本
+变更处理。
+
 1. 添加依赖和配置
     ``` gradle
     android {
@@ -56,6 +61,9 @@
             }
         }
     }
+
+    // 当前 AndroidX 开发线必须启用。
+    // gradle.properties: android.useAndroidX=true
 
     dependencies {
         // 替换成最新版本, 需要注意的是api

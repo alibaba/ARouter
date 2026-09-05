@@ -6,8 +6,9 @@ import android.content.Intent;
 import android.os.BadParcelableException;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.alibaba.android.arouter.facade.template.ILogger;
 import com.alibaba.android.arouter.launcher.ARouter;
