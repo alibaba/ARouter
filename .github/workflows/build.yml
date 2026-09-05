@@ -140,6 +140,12 @@ jobs:
           :arouter-api:installLocally
           :arouter-gradle-plugin:installLocally
 
+      - name: Install AndroidX verification tools
+        if: matrix.agp == '7.4.2'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ripgrep unzip binutils
+
       - name: Verify native AndroidX dependency contract
         if: matrix.agp == '7.4.2'
         run: ./gradle/verify-androidx.sh

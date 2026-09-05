@@ -34,6 +34,10 @@ or skipped tests. Local copies are retained by API and build type under
 
 ## Published-artifact consumer
 
+The dependency verifier requires `rg` (ripgrep), `unzip`, and `strings`
+(`binutils` on Linux). CI installs these tools explicitly; they must also be on
+`PATH` when running the verifier locally.
+
 First stage all four local artifacts using JDK 8:
 
 ```sh
