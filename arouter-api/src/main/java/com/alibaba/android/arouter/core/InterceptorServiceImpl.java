@@ -8,9 +8,9 @@ import com.alibaba.android.arouter.facade.annotation.Route;
 import com.alibaba.android.arouter.facade.callback.InterceptorCallback;
 import com.alibaba.android.arouter.facade.service.InterceptorService;
 import com.alibaba.android.arouter.facade.template.IInterceptor;
-import com.alibaba.android.arouter.utils.MapUtils;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.alibaba.android.arouter.launcher.ARouter.logger;
@@ -27,30 +27,31 @@ import static com.alibaba.android.arouter.utils.Consts.TAG;
 public class InterceptorServiceImpl implements InterceptorService {
     private static final long INTERCEPTOR_INIT_TIMEOUT_SECONDS = 10;
     private final InterceptorInitState interceptorInitState = new InterceptorInitState();
+    private final List<IInterceptor> interceptors = new ArrayList<>();
 
     @Override
     public void doInterceptions(final Postcard postcard, final InterceptorCallback callback) {
-        if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
-            InterceptorInitState.Result initResult;
-            try {
-                initResult = interceptorInitState.await(INTERCEPTOR_INIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                HandlerException interruption = new HandlerException("Interceptor initialization was interrupted.");
-                interruption.initCause(ex);
-                callback.onInterrupt(interruption);
-                return;
-            }
+        InterceptorInitState.Result initResult;
+        try {
+            initResult = interceptorInitState.await(INTERCEPTOR_INIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            HandlerException interruption = new HandlerException("Interceptor initialization was interrupted.");
+            interruption.initCause(ex);
+            callback.onInterrupt(interruption);
+            return;
+        }
 
-            if (initResult.getOutcome() == InterceptorInitState.Outcome.TIMEOUT) {
-                callback.onInterrupt(new HandlerException("Interceptors initialization takes too much time."));
-                return;
-            } else if (initResult.getOutcome() == InterceptorInitState.Outcome.FAILURE) {
-                callback.onInterrupt(initResult.getFailure());
-                return;
-            }
+        if (initResult.getOutcome() == InterceptorInitState.Outcome.TIMEOUT) {
+            callback.onInterrupt(new HandlerException("Interceptors initialization takes too much time."));
+            return;
+        } else if (initResult.getOutcome() == InterceptorInitState.Outcome.FAILURE) {
+            callback.onInterrupt(initResult.getFailure());
+            return;
+        }
 
-            InterceptorChain interceptorChain = new InterceptorChain(Warehouse.interceptors, postcard, callback);
+        if (!interceptors.isEmpty()) {
+            InterceptorChain interceptorChain = new InterceptorChain(interceptors, postcard, callback);
             try {
                 interceptorChain.scheduleTimeout(postcard.getTimeout(), TimeUnit.SECONDS);
                 LogisticsCenter.executor.execute(interceptorChain);
@@ -65,30 +66,32 @@ public class InterceptorServiceImpl implements InterceptorService {
     @Override
     public void init(final Context context) {
         interceptorInitState.start();
+        // An old async initializer must not read or modify a later debug re-init's registry.
+        final List<Class<? extends IInterceptor>> interceptorClasses =
+                new ArrayList<>(Warehouse.interceptorsIndex.values());
+        if (interceptorClasses.isEmpty()) {
+            interceptorInitState.succeed();
+            return;
+        }
         try {
             LogisticsCenter.executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    if (MapUtils.isNotEmpty(Warehouse.interceptorsIndex)) {
-                        for (Map.Entry<Integer, Class<? extends IInterceptor>> entry : Warehouse.interceptorsIndex.entrySet()) {
-                            Class<? extends IInterceptor> interceptorClass = entry.getValue();
-                            try {
-                                IInterceptor iInterceptor = interceptorClass.getConstructor().newInstance();
-                                iInterceptor.init(context);
-                                Warehouse.interceptors.add(iInterceptor);
-                            } catch (Exception ex) {
-                                HandlerException failure = interceptorInitFailure(interceptorClass, ex);
-                                interceptorInitState.fail(failure);
-                                logger.error(TAG, failure.getMessage(), ex);
-                                return;
-                            }
+                    for (Class<? extends IInterceptor> interceptorClass : interceptorClasses) {
+                        try {
+                            IInterceptor iInterceptor = interceptorClass.getConstructor().newInstance();
+                            iInterceptor.init(context);
+                            interceptors.add(iInterceptor);
+                        } catch (Exception ex) {
+                            HandlerException failure = interceptorInitFailure(interceptorClass, ex);
+                            interceptorInitState.fail(failure);
+                            logger.error(TAG, failure.getMessage(), ex);
+                            return;
                         }
-
-                        interceptorInitState.succeed();
-                        logger.info(TAG, "ARouter interceptors init over.");
-                    } else {
-                        interceptorInitState.succeed();
                     }
+
+                    interceptorInitState.succeed();
+                    logger.info(TAG, "ARouter interceptors init over.");
                 }
             });
         } catch (RuntimeException ex) {

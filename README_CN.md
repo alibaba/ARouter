@@ -49,6 +49,9 @@
 AndroidX 迁移后再升级。命名空间变化构成源码和二进制兼容边界，因此正式发布时会按大版本
 变更处理。
 
+ARouter 运行库仍保持 `minSdkVersion=14`。示例应用及其中使用 Gson 的 `module-java`
+采用 `minSdkVersion=21`；Gson 不是 ARouter 运行库的依赖。
+
 1. 添加依赖和配置
     ``` gradle
     android {

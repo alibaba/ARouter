@@ -85,6 +85,87 @@ public class InterceptorServiceImplInstrumentedTest {
     }
 
     @Test
+    public void retiredInitializationDoesNotModifyTheReplacementService() throws Exception {
+        ThreadPoolExecutor retiringExecutor = new ThreadPoolExecutor(
+                1, 1, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>()
+        );
+        try {
+            Warehouse.interceptorsIndex.put(1, BlockingInitInterceptor.class);
+            LogisticsCenter.executor = retiringExecutor;
+            new InterceptorServiceImpl().init(targetContext());
+            assertTrue(BlockingInitInterceptor.awaitInitializationStart());
+
+            // Debug destroy/re-init clears the registry while the old initializer can still run.
+            Warehouse.clear();
+            Warehouse.interceptorsIndex.put(1, PassingInterceptor.class);
+            LogisticsCenter.executor = testExecutor;
+            InterceptorServiceImpl replacement = new InterceptorServiceImpl();
+            replacement.init(targetContext());
+
+            RecordingCallback firstCallback = new RecordingCallback();
+            replacement.doInterceptions(new Postcard("/test/replacement/first", "test"), firstCallback);
+            assertTrue(firstCallback.await());
+            assertNull(firstCallback.interrupted.get());
+            assertEquals(1, PassingInterceptor.processCount.get());
+
+            BlockingInitInterceptor.releaseInitialization();
+            retiringExecutor.shutdown();
+            assertTrue(retiringExecutor.awaitTermination(5, TimeUnit.SECONDS));
+
+            PassingInterceptor.reset();
+            RecordingCallback secondCallback = new RecordingCallback();
+            Postcard postcard = new Postcard("/test/replacement/second", "test");
+            replacement.doInterceptions(postcard, secondCallback);
+            assertTrue(secondCallback.await());
+            assertSame(postcard, secondCallback.continued.get());
+            assertNull(secondCallback.interrupted.get());
+            assertEquals(1, PassingInterceptor.processCount.get());
+            assertEquals(0, BlockingInitInterceptor.processCount.get());
+        } finally {
+            BlockingInitInterceptor.releaseInitialization();
+            retiringExecutor.shutdownNow();
+            LogisticsCenter.executor = testExecutor;
+            assertTrue(retiringExecutor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void registryResetDoesNotSkipTheInitializingServicesInterceptors() throws Exception {
+        Warehouse.interceptorsIndex.put(1, BlockingInitInterceptor.class);
+        Warehouse.interceptorsIndex.put(2, PassingInterceptor.class);
+        InterceptorServiceImpl service = new InterceptorServiceImpl();
+        service.init(targetContext());
+        assertTrue(BlockingInitInterceptor.awaitInitializationStart());
+
+        Warehouse.clear();
+        BlockingInitInterceptor.releaseInitialization();
+        RecordingCallback callback = new RecordingCallback();
+        Postcard postcard = new Postcard("/test/registry-reset", "test");
+        service.doInterceptions(postcard, callback);
+
+        assertTrue(callback.await());
+        assertSame(postcard, callback.continued.get());
+        assertNull(callback.interrupted.get());
+        assertEquals(1, BlockingInitInterceptor.processCount.get());
+        assertEquals(1, PassingInterceptor.processCount.get());
+    }
+
+    @Test
+    public void emptyRegistryContinuesWithoutSchedulingWork() {
+        testExecutor.shutdown();
+        InterceptorServiceImpl service = new InterceptorServiceImpl();
+        service.init(targetContext());
+        RecordingCallback callback = new RecordingCallback();
+        Postcard postcard = new Postcard("/test/no-interceptors", "test");
+
+        service.doInterceptions(postcard, callback);
+
+        assertSame(postcard, callback.continued.get());
+        assertNull(callback.interrupted.get());
+        assertEquals(0, testExecutor.getTaskCount());
+    }
+
+    @Test
     public void initializationFailureInterruptsNavigationWithTheOriginalCause() throws Exception {
         Warehouse.interceptorsIndex.put(1, FailingInitInterceptor.class);
         InterceptorServiceImpl service = new InterceptorServiceImpl();
@@ -269,10 +350,12 @@ public class InterceptorServiceImplInstrumentedTest {
     }
 
     public static class BlockingInitInterceptor implements IInterceptor {
+        static final AtomicInteger processCount = new AtomicInteger();
         private static CountDownLatch initializationStarted;
         private static CountDownLatch initializationRelease;
 
         static void reset() {
+            processCount.set(0);
             initializationStarted = new CountDownLatch(1);
             initializationRelease = new CountDownLatch(1);
         }
@@ -287,6 +370,7 @@ public class InterceptorServiceImplInstrumentedTest {
 
         @Override
         public void process(Postcard postcard, InterceptorCallback callback) {
+            processCount.incrementAndGet();
             callback.onContinue(postcard);
         }
 
